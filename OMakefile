@@ -1,12 +1,19 @@
 USE_OCAMLFIND = true
 BYTE_ENABLED = true
 
+SOURCES[] =
+  type.ml
+  write.ml
+  yojson.cppo
+
 FILES[] =
-  yo_io
+  yojson
 
 OCAMLFLAGS = -dtypes
 OCAMLPACKS = easy-format biniou
 
+yojson.ml: $(SOURCES)
+	cppo yojson.cppo -o yojson.ml
 
 .DEFAULT: yojson.cma yojson.cmxa # test_yojson meow
 
