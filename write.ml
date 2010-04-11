@@ -1,5 +1,7 @@
 (* $Id$ *)
 
+(* included: type.ml *)
+
 open Bi_outbuf
 
 let hex n =
@@ -56,3 +58,76 @@ let test_string () =
   write_string ob s;
   Bi_outbuf.contents ob
 
+
+let write_null ob () =
+  Bi_outbuf.add_string ob "null"
+
+let write_bool ob x =
+  Bi_outbuf.add_string ob (if x then "true" else "false")
+
+
+let max_digits =
+  max
+    (String.length (string_of_int max_int))
+    (String.length (string_of_int min_int))
+
+let dec n =
+  Char.chr (n + 48)
+
+let rec write_digits s pos x =
+  if x = 0 then pos
+  else
+    let d = x mod 10 in
+    let pos = write_digits s pos (x / 10) in
+    s.[pos] <- dec d;
+    pos + 1
+
+let write_int ob x =
+  Bi_outbuf.extend ob max_digits;
+  if x > 0 then
+    ob.o_len <- write_digits ob.o_s ob.o_len x
+  else if x < 0 then (
+    Bi_outbuf.add_char ob '-';
+    ob.o_len <- write_digits ob.o_s (ob.o_len + 1) (abs x)
+  )
+  else (
+    Bi_outbuf.add_char ob '0';
+    ob.o_len <- ob.o_len + 1
+  )
+
+let json_float_of_float x =
+  match classify_float x with
+      FP_normal
+    | FP_subnormal ->
+	Printf.sprintf "%.17g" x (* works well except that
+				    integers are printed as ints *)
+    | FP_zero -> "0.0"
+    | FP_infinite -> if x > 0. then "Infinity" else "-Infinity"
+    | FP_nan -> "NaN"
+
+let write_float ob x =
+  Bi_outbuf.add_string ob (json_float_of_float x)
+
+let test_float () =
+  let l = [ 0.; 1.; -1. ] in
+  let l = l @ List.map (fun x -> 2. *. x +. 1.) l in
+  let l = l @ List.map (fun x -> x /. sqrt 2.) l in
+  let l = l @ List.map (fun x -> x *. sqrt 3.) l in
+  let l = l @ List.map cos l in
+  let l = l @ List.map (fun x -> x *. 1.23e50) l in
+  let l = l @ [ infinity; neg_infinity ] in
+  List.iter (
+    fun x -> 
+      let s = Printf.sprintf "%.17g" x in
+      let y = float_of_string s in
+      Printf.printf "%g %g %S %B\n" x y s (x = y)
+  )
+    l
+
+(*
+let () = test_float ()
+*)
+
+let write_intlit = Bi_outbuf.add_string
+let write_floatlit = Bi_outbuf.add_string
+let write_stringlit = Bi_outbuf.add_string
