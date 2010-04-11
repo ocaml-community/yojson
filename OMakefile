@@ -1,0 +1,21 @@
+USE_OCAMLFIND = true
+BYTE_ENABLED = true
+
+FILES[] =
+  yo_io
+
+OCAMLFLAGS = -dtypes
+OCAMLPACKS = easy-format biniou
+
+
+.DEFAULT: yojson.cma yojson.cmxa # test_yojson meow
+
+.PHONY: clean
+
+clean:
+        rm -f *.o *.a *.cm* *~ *.annot test_yojson test_yojson.opt \
+		meow meow.opt test.bin
+
+OCamlLibrary(yojson, $(FILES))
+#OCamlProgram(test_yojson, $(FILES) test_yojson)
+#OCamlProgram(meow, $(FILES) meow)
