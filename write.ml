@@ -95,6 +95,11 @@ let write_int ob x =
     ob.o_len <- ob.o_len + 1
   )
 
+(*
+  Ensure that the float is not printed as an int.
+  This is not required by JSON, but useful in order to guarantee
+  reversibility.
+*)
 let fix_float s =
   try
     for i = 0 to String.length s - 1 do
@@ -106,12 +111,16 @@ let fix_float s =
   with Exit ->
     s
 
+(*
+  string_of_float function that guarantees that a sufficient number
+  of digits is printed in order to allow reversibility.
+*)
 let jstring_of_float x =
   match classify_float x with
     FP_nan -> "NaN"
   | FP_infinite -> if x > 0. then "Infinity" else "-Infinity"
   | _ ->
-      let s = Printf.sprintf "%.18g" x in
+      let s = Printf.sprintf "%.17g" x in
       fix_float s
 
 let write_float ob x =
