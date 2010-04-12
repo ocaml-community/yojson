@@ -95,18 +95,27 @@ let write_int ob x =
     ob.o_len <- ob.o_len + 1
   )
 
-let json_float_of_float x =
+let fix_float s =
+  try
+    for i = 0 to String.length s - 1 do
+      match s.[i] with
+	  '0'..'9' | '-' -> ()
+	| _ -> raise Exit
+    done;
+    s ^ ".0"
+  with Exit ->
+    s
+
+let jstring_of_float x =
   match classify_float x with
-      FP_normal
-    | FP_subnormal ->
-	Printf.sprintf "%.17g" x (* works well except that
-				    integers are printed as ints *)
-    | FP_zero -> "0.0"
-    | FP_infinite -> if x > 0. then "Infinity" else "-Infinity"
-    | FP_nan -> "NaN"
+    FP_nan -> "NaN"
+  | FP_infinite -> if x > 0. then "Infinity" else "-Infinity"
+  | _ ->
+      let s = Printf.sprintf "%.18g" x in
+      fix_float s
 
 let write_float ob x =
-  Bi_outbuf.add_string ob (json_float_of_float x)
+  Bi_outbuf.add_string ob (jstring_of_float x)
 
 let test_float () =
   let l = [ 0.; 1.; -1. ] in

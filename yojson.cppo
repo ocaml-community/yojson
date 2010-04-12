@@ -34,14 +34,14 @@ module Safe =
 struct
 #define INT
 #define INTLIT
-#define FLOATLIT
+#define FLOAT
 #define STRING
 #define TUPLE
 #define VARIANT
 #include "type.ml"
 #undef INT
 #undef INTLIT
-#undef FLOATLIT
+#undef FLOAT
 #undef STRING
 #undef TUPLE
 #undef VARIANT
