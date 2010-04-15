@@ -4,6 +4,7 @@ BYTE_ENABLED = true
 SOURCES[] =
   type.ml
   write.ml
+  read.ml
   yojson.cppo
 
 FILES[] =
