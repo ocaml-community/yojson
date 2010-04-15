@@ -149,3 +149,81 @@ let () = test_float ()
 let write_intlit = Bi_outbuf.add_string
 let write_floatlit = Bi_outbuf.add_string
 let write_stringlit = Bi_outbuf.add_string
+
+let rec iter2_aux f_elt f_sep x = function
+    [] -> ()
+  | y :: l ->
+      f_sep x;
+      f_elt x y;
+      iter2_aux f_elt f_sep x l
+
+let iter2 f_elt f_sep x = function
+    [] -> ()
+  | y :: l ->
+      f_elt x y;
+      iter2_aux f_elt f_sep x l
+
+let f_sep ob =
+  Bi_outbuf.add_char ob ','
+
+let rec write ob (x : json) =
+  match x with
+      `Null -> write_null ob ()
+    | `Bool b -> write_bool ob b
+#ifdef INT
+    | `Int i -> write_int ob i
+#endif
+#ifdef INTLIT
+    | `Intlit s -> write_intlit ob s
+#endif
+#ifdef FLOAT
+    | `Float f -> write_float ob f
+#endif
+#ifdef FLOATLIT
+    | `Floatlit s -> write_floatlit ob s
+#endif
+#ifdef STRING
+    | `String s -> write_string ob s
+#endif
+#ifdef STRINGLIT
+    | `Stringlit s -> write_stringlit ob s
+#endif
+    | `Assoc l -> write_assoc ob l
+    | `List l -> write_list ob l
+#ifdef TUPLE
+    | `Tuple l -> write_tuple ob l
+#endif
+#ifdef VARIANT
+    | `Variant (s, o) -> write_variant ob s o
+#endif
+
+and write_assoc ob l =
+  let f_elt ob (s, x) =
+    Bi_outbuf.add_string ob s;
+    Bi_outbuf.add_char ob ':';
+    write ob x
+  in
+  Bi_outbuf.add_char ob '{';
+  iter2 f_elt f_sep ob l;
+  Bi_outbuf.add_char ob '}';
+
+and write_list ob l =
+  Bi_outbuf.add_char ob '[';
+  iter2 write f_sep ob l;
+  Bi_outbuf.add_char ob ']'
+
+and write_tuple ob l =
+  Bi_outbuf.add_char ob '(';
+  iter2 write f_sep ob l;
+  Bi_outbuf.add_char ob ')'
+
+and write_variant ob s o =
+  Bi_outbuf.add_char ob '<';
+  write_string ob s;
+  (match o with
+       None -> ()
+     | Some x ->
+	 Bi_outbuf.add_char ob ':';
+	 write ob x
+  );
+  Bi_outbuf.add_char ob '>'
