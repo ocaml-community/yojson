@@ -28,3 +28,8 @@ Other choices already in json-wheel:
   * encoding is ASCII except for the contents of string literals
   * string literals may represent arbitrary sequence of bytes
   * \uABCD escapes in string literals expand to UTF-8
+
+
+Miscellaneous:
+
+- no dependency on ocamlnet for UTF-8
