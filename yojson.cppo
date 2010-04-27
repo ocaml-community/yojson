@@ -1,5 +1,7 @@
 (* $Id$ *)
 
+#include "common.ml"
+
 #define INT
 #define INTLIT
 #define FLOAT

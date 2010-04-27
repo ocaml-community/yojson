@@ -1,19 +1,16 @@
 USE_OCAMLFIND = true
 BYTE_ENABLED = true
 
-SOURCES[] =
-  type.ml
-  write.ml
-  read.ml
-  yojson.cppo
-
 FILES[] =
   yojson
 
 OCAMLFLAGS = -dtypes
 OCAMLPACKS = easy-format biniou
 
-yojson.ml: $(SOURCES)
+read.ml: read.mll
+	ocamllex read.mll
+
+yojson.ml: yojson.cppo common.ml type.ml write.ml read.ml 
 	cppo yojson.cppo -o yojson.ml
 
 .DEFAULT: yojson.cma yojson.cmxa # test_yojson meow
@@ -22,7 +19,7 @@ yojson.ml: $(SOURCES)
 
 clean:
         rm -f *.o *.a *.cm* *~ *.annot test_yojson test_yojson.opt \
-		meow meow.opt test.bin
+		meow meow.opt test.bin read.ml yojson.ml
 
 OCamlLibrary(yojson, $(FILES))
 #OCamlProgram(test_yojson, $(FILES) test_yojson)
