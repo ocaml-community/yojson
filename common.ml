@@ -4,6 +4,14 @@ exception Json_error of string
 
 let json_error s = raise (Json_error s)
 
+type in_param = {
+  string_buf : Buffer.t
+}
+
+let create_in_param ?(len = 256) () = {
+  string_buf = Buffer.create len
+}
+
 
 let utf8_of_bytes buf a b c d =
   let i = (a lsl 12) lor (b lsl 8) lor (c lsl 4) lor d in

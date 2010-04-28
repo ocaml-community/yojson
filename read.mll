@@ -134,7 +134,7 @@ let hex = [ '0'-'9' 'a'-'f' 'A'-'F' ]
 let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
 
 
-rule read_json p = parse
+rule read_json buf = parse
   | "true"      { `Bool true }
   | "false"     { `Bool false }
   | "null"      { `Null }
@@ -161,7 +161,6 @@ rule read_json p = parse
                 }
   | '"'         {
                   #ifdef STRING
-                    let buf = p.string_buf in
 	            Buffer.clear buf;
 		    `String (finish_string buf lexbuf)
                   #elif defined STRINGLIT
@@ -181,20 +180,20 @@ rule read_json p = parse
   | '{'          { let acc = ref [] in
 		   try
 		     read_space lexbuf;
-		     let field_name = read_ident p lexbuf in
+		     let field_name = read_ident buf lexbuf in
 		     read_space lexbuf;
 		     read_colon lexbuf;
 		     read_space lexbuf;
-		     acc := (field_name, read_json p lexbuf) :: !acc;
+		     acc := (field_name, read_json buf lexbuf) :: !acc;
 		     while true do
 		       read_space lexbuf;
 		       read_object_sep lexbuf;
 		       read_space lexbuf;
-		       let field_name = read_ident p lexbuf in
+		       let field_name = read_ident buf lexbuf in
 		       read_space lexbuf;
 		       read_colon lexbuf;
 		       read_space lexbuf;
-		       acc := (field_name, read_json p lexbuf) :: !acc;
+		       acc := (field_name, read_json buf lexbuf) :: !acc;
 		     done;
 		     assert false
 		   with End_of_object ->
@@ -204,12 +203,12 @@ rule read_json p = parse
   | '['          { let acc = ref [] in
 		   try
 		     read_space lexbuf;
-		     acc := read_json p lexbuf :: !acc;
+		     acc := read_json buf lexbuf :: !acc;
 		     while true do
 		       read_space lexbuf;
 		       read_array_sep lexbuf;
 		       read_space lexbuf;
-		       acc := read_json p lexbuf :: !acc;
+		       acc := read_json buf lexbuf :: !acc;
 		     done;
 		     assert false
 		   with End_of_array ->
@@ -221,12 +220,12 @@ rule read_json p = parse
                      let acc = ref [] in
 		     try
 		       read_space lexbuf;
-		       acc := read_json p lexbuf :: !acc;
+		       acc := read_json buf lexbuf :: !acc;
 		       while true do
 			 read_space lexbuf;
 			 read_tuple_sep lexbuf;
 			 read_space lexbuf;
-			 acc := read_json p lexbuf :: !acc;
+			 acc := read_json buf lexbuf :: !acc;
 		       done;
 		       assert false
 		     with End_of_tuple ->
@@ -239,18 +238,18 @@ rule read_json p = parse
   | '<'          {
                    #ifdef VARIANT
                      read_space lexbuf;
-                     let cons = read_ident p lexbuf in
+                     let cons = read_ident buf lexbuf in
 		     read_space lexbuf;
-		     `Variant (cons, finish_variant p lexbuf)
+		     `Variant (cons, finish_variant buf lexbuf)
                    #else
                      lexer_error "Invalid token '<'" lexbuf
                    #endif
 		 }
 
-  | "//"[^'\n']* { read_json p lexbuf }
-  | "/*"         { finish_comment lexbuf; read_json p lexbuf }
-  | "\n"         { newline lexbuf; read_json p lexbuf }
-  | space        { read_json p lexbuf }
+  | "//"[^'\n']* { read_json buf lexbuf }
+  | "/*"         { finish_comment lexbuf; read_json buf lexbuf }
+  | "\n"         { newline lexbuf; read_json buf lexbuf }
+  | space        { read_json buf lexbuf }
   | eof          { raise End_of_file }
   | _            { lexer_error "Invalid token" lexbuf }
 
@@ -287,8 +286,8 @@ and finish_stringlit = parse
 	   s
 	 }
 
-and finish_variant p = parse 
-    ':'  { let x = read_json p lexbuf in
+and finish_variant buf = parse 
+    ':'  { let x = read_json buf lexbuf in
 	   read_space lexbuf;
 	   close_variant lexbuf;
 	   Some x }
@@ -336,14 +335,12 @@ and read_number = parse
   | "-Infinity" { `Float neg_infinity }
   | number      { `Float (float_of_string (lexeme lexbuf)) }
 
-and read_string p = parse
-    '"'      { let buf = p.string_buf in
-	       Buffer.clear buf;
+and read_string buf = parse
+    '"'      { Buffer.clear buf;
 	       finish_string buf lexbuf }
 
-and read_ident p = parse
-    '"'      { let buf = p.string_buf in
-	       Buffer.clear buf;
+and read_ident buf = parse
+    '"'      { Buffer.clear buf;
 	       finish_string buf lexbuf }
   | ident as s
              { s }
@@ -414,11 +411,11 @@ and read_tuple_sep = parse
     ','      { () }
   | ')'      { raise End_of_tuple }
 
-and read_fields read_field init_acc p = parse
+and read_fields read_field init_acc buf = parse
     '{'      { let acc = ref init_acc in
 	       try
 		 read_space lexbuf;
-		 let field_name = read_ident p lexbuf in
+		 let field_name = read_ident buf lexbuf in
 		 read_space lexbuf;
 		 read_colon lexbuf;
 		 read_space lexbuf;
@@ -427,7 +424,7 @@ and read_fields read_field init_acc p = parse
 		   read_space lexbuf;
 		   read_object_sep lexbuf;
 		   read_space lexbuf;
-		   let field_name = read_ident p lexbuf in
+		   let field_name = read_ident buf lexbuf in
 		   read_space lexbuf;
 		   read_colon lexbuf;
 		   read_space lexbuf;
@@ -446,7 +443,7 @@ and read_colon = parse
     ':'      { () }
 
 {
-  let _ = (read_json : param -> Lexing.lexbuf -> json)
+  let _ = (read_json : Buffer.t -> Lexing.lexbuf -> json)
 
   let read_list read_cell lexbuf =
     List.rev (read_list_rev read_cell lexbuf)
