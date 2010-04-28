@@ -1,0 +1,71 @@
+(* $Id$ *)
+
+#include "common.mli"
+
+#define INT
+#define INTLIT
+#define FLOAT
+#define FLOATLIT
+#define STRING
+#define STRINGLIT
+#define TUPLE
+#define VARIANT
+#include "type.ml"
+#include "write.mli"
+#undef INT
+#undef INTLIT
+#undef FLOAT
+#undef FLOATLIT
+#undef STRING
+#undef STRINGLIT
+#undef TUPLE
+#undef VARIANT
+
+module Basic :
+sig
+#define INT
+#define FLOAT
+#define STRING
+#include "type.ml"
+#include "write.mli"
+#include "read.mli"
+#undef INT
+#undef FLOAT
+#undef STRING
+end
+
+module Safe :
+sig
+#define INT
+#define INTLIT
+#define FLOAT
+#define STRING
+#define TUPLE
+#define VARIANT
+#include "type.ml"
+#include "write.mli"
+#include "read.mli"
+#undef INT
+#undef INTLIT
+#undef FLOAT
+#undef STRING
+#undef TUPLE
+#undef VARIANT
+end
+
+module Raw :
+sig
+#define INTLIT
+#define FLOATLIT
+#define STRINGLIT
+#define TUPLE
+#define VARIANT
+#include "type.ml"
+#include "write.mli"
+#include "read.mli"
+#undef INTLIT
+#undef FLOATLIT
+#undef STRINGLIT
+#undef TUPLE
+#undef VARIANT
+end

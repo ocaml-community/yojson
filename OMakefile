@@ -10,8 +10,11 @@ OCAMLPACKS = easy-format biniou
 read.ml: read.mll
 	ocamllex read.mll
 
-yojson.ml: yojson.cppo common.ml type.ml write.ml read.ml 
-	cppo yojson.cppo -o yojson.ml
+yojson.mli: yojson.mli.cppo common.mli type.ml write.mli read.mli
+	cppo -n yojson.mli.cppo -o yojson.mli
+
+yojson.ml: yojson.ml.cppo common.ml type.ml write.ml read.ml 
+	cppo yojson.ml.cppo -o yojson.ml
 
 .DEFAULT: yojson.cma yojson.cmxa # test_yojson meow
 

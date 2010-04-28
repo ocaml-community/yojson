@@ -56,8 +56,10 @@
       !n
 
   let make_positive_int lexbuf =
-    try `Int (extract_positive_int lexbuf)
-    with Int_overflow ->
+    #ifdef INT
+      try `Int (extract_positive_int lexbuf)
+      with Int_overflow ->
+    #endif
       #ifdef INTLIT
 	`Intlit (lexeme lexbuf)
       #else
@@ -81,8 +83,10 @@
       !n
 
   let make_negative_int lexbuf =
-    try `Int (extract_negative_int lexbuf)
-    with Int_overflow ->
+    #ifdef INT
+      try `Int (extract_negative_int lexbuf)
+      with Int_overflow ->
+    #endif
       #ifdef INTLIT
 	`Intlit (lexeme lexbuf)
       #else
@@ -109,9 +113,9 @@
 
   exception End_of_array
   exception End_of_object
+  exception End_of_tuple
 }
 
-let sp = [' ' '\t' '\r']*
 let space = [' ' '\t' '\r']+
 
 let digit = ['0'-'9']
@@ -127,23 +131,69 @@ let number = '-'? positive_int (frac | exp | frac exp)?
 
 let hex = [ '0'-'9' 'a'-'f' 'A'-'F' ]
 
-let unescaped = ['\x20'-'\x21' '\x23'-'\x5B' '\x5D'-'\xFF' ]
-
 let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
 
 
 rule read_json p = parse
-  | "//"[^'\n']* { read_json p lexbuf }
-  | "/*"         { finish_comment lexbuf; read_json p lexbuf }
+  | "true"      { `Bool true }
+  | "false"     { `Bool false }
+  | "null"      { `Null }
+  | "NaN"       {
+                  #ifdef FLOAT
+                    `Float nan
+                  #elif defined FLOATLIT
+                    `Floatlit "NaN"
+                  #endif
+                }
+  | "Infinity"  {
+                  #ifdef FLOAT
+                    `Float infinity
+                  #elif defined FLOATLIT
+                    `Floatlit "Infinity"
+                  #endif
+                }
+  | "-Infinity" {
+                  #ifdef FLOAT
+                    `Float neg_infinity
+                  #elif defined FLOATLIT
+                    `Floatlit "-Infinity"
+                  #endif
+                }
+  | '"'         {
+                  #ifdef STRING
+                    let buf = p.string_buf in
+	            Buffer.clear buf;
+		    `String (finish_string buf lexbuf)
+                  #elif defined STRINGLIT
+                    `Stringlit (finish_stringlit lexbuf)
+                  #endif
+                }
+  | positive_int         { make_positive_int lexbuf }
+  | '-' positive_int     { make_negative_int lexbuf }
+  | float       {
+                  #ifdef FLOAT
+                    `Float (float_of_string (lexeme lexbuf))
+                  #elif defined FLOATLIT
+                    `Floatlit (lexeme lexbuf)
+                  #endif
+                 }
+
   | '{'          { let acc = ref [] in
 		   try
-		     let field_name = read_field_name p lexbuf in
+		     read_space lexbuf;
+		     let field_name = read_ident p lexbuf in
+		     read_space lexbuf;
 		     read_colon lexbuf;
+		     read_space lexbuf;
 		     acc := (field_name, read_json p lexbuf) :: !acc;
 		     while true do
+		       read_space lexbuf;
 		       read_object_sep lexbuf;
-		       let field_name = read_field_name p lexbuf in
+		       read_space lexbuf;
+		       let field_name = read_ident p lexbuf in
+		       read_space lexbuf;
 		       read_colon lexbuf;
+		       read_space lexbuf;
 		       acc := (field_name, read_json p lexbuf) :: !acc;
 		     done;
 		     assert false
@@ -153,9 +203,12 @@ rule read_json p = parse
 
   | '['          { let acc = ref [] in
 		   try
+		     read_space lexbuf;
 		     acc := read_json p lexbuf :: !acc;
 		     while true do
+		       read_space lexbuf;
 		       read_array_sep lexbuf;
+		       read_space lexbuf;
 		       acc := read_json p lexbuf :: !acc;
 		     done;
 		     assert false
@@ -163,36 +216,52 @@ rule read_json p = parse
 		     `List (List.rev !acc)
 		 }
 
-  | "true"      { `Bool true }
-  | "false"     { `Bool false }
-  | "null"      { `Null }
-  | "NaN"       { `Float nan }
-  | "Infinity"  { `Float infinity }
-  | "-Infinity" { `Float neg_infinity }
-  | '"'         { let buf = p.string_buf in
-		 Buffer.clear buf;
-		 `String (finish_string buf lexbuf) }
-  | positive_int         { make_positive_int lexbuf }
-  | '-' positive_int     { make_negative_int lexbuf }
-  | float       { `Float (float_of_string (lexeme lexbuf)) }
-  | "\n"        { newline lexbuf; read_json p lexbuf }
-  | space       { read_json p lexbuf }
-  | eof         { raise End_of_file }
-  | _           { lexer_error "Invalid token" lexbuf }
+  | '('          {
+                   #ifdef TUPLE
+                     let acc = ref [] in
+		     try
+		       read_space lexbuf;
+		       acc := read_json p lexbuf :: !acc;
+		       while true do
+			 read_space lexbuf;
+			 read_tuple_sep lexbuf;
+			 read_space lexbuf;
+			 acc := read_json p lexbuf :: !acc;
+		       done;
+		       assert false
+		     with End_of_tuple ->
+		       `Tuple (List.rev !acc)
+	           #else
+		     lexer_error "Invalid token '('" lexbuf
+                   #endif
+		 }
+
+  | '<'          {
+                   #ifdef VARIANT
+                     read_space lexbuf;
+                     let cons = read_ident p lexbuf in
+		     read_space lexbuf;
+		     `Variant (cons, finish_variant p lexbuf)
+                   #else
+                     lexer_error "Invalid token '<'" lexbuf
+                   #endif
+		 }
+
+  | "//"[^'\n']* { read_json p lexbuf }
+  | "/*"         { finish_comment lexbuf; read_json p lexbuf }
+  | "\n"         { newline lexbuf; read_json p lexbuf }
+  | space        { read_json p lexbuf }
+  | eof          { raise End_of_file }
+  | _            { lexer_error "Invalid token" lexbuf }
 
 
 and finish_string buf = parse
-    '"'         { Buffer.contents buf }
-  | '\\'        { finish_escaped_char buf lexbuf;
-		  finish_string buf lexbuf }
-  | unescaped+  { add_lexeme buf lexbuf;
-		  finish_string buf lexbuf }
-  | _ as c      { custom_error 
-		    (sprintf "Unescaped control character \\u%04X or \
-                              unterminated string" (int_of_char c))
-		    lexbuf }
-  | eof         { custom_error "Unterminated string" lexbuf }
-
+    '"'           { Buffer.contents buf }
+  | '\\'          { finish_escaped_char buf lexbuf;
+		    finish_string buf lexbuf }
+  | [^ '"' '\\']+ { add_lexeme buf lexbuf;
+		    finish_string buf lexbuf }
+  | eof           { custom_error "Unterminated string" lexbuf }
 
 and finish_escaped_char buf = parse 
     '"'
@@ -208,6 +277,26 @@ and finish_escaped_char buf = parse
   | _    { lexer_error "Invalid escape sequence" lexbuf }
 
 
+and finish_stringlit = parse
+    ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
+    | [^'"' '\\'] )* '"'
+         { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
+	   let s = String.create (len+1) in
+	   s.[0] <- '"';
+	   String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
+	   s
+	 }
+
+and finish_variant p = parse 
+    ':'  { let x = read_json p lexbuf in
+	   read_space lexbuf;
+	   close_variant lexbuf;
+	   Some x }
+  | '>'  { None }
+
+and close_variant = parse
+    '>'  { () }
+
 and finish_comment = parse
   | "*/" { () }
   | eof  { lexer_error "Unterminated comment" lexbuf }
@@ -219,17 +308,21 @@ and finish_comment = parse
 
 (* Readers expecting a particular JSON construct *)
 
+and read_space = parse
+  | "//"[^'\n']*           { read_space lexbuf }
+  | "/*"                   { finish_comment lexbuf; read_space lexbuf }
+  | '\n'                   { newline lexbuf; read_space lexbuf }
+  | [' ' '\t' '\r']+       { read_space lexbuf }
+  | ""                     { () }
+
 and read_null = parse
-    sp "null"    { () }
+    "null"    { () }
 
 and read_bool = parse
-    sp "true"    { true }
-  | sp "false"   { false }
+    "true"    { true }
+  | "false"   { false }
 
 and read_int = parse
-    sp           { read_int_nospace lexbuf }
-
-and read_int_nospace = parse
     positive_int         { try extract_positive_int lexbuf
 			   with Int_overflow ->
 			     lexer_error "Int overflow" lexbuf }
@@ -238,82 +331,125 @@ and read_int_nospace = parse
 			     lexer_error "Int overflow" lexbuf }
   
 and read_number = parse
-    sp           { read_number_nospace lexbuf }
-
-and read_number_nospace = parse
   | "NaN"       { `Float nan }
   | "Infinity"  { `Float infinity }
   | "-Infinity" { `Float neg_infinity }
   | number      { `Float (float_of_string (lexeme lexbuf)) }
 
 and read_string p = parse
-    sp '"'      { let buf = p.string_buf in
-		  Buffer.clear buf;
-		  finish_string buf lexbuf }
+    '"'      { let buf = p.string_buf in
+	       Buffer.clear buf;
+	       finish_string buf lexbuf }
 
-and read_field_name p = parse
-    sp '"'      { let buf = p.string_buf in
-		  Buffer.clear buf;
-		  finish_string buf lexbuf }
-  | sp (ident as s)
-                { s }
+and read_ident p = parse
+    '"'      { let buf = p.string_buf in
+	       Buffer.clear buf;
+	       finish_string buf lexbuf }
+  | ident as s
+             { s }
 
 and read_sequence read_cell init_acc = parse
-    sp '[' sp   { let acc = ref init_acc in
-		  try
-		    acc := read_cell !acc lexbuf;
-		    while true do
-		      read_array_sep lexbuf;
-		      acc := read_cell !acc lexbuf;
-		    done;
-		    assert false
-		  with End_of_array ->
-		    !acc
-		}
+    '['      { let acc = ref init_acc in
+	       try
+		 read_space lexbuf;
+		 acc := read_cell !acc lexbuf;
+		 while true do
+		   read_space lexbuf;
+		   read_array_sep lexbuf;
+		   read_space lexbuf;
+		   acc := read_cell !acc lexbuf;
+		 done;
+		 assert false
+	       with End_of_array ->
+		 !acc
+	     }
 
 and read_list_rev read_cell = parse
-    sp '[' sp   { let acc = ref [] in
-		  try
-		    acc := read_cell lexbuf :: !acc;
-		    while true do
-		      read_array_sep lexbuf;
-		      acc := read_cell lexbuf :: !acc;
-		    done;
-		    assert false
-		  with End_of_array ->
-		    !acc
-		}
+    '['      { let acc = ref [] in
+	       try
+		 read_space lexbuf;
+		 acc := read_cell lexbuf :: !acc;
+		 while true do
+		   read_space lexbuf;
+		   read_array_sep lexbuf;
+		   read_space lexbuf;
+		   acc := read_cell lexbuf :: !acc;
+		 done;
+		 assert false
+	       with End_of_array ->
+		 !acc
+	     }
 
 and read_array_sep = parse
-    sp ',' sp   { () }
-  | sp ']'      { raise End_of_array }
+    ','      { () }
+  | ']'      { raise End_of_array }
+
+
+and read_tuple read_cell init_acc = parse
+    '('          {
+                   #ifdef TUPLE
+                     let pos = ref 0 in
+                     let acc = ref init_acc in
+		     try
+		       read_space lexbuf;
+		       acc := read_cell !pos !acc lexbuf;
+		       incr pos;
+		       while true do
+			 read_space lexbuf;
+			 read_tuple_sep lexbuf;
+			 read_space lexbuf;
+			 acc := read_cell !pos !acc lexbuf;
+			 incr pos;
+		       done;
+		       assert false
+		     with End_of_tuple ->
+		       !acc
+	           #else
+		     lexer_error "Invalid token '('" lexbuf
+                   #endif
+		 }
+
+
+and read_tuple_sep = parse
+    ','      { () }
+  | ')'      { raise End_of_tuple }
 
 and read_fields read_field init_acc p = parse
-    sp '{' sp   { let acc = ref init_acc in
-		  try
-		    let field_name = read_field_name p lexbuf in
-		    read_colon lexbuf;
-		    acc := read_field !acc field_name lexbuf;
-		    while true do
-		      read_object_sep lexbuf;
-		      let field_name = read_field_name p lexbuf in
-		      read_colon lexbuf;
-		      acc := read_field !acc field_name lexbuf;
-		    done;
-		    assert false
-		  with End_of_object ->
-		    !acc
-		}
+    '{'      { let acc = ref init_acc in
+	       try
+		 read_space lexbuf;
+		 let field_name = read_ident p lexbuf in
+		 read_space lexbuf;
+		 read_colon lexbuf;
+		 read_space lexbuf;
+		 acc := read_field !acc field_name lexbuf;
+		 while true do
+		   read_space lexbuf;
+		   read_object_sep lexbuf;
+		   read_space lexbuf;
+		   let field_name = read_ident p lexbuf in
+		   read_space lexbuf;
+		   read_colon lexbuf;
+		   read_space lexbuf;
+		   acc := read_field !acc field_name lexbuf;
+		 done;
+		 assert false
+	       with End_of_object ->
+		 !acc
+	     }
 
 and read_object_sep = parse
-    sp ',' sp   { () }
-  | sp '}'      { raise End_of_object }
+    ','      { () }
+  | '}'      { raise End_of_object }
 
 and read_colon = parse
-    sp ':' sp   { () }
+    ':'      { () }
 
 {
-  let read_list read_cell lexbuf = List.rev (read_list_rev read_cell lexbuf)
+  let _ = (read_json : param -> Lexing.lexbuf -> json)
+
+  let read_list read_cell lexbuf =
+    List.rev (read_list_rev read_cell lexbuf)
 
   let array_of_rev_list l =
     match l with

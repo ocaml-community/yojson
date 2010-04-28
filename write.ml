@@ -212,11 +212,14 @@ and write_list ob l =
   iter2 write f_sep ob l;
   Bi_outbuf.add_char ob ']'
 
+#ifdef TUPLE
 and write_tuple ob l =
   Bi_outbuf.add_char ob '(';
   iter2 write f_sep ob l;
   Bi_outbuf.add_char ob ')'
+#endif
 
+#ifdef VARIANT
 and write_variant ob s o =
   Bi_outbuf.add_char ob '<';
   write_string ob s;
@@ -227,3 +230,4 @@ and write_variant ob s o =
 	 write ob x
   );
   Bi_outbuf.add_char ob '>'
+#endif
