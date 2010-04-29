@@ -2,7 +2,7 @@
 
 open Printf
 
-let cat std in_file out_file =
+let cat std compact in_file out_file =
   let ic =
     match in_file with
 	`Stdin -> stdin
@@ -21,7 +21,11 @@ let cat std in_file out_file =
   in
   try
     let x = Yojson.Safe.from_channel ic in
-    Yojson.Safe.to_channel ~std oc x;
+    if compact then
+      Yojson.Safe.to_channel ~std oc x
+    else
+      Yojson.Pretty.to_channel ~std oc (x :> Yojson.json);
+    output_char oc '\n';
     finally ();
     true
   with e ->
@@ -33,6 +37,7 @@ let cat std in_file out_file =
 let parse_cmdline () =
   let out = ref None in
   let std = ref false in
+  let compact = ref false in
   let options = [
     "-o", Arg.String (fun s -> out := Some s), 
     "<file>
@@ -41,6 +46,9 @@ let parse_cmdline () =
     "
           Convert tuples and variants into standard JSON,
           refuse to print NaN and infinities";
+    "-c", Arg.Set compact,
+    "
+          Compact output (default: pretty-printed)";
   ]
   in
   let files = ref [] in
@@ -64,12 +72,12 @@ let parse_cmdline () =
 	None -> `Stdout
       | Some x -> `File x
   in
-  !std, in_file, out_file
+  !std, !compact, in_file, out_file
 
 
 let () =
-  let std, in_file, out_file = parse_cmdline () in
-  let success = cat std in_file out_file in
+  let std, compact, in_file, out_file = parse_cmdline () in
+  let success = cat std compact in_file out_file in
   if success then
     exit 0
   else

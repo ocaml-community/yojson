@@ -11,7 +11,13 @@
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+type json_max = json
 #include "write.mli"
+module Pretty :
+sig
+#include "pretty.mli"
+end
+#include "write2.mli"
 #undef INT
 #undef INTLIT
 #undef FLOAT
@@ -28,6 +34,7 @@ sig
 #define STRING
 #include "type.ml"
 #include "write.mli"
+#include "write2.mli"
 #include "read.mli"
 #undef INT
 #undef FLOAT
@@ -44,6 +51,7 @@ sig
 #define VARIANT
 #include "type.ml"
 #include "write.mli"
+#include "write2.mli"
 #include "read.mli"
 #undef INT
 #undef INTLIT
@@ -62,6 +70,7 @@ sig
 #define VARIANT
 #include "type.ml"
 #include "write.mli"
+#include "write2.mli"
 #include "read.mli"
 #undef INTLIT
 #undef FLOATLIT

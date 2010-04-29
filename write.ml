@@ -25,7 +25,12 @@ let write_control_char src start stop ob c =
   start := stop + 1
 
 let finish_string src start ob =
-  Bi_outbuf.blit src !start (String.length src - !start) ob
+  try
+    Bi_outbuf.blit src !start (String.length src - !start) ob
+  with _ ->
+    Printf.eprintf "src=%S start=%i len=%i\n%!"
+      src !start (String.length src - !start);
+    failwith "oops"
 
 let write_string_body ob s =
   let start = ref 0 in
@@ -49,14 +54,17 @@ let write_string ob s =
   write_string_body ob s;
   Bi_outbuf.add_char ob '"'
 
+let json_string_of_string s =
+  let ob = Bi_outbuf.create 10 in
+  write_string ob s;
+  Bi_outbuf.contents ob
+
 let test_string () =
   let s = String.create 256 in
   for i = 0 to 255 do
     s.[i] <- Char.chr i
   done;
-  let ob = Bi_outbuf.create 10 in
-  write_string ob s;
-  Bi_outbuf.contents ob
+  json_string_of_string s
 
 
 let write_null ob () =
@@ -95,6 +103,10 @@ let write_int ob x =
     ob.o_len <- ob.o_len + 1
   )
 
+let json_string_of_int i =
+  string_of_int i
+
+
 (*
   Ensure that the float is not printed as an int.
   This is not required by JSON, but useful in order to guarantee
@@ -127,6 +139,12 @@ let write_float ob x =
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
 	
+let json_string_of_float x =
+  let ob = Bi_outbuf.create 20 in
+  write_float ob x;
+  Bi_outbuf.contents ob
+
+
 let write_std_float ob x =
   match classify_float x with
     FP_nan ->
@@ -143,7 +161,10 @@ let write_std_float ob x =
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
 	
-
+let std_json_string_of_float x =
+  let ob = Bi_outbuf.create 20 in
+  write_std_float ob x;
+  Bi_outbuf.contents ob
 
 
 let test_float () =

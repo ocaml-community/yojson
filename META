@@ -1,4 +1,4 @@
 description = "JSON toolkit"
 requires = "easy-format biniou"
-archive(byte) = "yojson.cma"
-archive(native) = "yojson.cmxa"
+archive(byte) = "yojson.cmo"
+archive(native) = "yojson.cmx"
