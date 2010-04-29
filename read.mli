@@ -1,7 +1,5 @@
 (* $Id$ *)
 
-val read_json : Buffer.t -> Lexing.lexbuf -> json
-
 val finish_string : Buffer.t -> Lexing.lexbuf -> string
 val finish_escaped_char : Buffer.t -> Lexing.lexbuf -> unit
 val finish_variant : Buffer.t -> Lexing.lexbuf -> json option
@@ -32,3 +30,10 @@ val read_fields :
   'a -> Buffer.t -> Lexing.lexbuf -> 'a
 val read_object_sep : Lexing.lexbuf -> unit
 val read_colon : Lexing.lexbuf -> unit
+
+
+val read_json : Buffer.t -> Lexing.lexbuf -> json
+
+val from_string : ?buf:Buffer.t -> string -> json
+val from_channel : ?buf:Buffer.t -> in_channel -> json
+val from_file : ?buf:Buffer.t -> string -> json

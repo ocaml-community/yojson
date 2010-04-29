@@ -231,7 +231,7 @@ rule read_json buf = parse
 		     with End_of_tuple ->
 		       `Tuple (List.rev !acc)
 	           #else
-		     lexer_error "Invalid token '('" lexbuf
+		     lexer_error "Invalid token" lexbuf
                    #endif
 		 }
 
@@ -242,7 +242,7 @@ rule read_json buf = parse
 		     read_space lexbuf;
 		     `Variant (cons, finish_variant buf lexbuf)
                    #else
-                     lexer_error "Invalid token '<'" lexbuf
+                     lexer_error "Invalid token" lexbuf
                    #endif
 		 }
 
@@ -402,7 +402,7 @@ and read_tuple read_cell init_acc = parse
 		     with End_of_tuple ->
 		       !acc
 	           #else
-		     lexer_error "Invalid token '('" lexbuf
+		     lexer_error "Invalid token" lexbuf
                    #endif
 		 }
 
@@ -464,4 +464,28 @@ and read_colon = parse
   let read_array read_cell lexbuf =
     let l = read_list_rev read_cell lexbuf in
     array_of_rev_list l
+
+  let from_lexbuf ?buf lexbuf =
+    let buf =
+      match buf with
+	  None -> Buffer.create 256
+	| Some buf -> buf
+    in
+    read_json buf lexbuf
+
+  let from_string ?buf s =
+    from_lexbuf ?buf (Lexing.from_string s)
+
+  let from_channel ?buf ic =
+    from_lexbuf ?buf (Lexing.from_channel ic)
+
+  let from_file ?buf file =
+    let ic = open_in file in
+    try
+      let x = from_channel ?buf ic in
+      close_in ic;
+      x
+    with e ->
+      close_in_noerr ic;
+      raise e
 }

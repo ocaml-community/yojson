@@ -26,7 +26,31 @@ val write_assoc : Bi_outbuf.t -> (string * json) list -> unit
 val write_list : Bi_outbuf.t -> json list -> unit
 #ifdef TUPLE
 val write_tuple : Bi_outbuf.t -> json list -> unit
+val write_std_tuple : Bi_outbuf.t -> json list -> unit
 #endif
 #ifdef VARIANT
 val write_variant : Bi_outbuf.t -> string -> json option -> unit
+val write_std_variant : Bi_outbuf.t -> string -> json option -> unit
 #endif
+
+
+val write_json : Bi_outbuf.t -> json -> unit
+val write_std_json : Bi_outbuf.t -> json -> unit
+
+val to_string :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  json -> string
+
+val to_channel :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  out_channel -> json -> unit
+
+val to_file :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  string -> json -> unit

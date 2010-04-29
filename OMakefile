@@ -16,7 +16,7 @@ yojson.mli: yojson.mli.cppo common.mli type.ml write.mli read.mli
 yojson.ml: yojson.ml.cppo common.ml type.ml write.ml read.ml 
 	cppo yojson.ml.cppo -o yojson.ml
 
-.DEFAULT: yojson.cma yojson.cmxa # test_yojson meow
+.DEFAULT: yojson.cma yojson.cmxa ydump
 
 .PHONY: clean
 
@@ -25,5 +25,4 @@ clean:
 		meow meow.opt test.bin read.ml yojson.ml
 
 OCamlLibrary(yojson, $(FILES))
-#OCamlProgram(test_yojson, $(FILES) test_yojson)
-#OCamlProgram(meow, $(FILES) meow)
+OCamlProgram(ydump, $(FILES) ydump)
