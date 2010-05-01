@@ -1,4 +1,0 @@
-description = "JSON toolkit"
-requires = "easy-format biniou"
-archive(byte) = "yojson.cmo"
-archive(native) = "yojson.cmx"
