@@ -73,7 +73,10 @@ let parse_cmdline () =
     files := s :: !files
   in
   let msg =
-    sprintf "Usage: %s [input file]" Sys.argv.(0)
+    sprintf "\
+JSON pretty-printer
+
+Usage: %s [input file]" Sys.argv.(0)
   in
   Arg.parse options anon_fun msg;
   let in_file =
