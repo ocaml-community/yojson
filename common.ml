@@ -26,3 +26,11 @@ let utf8_of_bytes buf a b c d =
     Buffer.add_char buf (Char.chr (0x80 lor ((i lsr 6) land 0x3f)));
     Buffer.add_char buf (Char.chr (0x80 lor (i land 0x3f)))
   )
+
+
+let is_object_or_array x =
+  match x with
+      `List _
+    | `Assoc _ -> true
+    | _ -> false
+

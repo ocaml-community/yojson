@@ -338,8 +338,6 @@ and write_std_variant ob s o =
 #endif
 
 
-
-
 let to_string ?buf ?(len = 256) ?(std = false) x =
   let ob =
     match buf with
@@ -348,8 +346,12 @@ let to_string ?buf ?(len = 256) ?(std = false) x =
 	  Bi_outbuf.clear ob;
 	  ob
   in
-  if std then
-    write_std_json ob x
+  if std then (
+    if not (is_object_or_array x) then
+      json_error "Root is not an object or array"
+    else
+      write_std_json ob x
+  )
   else
     write_json ob x;
   let s = Bi_outbuf.contents ob in
@@ -362,8 +364,13 @@ let to_channel ?buf ?len ?(std = false) oc x =
 	None -> Bi_outbuf.create_channel_writer ?len oc
       | Some ob -> ob
   in
-  if std then
-    write_std_json ob x
+  if std then (
+    if not (is_object_or_array x) then
+      json_error
+	"Root is not an object or array as requested by the JSON standard"
+    else
+      write_std_json ob x
+  )
   else
     write_json ob x;
   Bi_outbuf.flush_channel_writer ob

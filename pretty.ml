@@ -54,7 +54,12 @@ and format_field std (name, x) =
   Label ((Atom (s, atom), label), format std x)
 
 
-let format ?(std = false) x = format std (x :> json)
+let format ?(std = false) x =
+  if std && not (is_object_or_array x) then
+    json_error
+      "Root is not an object or array as requested by the JSON standard"
+  else
+    format std (x :> json)
 
 let to_string ?std x =
   Easy_format.Pretty.to_string (format ?std x)

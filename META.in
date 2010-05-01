@@ -1,0 +1,6 @@
+name = "yojson"
+version = "@@VERSION@@"
+description = "JSON parsing and printing (successor of json-wheel)"
+requires = "easy-format,biniou"
+archive(byte) = "yojson.cmo"
+archive(native) = "yojson.cmx"

@@ -344,6 +344,7 @@ and read_ident buf = parse
 	       finish_string buf lexbuf }
   | ident as s
              { s }
+  | '}'      { raise End_of_object }
 
 and read_sequence read_cell init_acc = parse
     '['      { let acc = ref init_acc in

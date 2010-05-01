@@ -1,10 +1,38 @@
+# $Id$
+
+VERSION = 0.8.0
+
 FLAGS = -dtypes
 PACKS = easy-format,biniou
 
-.PHONY: default all opt
+.PHONY: default all opt install
 default: all opt
 all: yojson.cmo
 opt: yojson.cmx ydump
+
+ifndef PREFIX
+  PREFIX = $(shell dirname $$(dirname $$(which ocamlfind)))
+  export PREFIX
+endif
+
+ifndef BINDIR
+  BINDIR = $(PREFIX)/bin
+  export BINDIR
+endif
+
+META: META.in Makefile
+	sed -e 's:@@VERSION@@:$(VERSION):' META.in > META
+
+install: META
+	test ! -f ydump || cp ydump $(BINDIR)/
+	test ! -f ydump.exe || cp ydump.exe $(BINDIR)/
+	ocamlfind install yojson META \
+          $$(ls yojson.mli yojson.cmi yojson.cmo yojson.cmx yojson.o)
+
+uninstall:
+	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
+	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe 
+	ocamlfind remove yojson
 
 read.ml: read.mll
 	ocamllex read.mll
@@ -30,8 +58,9 @@ ydump: yojson.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump -package $(PACKS) -linkpkg \
 		yojson.cmx ydump.ml
 
+
 .PHONY: clean
 
 clean:
 	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
-		read.ml yojson.mli yojson.ml
+		read.ml yojson.mli yojson.ml META
