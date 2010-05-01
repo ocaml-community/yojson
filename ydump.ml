@@ -2,7 +2,7 @@
 
 open Printf
 
-let cat std compact in_file out_file =
+let cat std compact stream in_file out_file =
   let ic =
     match in_file with
 	`Stdin -> stdin
@@ -19,18 +19,29 @@ let cat std compact in_file out_file =
     if ic != stdin then
       close_in_noerr ic
   in
-  try
-    let x = Yojson.Safe.from_channel ic in
+  let print x =
     if compact then
       Yojson.Safe.to_channel ~std oc x
     else
       Yojson.Pretty.to_channel ~std oc (x :> Yojson.json);
-    output_char oc '\n';
+    output_char oc '\n'
+  in
+  try
+    if stream then
+      Stream.iter print (Yojson.Safe.stream_from_channel ic)
+    else
+      print (Yojson.Safe.from_channel ic);
     finally ();
     true
   with e ->
     finally ();
-    eprintf "Error:\n%s\n%!" (Printexc.to_string e);
+    eprintf "Error:\n";
+    (match e with
+	 Yojson.Json_error s ->
+	   eprintf "%s\n%!" s
+       | e ->
+	   eprintf "%s\n%!" (Printexc.to_string e)
+    );
     false
 
 
@@ -38,6 +49,7 @@ let parse_cmdline () =
   let out = ref None in
   let std = ref false in
   let compact = ref false in
+  let stream = ref false in
   let options = [
     "-o", Arg.String (fun s -> out := Some s), 
     "<file>
@@ -49,6 +61,10 @@ let parse_cmdline () =
     "-c", Arg.Set compact,
     "
           Compact output (default: pretty-printed)";
+    "-s", Arg.Set stream,
+    "
+          Streaming mode: read and write a sequence of JSON values instead of
+          just one."
   ]
   in
   let files = ref [] in
@@ -72,12 +88,12 @@ let parse_cmdline () =
 	None -> `Stdout
       | Some x -> `File x
   in
-  !std, !compact, in_file, out_file
+  !std, !compact, !stream, in_file, out_file
 
 
 let () =
-  let std, compact, in_file, out_file = parse_cmdline () in
-  let success = cat std compact in_file out_file in
+  let std, compact, stream, in_file, out_file = parse_cmdline () in
+  let success = cat std compact stream in_file out_file in
   if success then
     exit 0
   else

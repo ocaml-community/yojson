@@ -8,10 +8,17 @@
   let string_of_loc (pos1, pos2) =
     let line1 = pos1.pos_lnum
     and start1 = pos1.pos_bol in
-    Printf.sprintf "File %S, line %i, characters %i-%i"
-      pos1.pos_fname line1
-      (pos1.pos_cnum - start1)
-      (pos2.pos_cnum - start1)
+    let fname = pos1.pos_fname in
+    if fname = "" then
+      Printf.sprintf "Line %i, characters %i-%i"
+	line1
+	(pos1.pos_cnum - start1)
+	(pos2.pos_cnum - start1)
+    else
+      Printf.sprintf "File %S, line %i, characters %i-%i"
+	fname line1
+	(pos1.pos_cnum - start1)
+	(pos2.pos_cnum - start1)
       
   let dec c =
     Char.code c - 48
@@ -110,10 +117,6 @@
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     Buffer.add_substring buf lexbuf.lex_buffer lexbuf.lex_start_pos len
-
-  exception End_of_array
-  exception End_of_object
-  exception End_of_tuple
 }
 
 let space = [' ' '\t' '\r']+
@@ -180,6 +183,7 @@ rule read_json buf = parse
   | '{'          { let acc = ref [] in
 		   try
 		     read_space lexbuf;
+		     read_object_end lexbuf;
 		     let field_name = read_ident buf lexbuf in
 		     read_space lexbuf;
 		     read_colon lexbuf;
@@ -203,6 +207,7 @@ rule read_json buf = parse
   | '['          { let acc = ref [] in
 		   try
 		     read_space lexbuf;
+		     read_array_end lexbuf;
 		     acc := read_json buf lexbuf :: !acc;
 		     while true do
 		       read_space lexbuf;
@@ -220,6 +225,7 @@ rule read_json buf = parse
                      let acc = ref [] in
 		     try
 		       read_space lexbuf;
+		       read_tuple_end lexbuf;
 		       acc := read_json buf lexbuf :: !acc;
 		       while true do
 			 read_space lexbuf;
@@ -250,7 +256,7 @@ rule read_json buf = parse
   | "/*"         { finish_comment lexbuf; read_json buf lexbuf }
   | "\n"         { newline lexbuf; read_json buf lexbuf }
   | space        { read_json buf lexbuf }
-  | eof          { raise End_of_file }
+  | eof          { custom_error "Unexpected end of input" lexbuf }
   | _            { lexer_error "Invalid token" lexbuf }
 
 
@@ -260,7 +266,7 @@ and finish_string buf = parse
 		    finish_string buf lexbuf }
   | [^ '"' '\\']+ { add_lexeme buf lexbuf;
 		    finish_string buf lexbuf }
-  | eof           { custom_error "Unterminated string" lexbuf }
+  | eof           { custom_error "Unexpected end of input" lexbuf }
 
 and finish_escaped_char buf = parse 
     '"'
@@ -274,6 +280,7 @@ and finish_escaped_char buf = parse
   | 'u' (hex as a) (hex as b) (hex as c) (hex as d)
          { utf8_of_bytes buf (hex a) (hex b) (hex c) (hex d) }
   | _    { lexer_error "Invalid escape sequence" lexbuf }
+  | eof  { custom_error "Unexpected end of input" lexbuf }
 
 
 and finish_stringlit = parse
@@ -285,6 +292,8 @@ and finish_stringlit = parse
 	   String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
 	   s
 	 }
+  | _    { lexer_error "Invalid string literal" lexbuf }
+  | eof  { custom_error "Unexpected end of input" lexbuf }
 
 and finish_variant buf = parse 
     ':'  { let x = read_json buf lexbuf in
@@ -292,20 +301,29 @@ and finish_variant buf = parse
 	   close_variant lexbuf;
 	   Some x }
   | '>'  { None }
+  | _    { lexer_error "Expected ':' or '>'" lexbuf }
+  | eof  { custom_error "Unexpected end of input" lexbuf }
 
 and close_variant = parse
     '>'  { () }
+  | _    { lexer_error "Expected '>'" lexbuf }
+  | eof  { custom_error "Unexpected end of input" lexbuf }
 
 and finish_comment = parse
   | "*/" { () }
   | eof  { lexer_error "Unterminated comment" lexbuf }
   | '\n' { newline lexbuf; finish_comment lexbuf }
   | _    { finish_comment lexbuf }
+  | eof  { custom_error "Unexpected end of input" lexbuf }
 
 
 
 
 (* Readers expecting a particular JSON construct *)
+
+and read_eof = parse
+    eof       { true }
+  | ""        { false }
 
 and read_space = parse
   | "//"[^'\n']*           { read_space lexbuf }
@@ -316,10 +334,14 @@ and read_space = parse
 
 and read_null = parse
     "null"    { () }
+  | _         { lexer_error "Expected 'null'" lexbuf }
+  | eof       { custom_error "Unexpected end of input" lexbuf }
 
 and read_bool = parse
     "true"    { true }
   | "false"   { false }
+  | _         { lexer_error "Expected 'true' or 'false'" lexbuf }
+  | eof       { custom_error "Unexpected end of input" lexbuf }
 
 and read_int = parse
     positive_int         { try extract_positive_int lexbuf
@@ -328,28 +350,36 @@ and read_int = parse
   | '-' positive_int     { try extract_negative_int lexbuf
 			   with Int_overflow ->
 			     lexer_error "Int overflow" lexbuf }
-  
+  | _                    { lexer_error "Expected integer" lexbuf }
+  | eof                  { custom_error "Unexpected end of input" lexbuf }
+
 and read_number = parse
   | "NaN"       { `Float nan }
   | "Infinity"  { `Float infinity }
   | "-Infinity" { `Float neg_infinity }
   | number      { `Float (float_of_string (lexeme lexbuf)) }
+  | _           { lexer_error "Expected number" lexbuf }
+  | eof         { custom_error "Unexpected end of input" lexbuf }
 
 and read_string buf = parse
     '"'      { Buffer.clear buf;
 	       finish_string buf lexbuf }
+  | _        { lexer_error "Expected '\"'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 and read_ident buf = parse
     '"'      { Buffer.clear buf;
 	       finish_string buf lexbuf }
   | ident as s
              { s }
-  | '}'      { raise End_of_object }
+  | _        { lexer_error "Expected string or identifier" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 and read_sequence read_cell init_acc = parse
     '['      { let acc = ref init_acc in
 	       try
 		 read_space lexbuf;
+		 read_array_end lexbuf;
 		 acc := read_cell !acc lexbuf;
 		 while true do
 		   read_space lexbuf;
@@ -361,11 +391,14 @@ and read_sequence read_cell init_acc = parse
 	       with End_of_array ->
 		 !acc
 	     }
+  | _        { lexer_error "Expected '['" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 and read_list_rev read_cell = parse
     '['      { let acc = ref [] in
 	       try
 		 read_space lexbuf;
+		 read_array_end lexbuf;
 		 acc := read_cell lexbuf :: !acc;
 		 while true do
 		   read_space lexbuf;
@@ -377,10 +410,18 @@ and read_list_rev read_cell = parse
 	       with End_of_array ->
 		 !acc
 	     }
+  | _        { lexer_error "Expected '['" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
+
+and read_array_end = parse
+    ']'      { raise End_of_array }
+  | ""       { () }
 
 and read_array_sep = parse
     ','      { () }
   | ']'      { raise End_of_array }
+  | _        { lexer_error "Expected ',' or ']'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 
 and read_tuple read_cell init_acc = parse
@@ -390,6 +431,7 @@ and read_tuple read_cell init_acc = parse
                      let acc = ref init_acc in
 		     try
 		       read_space lexbuf;
+		       read_tuple_end lexbuf;
 		       acc := read_cell !pos !acc lexbuf;
 		       incr pos;
 		       while true do
@@ -406,16 +448,24 @@ and read_tuple read_cell init_acc = parse
 		     lexer_error "Invalid token" lexbuf
                    #endif
 		 }
+  | _        { lexer_error "Expected ')'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
+and read_tuple_end = parse
+    ')'      { raise End_of_tuple }
+  | ""       { () }
 
 and read_tuple_sep = parse
     ','      { () }
   | ')'      { raise End_of_tuple }
+  | _        { lexer_error "Expected ',' or ')'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 and read_fields read_field init_acc buf = parse
     '{'      { let acc = ref init_acc in
 	       try
 		 read_space lexbuf;
+		 read_object_end lexbuf;
 		 let field_name = read_ident buf lexbuf in
 		 read_space lexbuf;
 		 read_colon lexbuf;
@@ -435,13 +485,23 @@ and read_fields read_field init_acc buf = parse
 	       with End_of_object ->
 		 !acc
 	     }
+  | _        { lexer_error "Expected '{'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
+
+and read_object_end = parse
+    '}'      { raise End_of_object }
+  | ""       { () }
 
 and read_object_sep = parse
     ','      { () }
   | '}'      { raise End_of_object }
+  | _        { lexer_error "Expected ',' or '}'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 and read_colon = parse
     ':'      { () }
+  | _        { lexer_error "Expected ':'" lexbuf }
+  | eof      { custom_error "Unexpected end of input" lexbuf }
 
 {
   let _ = (read_json : Buffer.t -> Lexing.lexbuf -> json)
@@ -466,19 +526,43 @@ and read_colon = parse
     let l = read_list_rev read_cell lexbuf in
     array_of_rev_list l
 
-  let from_lexbuf ?buf lexbuf =
+  let finish lexbuf =
+    read_space lexbuf;
+    if not (read_eof lexbuf) then
+      json_error "Junk after end of JSON value"
+
+  let from_lexbuf ?buf ?(stream = false) lexbuf =
     let buf =
       match buf with
 	  None -> Buffer.create 256
 	| Some buf -> buf
     in
-    read_json buf lexbuf
+    read_space lexbuf;
+
+    let x =
+      if read_eof lexbuf then
+	raise End_of_input
+      else
+	read_json buf lexbuf
+    in
+
+    if not stream then
+      finish lexbuf;
+
+    x
+
 
   let from_string ?buf s =
-    from_lexbuf ?buf (Lexing.from_string s)
+    try
+      from_lexbuf ?buf (Lexing.from_string s)
+    with End_of_input ->
+      json_error "Blank input data"
 
   let from_channel ?buf ic =
-    from_lexbuf ?buf (Lexing.from_channel ic)
+    try
+      from_lexbuf ?buf (Lexing.from_channel ic)
+    with End_of_input ->
+      json_error "Blank input data"
 
   let from_file ?buf file =
     let ic = open_in file in
@@ -489,4 +573,58 @@ and read_colon = parse
     with e ->
       close_in_noerr ic;
       raise e
+
+  let stream_from_lexbuf ?buf ?(fin = fun () -> ()) lexbuf =
+    let buf =
+      match buf with
+	  None -> Some (Buffer.create 256)
+	| Some _ -> buf
+    in
+    let stream = Some true in
+    let f i =
+      try Some (from_lexbuf ?buf ?stream lexbuf)
+      with End_of_input ->
+	fin ();
+	None
+    in
+    Stream.from f
+
+  type json2 = [ `Json of json | `Exn of exn ]
+
+  let stream2_from_lexbuf ?buf ?(fin = fun () -> ()) lexbuf =
+    let buf =
+      match buf with
+	  None -> Some (Buffer.create 256)
+	| Some _ -> buf
+    in
+    let stream = Some true in
+    let f i =
+      try Some (`Json (from_lexbuf ?buf ?stream lexbuf))
+      with
+	  End_of_input -> fin (); None
+	| e -> Some (`Exn e)
+    in
+    Stream.from f
+
+  let stream_from_string ?buf s =
+    stream_from_lexbuf ?buf (Lexing.from_string s)
+
+  let stream2_from_string ?buf s =
+    stream2_from_lexbuf ?buf (Lexing.from_string s)
+
+  let stream_from_channel ?buf ?fin ic =
+    stream_from_lexbuf ?buf ?fin (Lexing.from_channel ic)
+
+  let stream2_from_channel ?buf ?fin ic =
+    stream2_from_lexbuf ?buf ?fin (Lexing.from_channel ic)
+
+  let stream_from_file ?buf file =
+    let ic = open_in file in
+    let fin () = close_in ic in
+    stream_from_lexbuf ?buf ~fin (Lexing.from_channel ic)
+
+  let stream2_from_file ?buf file =
+    let ic = open_in file in
+    let fin () = close_in ic in
+    stream2_from_lexbuf ?buf ~fin (Lexing.from_channel ic)
 }

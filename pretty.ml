@@ -29,12 +29,16 @@ let rec format std (x : json) =
     | `Stringlit s -> Atom (s, atom)
     | `List [] -> Atom ("[]", atom)
     | `List l -> List (("[", ",", "]", array), List.map (format std) l)
+    | `Assoc [] -> Atom ("{}", atom)
     | `Assoc l -> List (("{", ",", "}", record), List.map (format_field std) l)
     | `Tuple l ->
 	if std then
 	  format std (`List l)
 	else
-	  List (("(", ",", ")", tuple), List.map (format std) l)
+	  if l = [] then
+	    Atom ("()", atom)
+	  else
+	    List (("(", ",", ")", tuple), List.map (format std) l)
 
     | `Variant (s, None) ->
 	if std then
