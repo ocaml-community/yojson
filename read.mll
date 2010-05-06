@@ -552,22 +552,48 @@ and read_colon = parse
     x
 
 
-  let from_string ?buf s =
+  let set_position lb fname lnum =
+    match fname, lnum with
+	None, None -> ()
+      | _ ->
+	  let cur = lb.lex_curr_p in
+	  let fname =
+	    match fname with
+		None -> cur.pos_fname
+	      | Some s -> s 
+	  in
+	  let lnum =
+	    match lnum with
+		None -> cur.pos_lnum
+	      | Some i -> i
+	  in
+	  lb.lex_curr_p <- {
+	    pos_fname = fname;
+	    pos_lnum = lnum;
+	    pos_bol = cur.pos_bol;
+	    pos_cnum = cur.pos_cnum;
+	  }
+
+  let from_string ?buf ?fname ?lnum s =
     try
-      from_lexbuf ?buf (Lexing.from_string s)
+      let lexbuf = Lexing.from_string s in
+      set_position lexbuf fname lnum;
+      from_lexbuf ?buf lexbuf
     with End_of_input ->
       json_error "Blank input data"
 
-  let from_channel ?buf ic =
+  let from_channel ?buf ?fname ?lnum ic =
     try
-      from_lexbuf ?buf (Lexing.from_channel ic)
+      let lexbuf = Lexing.from_channel ic in
+      set_position lexbuf fname lnum;
+      from_lexbuf ?buf lexbuf
     with End_of_input ->
       json_error "Blank input data"
 
-  let from_file ?buf file =
+  let from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     try
-      let x = from_channel ?buf ic in
+      let x = from_channel ?buf ?fname ?lnum ic in
       close_in ic;
       x
     with e ->
@@ -589,42 +615,55 @@ and read_colon = parse
     in
     Stream.from f
 
-  type json2 = [ `Json of json | `Exn of exn ]
+  let stream_from_string ?buf ?fname ?lnum s =
+    let lexbuf = Lexing.from_string s in
+    set_position lexbuf fname lnum;
+    stream_from_lexbuf ?buf (Lexing.from_string s)
 
-  let stream2_from_lexbuf ?buf ?(fin = fun () -> ()) lexbuf =
+  let stream_from_channel ?buf ?fin ?fname ?lnum ic =
+    let lexbuf = Lexing.from_channel ic in
+    set_position lexbuf fname lnum;
+    stream_from_lexbuf ?buf ?fin lexbuf
+
+  let stream_from_file ?buf ?fname ?lnum file =
+    let ic = open_in file in
+    let fin () = close_in ic in
+    let fname =
+      match fname with
+	  None -> Some file
+	| x -> x
+    in
+    let lexbuf = Lexing.from_channel ic in
+    set_position lexbuf fname lnum;
+    stream_from_lexbuf ?buf ~fin lexbuf
+
+  type json_line = [ `Json of json | `Exn of exn ]
+
+  let linestream_from_channel
+      ?buf ?(fin = fun () -> ()) ?fname ?lnum:(lnum0 = 1) ic =
     let buf =
       match buf with
 	  None -> Some (Buffer.create 256)
 	| Some _ -> buf
     in
-    let stream = Some true in
     let f i =
-      try Some (`Json (from_lexbuf ?buf ?stream lexbuf))
+      try 
+	let line = input_line ic in
+	let lnum = lnum0 + i in
+	Some (`Json (from_string ?buf ?fname ~lnum line))
       with
-	  End_of_input -> fin (); None
+	  End_of_file -> fin (); None
 	| e -> Some (`Exn e)
     in
     Stream.from f
 
-  let stream_from_string ?buf s =
-    stream_from_lexbuf ?buf (Lexing.from_string s)
-
-  let stream2_from_string ?buf s =
-    stream2_from_lexbuf ?buf (Lexing.from_string s)
-
-  let stream_from_channel ?buf ?fin ic =
-    stream_from_lexbuf ?buf ?fin (Lexing.from_channel ic)
-
-  let stream2_from_channel ?buf ?fin ic =
-    stream2_from_lexbuf ?buf ?fin (Lexing.from_channel ic)
-
-  let stream_from_file ?buf file =
+  let linestream_from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     let fin () = close_in ic in
-    stream_from_lexbuf ?buf ~fin (Lexing.from_channel ic)
-
-  let stream2_from_file ?buf file =
-    let ic = open_in file in
-    let fin () = close_in ic in
-    stream2_from_lexbuf ?buf ~fin (Lexing.from_channel ic)
+    let fname =
+      match fname with
+	  None -> Some file
+	| x -> x
+    in
+    linestream_from_channel ?buf ~fin ?fname ?lnum ic
 }

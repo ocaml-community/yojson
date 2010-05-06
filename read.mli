@@ -38,27 +38,65 @@ val read_colon : Lexing.lexbuf -> unit
 
 val read_json : Buffer.t -> Lexing.lexbuf -> json
 
-val from_lexbuf : ?buf:Buffer.t -> ?stream:bool -> Lexing.lexbuf -> json
+val from_lexbuf :
+  ?buf:Buffer.t ->
+  ?stream:bool ->
+  Lexing.lexbuf -> json
 
-val from_string : ?buf:Buffer.t -> string -> json
-val from_channel : ?buf:Buffer.t -> in_channel -> json
-val from_file : ?buf:Buffer.t -> string -> json
+val from_string :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  string -> json
+
+val from_channel :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  in_channel -> json
+
+val from_file :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  string -> json
 
 
-type json2 = [ `Json of json | `Exn of exn ]
+type json_line = [ `Json of json | `Exn of exn ]
 
 val stream_from_lexbuf :
-  ?buf:Buffer.t -> ?fin:(unit -> unit) -> Lexing.lexbuf -> json Stream.t
-val stream2_from_lexbuf :
-  ?buf:Buffer.t -> ?fin:(unit -> unit) -> Lexing.lexbuf -> json2 Stream.t
+  ?buf:Buffer.t ->
+  ?fin:(unit -> unit) ->
+  Lexing.lexbuf -> json Stream.t
 
-val stream_from_string : ?buf:Buffer.t -> string -> json Stream.t
-val stream2_from_string : ?buf:Buffer.t -> string -> json2 Stream.t
+val stream_from_string :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  string -> json Stream.t
 
 val stream_from_channel :
-  ?buf:Buffer.t -> ?fin:(unit -> unit) -> in_channel -> json Stream.t
-val stream2_from_channel :
-  ?buf:Buffer.t -> ?fin:(unit -> unit) -> in_channel -> json2 Stream.t
+  ?buf:Buffer.t ->
+  ?fin:(unit -> unit) ->
+  ?fname:string ->
+  ?lnum:int ->
+  in_channel -> json Stream.t
 
-val stream_from_file : ?buf:Buffer.t -> string -> json Stream.t
-val stream2_from_file : ?buf:Buffer.t -> string -> json2 Stream.t
+val stream_from_file :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  string -> json Stream.t
+
+val linestream_from_channel :
+  ?buf:Buffer.t ->
+  ?fin:(unit -> unit) ->
+  ?fname:string ->
+  ?lnum:int ->
+  in_channel -> json_line Stream.t
+
+val linestream_from_file :
+  ?buf:Buffer.t ->
+  ?fname:string ->
+  ?lnum:int ->
+  string -> json_line Stream.t
