@@ -1,45 +1,70 @@
 (* $Id$ *)
 
-val finish_string : Buffer.t -> Lexing.lexbuf -> string
-val finish_escaped_char : Buffer.t -> Lexing.lexbuf -> unit
-val finish_variant : Buffer.t -> Lexing.lexbuf -> json option
-val close_variant : Lexing.lexbuf -> unit
-val finish_comment : Lexing.lexbuf -> unit
+type lexer_state
 
-val read_space : Lexing.lexbuf -> unit
+val finish_string : lexer_state -> Lexing.lexbuf -> string
+val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
+val finish_variant : lexer_state -> Lexing.lexbuf -> json option
+val close_variant : lexer_state -> Lexing.lexbuf -> unit
+val finish_comment : lexer_state -> Lexing.lexbuf -> unit
+
+val read_space : lexer_state -> Lexing.lexbuf -> unit
 val read_eof : Lexing.lexbuf -> bool
-val read_null : Lexing.lexbuf -> unit
-val read_bool : Lexing.lexbuf -> bool
-val read_int : Lexing.lexbuf -> int
-val read_number : Lexing.lexbuf -> [> `Float of float ]
-val read_string : Buffer.t -> Lexing.lexbuf -> string
-val read_ident : Buffer.t -> Lexing.lexbuf -> string
+val read_null : lexer_state -> Lexing.lexbuf -> unit
+val read_bool : lexer_state -> Lexing.lexbuf -> bool
+val read_int : lexer_state -> Lexing.lexbuf -> int
+val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
+val read_string : lexer_state -> Lexing.lexbuf -> string
+val read_ident : lexer_state -> Lexing.lexbuf -> string
 
 val read_sequence :
-  ('a -> Lexing.lexbuf -> 'a) -> 'a -> Lexing.lexbuf -> 'a
-val read_list : (Lexing.lexbuf -> 'a) -> Lexing.lexbuf -> 'a list
-val read_list_rev : (Lexing.lexbuf -> 'a) -> Lexing.lexbuf -> 'a list
+  ('a -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
+val read_list :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a list
+
+val read_list_rev :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a list
+
 val read_array_end : Lexing.lexbuf -> unit
-val read_array_sep : Lexing.lexbuf -> unit
-val read_array : (Lexing.lexbuf -> 'a) -> Lexing.lexbuf -> 'a array
+val read_array_sep : lexer_state -> Lexing.lexbuf -> unit
+
+val read_array :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a array
 
 val read_tuple :
-  (int -> 'a -> Lexing.lexbuf -> 'a) -> 'a -> Lexing.lexbuf -> 'a
+  (int -> 'a -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
 val read_tuple_end : Lexing.lexbuf -> unit
-val read_tuple_sep : Lexing.lexbuf -> unit
+val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
 
 val read_fields :
-  ('a -> string -> Lexing.lexbuf -> 'a) ->
-  'a -> Buffer.t -> Lexing.lexbuf -> 'a
+  ('a -> string -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
 val read_object_end : Lexing.lexbuf -> unit
-val read_object_sep : Lexing.lexbuf -> unit
-val read_colon : Lexing.lexbuf -> unit
+val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
+val read_colon : lexer_state -> Lexing.lexbuf -> unit
 
 
-val read_json : Buffer.t -> Lexing.lexbuf -> json
+val read_json : lexer_state -> Lexing.lexbuf -> json
 
 val from_lexbuf :
-  ?buf:Buffer.t ->
+  lexer_state ->
   ?stream:bool ->
   Lexing.lexbuf -> json
 
@@ -65,7 +90,7 @@ val from_file :
 type json_line = [ `Json of json | `Exn of exn ]
 
 val stream_from_lexbuf :
-  ?buf:Buffer.t ->
+  lexer_state ->
   ?fin:(unit -> unit) ->
   Lexing.lexbuf -> json Stream.t
 

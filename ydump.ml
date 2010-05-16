@@ -3,10 +3,10 @@
 open Printf
 
 let cat std compact stream in_file out_file =
-  let ic =
+  let ic, fname =
     match in_file with
-	`Stdin -> stdin
-      | `File s -> open_in s
+	`Stdin -> stdin, "<stdin>"
+      | `File s -> open_in s, s
   in
   let oc =
     match out_file with
@@ -28,9 +28,9 @@ let cat std compact stream in_file out_file =
   in
   try
     if stream then
-      Stream.iter print (Yojson.Safe.stream_from_channel ic)
+      Stream.iter print (Yojson.Safe.stream_from_channel ~fname ic)
     else
-      print (Yojson.Safe.from_channel ic);
+      print (Yojson.Safe.from_channel ~fname ic);
     finally ();
     true
   with e ->

@@ -58,8 +58,8 @@ ydump: yojson.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump -package $(PACKS) -linkpkg \
 		yojson.cmx ydump.ml
 
-bench: bench.ml yojson.cmx
-	OCAMLPATH=..:$$OCAMLPATH ocamlfind ocamlopt -o bench \
+bench: bench.ml yojson.cmx META
+	ocamlfind ocamlopt -o bench \
 		-package unix,yojson,json-wheel -linkpkg bench.ml
 
 .PHONY: clean
