@@ -32,7 +32,7 @@
       (* Buffer used to accumulate substrings *)
 
     mutable lnum : int;
-      (* Current line number (starting from 1)
+      (* Current line number (starting from 1) *)
 
     mutable bol : int;
       (* Absolute position of the first character of the current line 
