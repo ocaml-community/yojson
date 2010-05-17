@@ -1,5 +1,29 @@
 (* $Id$ *)
 
+(** {3 JSON writers} *)
+
+val to_string :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  json -> string
+
+val to_channel :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  out_channel -> json -> unit
+
+val to_file :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  string -> json -> unit
+
+
+(**/**)
+(* begin undocumented section *)
+
 val write_null : Bi_outbuf.t -> unit -> unit
 val write_bool : Bi_outbuf.t -> bool -> unit
 #ifdef INT
@@ -37,20 +61,5 @@ val write_std_variant : Bi_outbuf.t -> string -> json option -> unit
 val write_json : Bi_outbuf.t -> json -> unit
 val write_std_json : Bi_outbuf.t -> json -> unit
 
-val to_string :
-  ?buf:Bi_outbuf.t ->
-  ?len:int ->
-  ?std:bool ->
-  json -> string
-
-val to_channel :
-  ?buf:Bi_outbuf.t ->
-  ?len:int ->
-  ?std:bool ->
-  out_channel -> json -> unit
-
-val to_file :
-  ?buf:Bi_outbuf.t ->
-  ?len:int ->
-  ?std:bool ->
-  string -> json -> unit
+(* end undocumented section *)
+(**/**)

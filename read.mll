@@ -563,16 +563,11 @@ and read_colon v = parse
     if not (read_eof lexbuf) then
       custom_error "Junk after end of JSON value" v lexbuf
 
-  let init buf fname lnum =
+  let init_lexer ?buf ?fname ?(lnum = 1) () =
     let buf =
       match buf with
 	  None -> Buffer.create 256
 	| Some buf -> buf
-    in
-    let lnum = 
-      match lnum with
-	  None -> 1
-	| Some x -> x
     in
     {
       buf = buf;
@@ -600,7 +595,7 @@ and read_colon v = parse
   let from_string ?buf ?fname ?lnum s =
     try
       let lexbuf = Lexing.from_string s in
-      let v = init buf fname lnum in
+      let v = init_lexer ?buf ?fname ?lnum () in
       from_lexbuf v lexbuf
     with End_of_input ->
       json_error "Blank input data"
@@ -608,7 +603,7 @@ and read_colon v = parse
   let from_channel ?buf ?fname ?lnum ic =
     try
       let lexbuf = Lexing.from_channel ic in
-      let v = init buf fname lnum in
+      let v = init_lexer ?buf ?fname ?lnum () in
       from_lexbuf v lexbuf
     with End_of_input ->
       json_error "Blank input data"
@@ -634,12 +629,12 @@ and read_colon v = parse
     Stream.from f
 
   let stream_from_string ?buf ?fname ?lnum s =
-    let v = init buf fname lnum in
+    let v = init_lexer ?buf ?fname ?lnum () in
     stream_from_lexbuf v (Lexing.from_string s)
 
   let stream_from_channel ?buf ?fin ?fname ?lnum ic =
     let lexbuf = Lexing.from_channel ic in
-    let v = init buf fname lnum in
+    let v = init_lexer ?buf ?fname ?lnum () in
     stream_from_lexbuf v ?fin lexbuf
 
   let stream_from_file ?buf ?fname ?lnum file =
@@ -651,7 +646,7 @@ and read_colon v = parse
 	| x -> x
     in
     let lexbuf = Lexing.from_channel ic in
-    let v = init buf fname lnum in
+    let v = init_lexer ?buf ?fname ?lnum () in
     stream_from_lexbuf v ~fin lexbuf
 
   type json_line = [ `Json of json | `Exn of exn ]

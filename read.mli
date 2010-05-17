@@ -1,67 +1,27 @@
 (* $Id$ *)
 
-type lexer_state
+(** {3 JSON readers} *)
 
-val finish_string : lexer_state -> Lexing.lexbuf -> string
-val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
-val finish_variant : lexer_state -> Lexing.lexbuf -> json option
-val close_variant : lexer_state -> Lexing.lexbuf -> unit
-val finish_comment : lexer_state -> Lexing.lexbuf -> unit
+type lexer_state = {
+  buf : Buffer.t;
+    (** Buffer used to accumulate substrings *)
+  
+  mutable lnum : int;
+    (** Current line number (counting from 1) *)
 
-val read_space : lexer_state -> Lexing.lexbuf -> unit
-val read_eof : Lexing.lexbuf -> bool
-val read_null : lexer_state -> Lexing.lexbuf -> unit
-val read_bool : lexer_state -> Lexing.lexbuf -> bool
-val read_int : lexer_state -> Lexing.lexbuf -> int
-val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
-val read_string : lexer_state -> Lexing.lexbuf -> string
-val read_ident : lexer_state -> Lexing.lexbuf -> string
+  mutable bol : int;
+    (** Absolute position of the first character of the current line
+        (counting from 0) *)
 
-val read_sequence :
-  ('a -> lexer_state -> Lexing.lexbuf -> 'a) ->
-  'a ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a
+  mutable fname : string option;
+    (** Name referencing the input file in error messages *)
+}
 
-val read_list :
-  (lexer_state -> Lexing.lexbuf -> 'a) ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a list
-
-val read_list_rev :
-  (lexer_state -> Lexing.lexbuf -> 'a) ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a list
-
-val read_array_end : Lexing.lexbuf -> unit
-val read_array_sep : lexer_state -> Lexing.lexbuf -> unit
-
-val read_array :
-  (lexer_state -> Lexing.lexbuf -> 'a) ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a array
-
-val read_tuple :
-  (int -> 'a -> lexer_state -> Lexing.lexbuf -> 'a) ->
-  'a ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a
-
-val read_tuple_end : Lexing.lexbuf -> unit
-val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
-
-val read_fields :
-  ('a -> string -> lexer_state -> Lexing.lexbuf -> 'a) ->
-  'a ->
-  lexer_state ->
-  Lexing.lexbuf -> 'a
-
-val read_object_end : Lexing.lexbuf -> unit
-val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
-val read_colon : lexer_state -> Lexing.lexbuf -> unit
-
-
-val read_json : lexer_state -> Lexing.lexbuf -> json
+val init_lexer :
+  ?buf: Buffer.t ->
+  ?fname: string ->
+  ?lnum: int -> 
+  unit -> lexer_state
 
 val from_lexbuf :
   lexer_state ->
@@ -125,3 +85,71 @@ val linestream_from_file :
   ?fname:string ->
   ?lnum:int ->
   string -> json_line Stream.t
+
+
+(**/**)
+(* begin undocumented section *)
+
+val finish_string : lexer_state -> Lexing.lexbuf -> string
+val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
+val finish_variant : lexer_state -> Lexing.lexbuf -> json option
+val close_variant : lexer_state -> Lexing.lexbuf -> unit
+val finish_comment : lexer_state -> Lexing.lexbuf -> unit
+
+val read_space : lexer_state -> Lexing.lexbuf -> unit
+val read_eof : Lexing.lexbuf -> bool
+val read_null : lexer_state -> Lexing.lexbuf -> unit
+val read_bool : lexer_state -> Lexing.lexbuf -> bool
+val read_int : lexer_state -> Lexing.lexbuf -> int
+val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
+val read_string : lexer_state -> Lexing.lexbuf -> string
+val read_ident : lexer_state -> Lexing.lexbuf -> string
+
+val read_sequence :
+  ('a -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
+val read_list :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a list
+
+val read_list_rev :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a list
+
+val read_array_end : Lexing.lexbuf -> unit
+val read_array_sep : lexer_state -> Lexing.lexbuf -> unit
+
+val read_array :
+  (lexer_state -> Lexing.lexbuf -> 'a) ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a array
+
+val read_tuple :
+  (int -> 'a -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
+val read_tuple_end : Lexing.lexbuf -> unit
+val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
+
+val read_fields :
+  ('a -> string -> lexer_state -> Lexing.lexbuf -> 'a) ->
+  'a ->
+  lexer_state ->
+  Lexing.lexbuf -> 'a
+
+val read_object_end : Lexing.lexbuf -> unit
+val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
+val read_colon : lexer_state -> Lexing.lexbuf -> unit
+
+val read_json : lexer_state -> Lexing.lexbuf -> json
+
+
+(* end undocumented section *)
+(**/**)

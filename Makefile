@@ -5,7 +5,7 @@ VERSION = 0.8.0
 FLAGS = -dtypes
 PACKS = easy-format,biniou
 
-.PHONY: default all opt install
+.PHONY: default all opt install doc
 default: all opt
 all: yojson.cmo
 opt: yojson.cmx ydump
@@ -58,6 +58,10 @@ ydump: yojson.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump -package $(PACKS) -linkpkg \
 		yojson.cmx ydump.ml
 
+doc:
+	mkdir -p doc
+	ocamlfind ocamldoc -d doc -html -package biniou yojson.mli
+
 bench: bench.ml yojson.cmx META
 	ocamlfind ocamlopt -o bench \
 		-package unix,yojson,json-wheel -linkpkg bench.ml
@@ -67,3 +71,4 @@ bench: bench.ml yojson.cmx META
 clean:
 	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
 		read.ml yojson.mli yojson.ml META
+	rm -rf doc
