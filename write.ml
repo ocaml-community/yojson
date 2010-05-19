@@ -338,14 +338,7 @@ and write_std_variant ob s o =
 #endif
 
 
-let to_string ?buf ?(len = 256) ?(std = false) x =
-  let ob =
-    match buf with
-	None -> Bi_outbuf.create len
-      | Some ob ->
-	  Bi_outbuf.clear ob;
-	  ob
-  in
+let to_outbuf ?(std = false) ob x =
   if std then (
     if not (is_object_or_array x) then
       json_error "Root is not an object or array"
@@ -353,32 +346,69 @@ let to_string ?buf ?(len = 256) ?(std = false) x =
       write_std_json ob x
   )
   else
-    write_json ob x;
+    write_json ob x
+
+
+let to_string ?buf ?(len = 256) ?std x =
+  let ob =
+    match buf with
+	None -> Bi_outbuf.create len
+      | Some ob ->
+	  Bi_outbuf.clear ob;
+	  ob
+  in
+  to_outbuf ?std ob x;
   let s = Bi_outbuf.contents ob in
   Bi_outbuf.clear ob;
   s
 
-let to_channel ?buf ?len ?(std = false) oc x =
+let to_channel ?buf ?len ?std oc x =
   let ob =
     match buf with
 	None -> Bi_outbuf.create_channel_writer ?len oc
       | Some ob -> ob
   in
-  if std then (
-    if not (is_object_or_array x) then
-      json_error
-	"Root is not an object or array as requested by the JSON standard"
-    else
-      write_std_json ob x
-  )
-  else
-    write_json ob x;
+  to_outbuf ?std ob x;
   Bi_outbuf.flush_channel_writer ob
   
-let to_file ?buf ?len ?std file x =
+let to_file ?len ?std file x =
   let oc = open_out file in
   try
-    to_channel ?buf ?len ?std oc x;
+    to_channel ?len ?std oc x;
+    close_out oc
+  with e ->
+    close_out_noerr oc;
+    raise e
+
+let stream_to_outbuf ?std ob st =
+  Stream.iter (to_outbuf ?std ob) st
+
+let stream_to_string ?buf ?(len = 256) ?std st =
+  let ob =
+    match buf with
+	None -> Bi_outbuf.create len
+      | Some ob ->
+	  Bi_outbuf.clear ob;
+	  ob
+  in
+  stream_to_outbuf ?std ob st;
+  let s = Bi_outbuf.contents ob in
+  Bi_outbuf.clear ob;
+  s
+
+let stream_to_channel ?buf ?len ?std oc st =
+  let ob =
+    match buf with
+	None -> Bi_outbuf.create_channel_writer ?len oc
+      | Some ob -> ob
+  in
+  stream_to_outbuf ?std ob st;
+  Bi_outbuf.flush_channel_writer ob
+  
+let stream_to_file ?len ?std file st =
+  let oc = open_out file in
+  try
+    stream_to_channel ?len ?std oc st;
     close_out oc
   with e ->
     close_out_noerr oc;

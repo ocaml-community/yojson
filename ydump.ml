@@ -23,7 +23,7 @@ let cat std compact stream in_file out_file =
     if compact then
       Yojson.Safe.to_channel ~std oc x
     else
-      Yojson.Pretty.to_channel ~std oc (x :> Yojson.json);
+      Yojson.Safe.pretty_to_channel ~std oc x;
     output_char oc '\n'
   in
   try

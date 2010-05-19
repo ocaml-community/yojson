@@ -58,7 +58,8 @@ ydump: yojson.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump -package $(PACKS) -linkpkg \
 		yojson.cmx ydump.ml
 
-doc:
+doc: doc/index.html
+doc/index.html: yojson.mli
 	mkdir -p doc
 	ocamlfind ocamldoc -d doc -html -package biniou yojson.mli
 

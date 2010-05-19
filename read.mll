@@ -622,9 +622,13 @@ and read_colon v = parse
     let stream = Some true in
     let f i =
       try Some (from_lexbuf v ?stream lexbuf)
-      with End_of_input ->
-	fin ();
-	None
+      with
+	  End_of_input ->
+	    fin ();
+	    None
+	| e ->
+	    (try fin () with _ -> ());
+	    raise e
     in
     Stream.from f
 
