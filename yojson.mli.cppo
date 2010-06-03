@@ -22,11 +22,11 @@
    @see <http://json.org> JSON specification
  *)
 
-(** {2 Shared types and functions} *)
+(** {1 Shared types and functions} *)
 
 #include "common.mli"
 
-(** {2 Basic JSON tree type} *)
+(** {1 Basic JSON tree type} *)
 
 module Basic :
 sig
@@ -42,7 +42,7 @@ sig
 #undef STRING
 end
 
-(** {2 Multipurpose JSON tree type} *)
+(** {1 Multipurpose JSON tree type} *)
 
 module Safe :
 sig
@@ -64,7 +64,7 @@ sig
 #undef VARIANT
 end
 
-(** {2 JSON tree type with literal int/float/string leaves} *)
+(** {1 JSON tree type with literal int/float/string leaves} *)
 
 module Raw :
 sig
@@ -84,7 +84,7 @@ sig
 #undef VARIANT
 end
 
-(** {2 Supertype of all JSON tree types} *)
+(** {1 Supertype of all JSON tree types} *)
 
 #define INT
 #define INTLIT

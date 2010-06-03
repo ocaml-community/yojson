@@ -1,6 +1,6 @@
 (* $Id$ *)
 
-(** {3 JSON readers} *)
+(** {2 JSON readers} *)
 
 
 val from_string :

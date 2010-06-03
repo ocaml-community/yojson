@@ -1,6 +1,6 @@
 (* $Id$ *)
 
-(** {3 JSON writers} *)
+(** {2 JSON writers} *)
 
 val to_string :
   ?buf:Bi_outbuf.t ->
