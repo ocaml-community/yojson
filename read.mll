@@ -144,8 +144,7 @@
 
   let newline v lexbuf =
     v.lnum <- v.lnum + 1;
-    v.bol <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos;
-    printf "lnum=%i bol=%i\n%!" v.lnum v.bol
+    v.bol <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos
 
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
