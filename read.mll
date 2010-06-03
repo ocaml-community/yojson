@@ -535,6 +535,120 @@ and read_colon v = parse
   | _        { lexer_error "Expected ':' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
+
+(*** And now pretty much the same thing repeated, 
+     only for the purpose of skipping ignored field values ***)
+
+and skip_json v = parse
+  | "true"      { () }
+  | "false"     { () }
+  | "null"      { () }
+  | "NaN"       { () }
+  | "Infinity"  { () }
+  | "-Infinity" { () }
+  | '"'         { finish_skip_stringlit v lexbuf }
+  | '-'? positive_int     { () }
+  | float       { () }
+
+  | '{'          { try
+		     read_space v lexbuf;
+		     read_object_end lexbuf;
+		     skip_ident v lexbuf;
+		     read_space v lexbuf;
+		     read_colon v lexbuf;
+		     read_space v lexbuf;
+		     skip_json v lexbuf;
+		     while true do
+		       read_space v lexbuf;
+		       read_object_sep v lexbuf;
+		       read_space v lexbuf;
+		       skip_ident v lexbuf;
+		       read_space v lexbuf;
+		       read_colon v lexbuf;
+		       read_space v lexbuf;
+		       skip_json v lexbuf;
+		     done;
+		     assert false
+		   with End_of_object ->
+		     ()
+		 }
+
+  | '['          { try
+		     read_space v lexbuf;
+		     read_array_end lexbuf;
+		     skip_json v lexbuf;
+		     while true do
+		       read_space v lexbuf;
+		       read_array_sep v lexbuf;
+		       read_space v lexbuf;
+		       skip_json v lexbuf;
+		     done;
+		     assert false
+		   with End_of_array ->
+		     ()
+		 }
+
+  | '('          {
+                   #ifdef TUPLE
+                     try
+		       read_space v lexbuf;
+		       read_tuple_end lexbuf;
+		       skip_json v lexbuf;
+		       while true do
+			 read_space v lexbuf;
+			 read_tuple_sep v lexbuf;
+			 read_space v lexbuf;
+			 skip_json v lexbuf;
+		       done;
+		       assert false
+		     with End_of_tuple ->
+		       ()
+	           #else
+		     lexer_error "Invalid token" v lexbuf
+                   #endif
+		 }
+
+  | '<'          {
+                   #ifdef VARIANT
+                     read_space v lexbuf;
+                     skip_ident v lexbuf;
+		     read_space v lexbuf;
+		     finish_skip_variant v lexbuf
+                   #else
+                     lexer_error "Invalid token" v lexbuf
+                   #endif
+		 }
+
+  | "//"[^'\n']* { skip_json v lexbuf }
+  | "/*"         { finish_comment v lexbuf; skip_json v lexbuf }
+  | "\n"         { newline v lexbuf; skip_json v lexbuf }
+  | space        { skip_json v lexbuf }
+  | eof          { custom_error "Unexpected end of input" v lexbuf }
+  | _            { lexer_error "Invalid token" v lexbuf }
+
+
+and finish_skip_stringlit v = parse
+    ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
+    | [^'"' '\\'] )* '"'
+         { () }
+  | _    { lexer_error "Invalid string literal" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and finish_skip_variant v = parse 
+    ':'  { skip_json v lexbuf;
+	   read_space v lexbuf;
+	   close_variant v lexbuf }
+  | '>'  { () }
+  | _    { lexer_error "Expected ':' or '>' but found" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and skip_ident v = parse
+    '"'      { finish_skip_stringlit v lexbuf }
+  | ident    { () }
+  | _        { lexer_error "Expected string or identifier but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+
 {
   let _ = (read_json : lexer_state -> Lexing.lexbuf -> json)
 

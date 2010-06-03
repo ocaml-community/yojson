@@ -147,10 +147,14 @@ val linestream_from_file :
 (* begin undocumented section *)
 
 val finish_string : lexer_state -> Lexing.lexbuf -> string
+val finish_stringlit : lexer_state -> Lexing.lexbuf -> string
+val finish_skip_stringlit : lexer_state -> Lexing.lexbuf -> unit
 val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
 val finish_variant : lexer_state -> Lexing.lexbuf -> json option
+val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
 val close_variant : lexer_state -> Lexing.lexbuf -> unit
 val finish_comment : lexer_state -> Lexing.lexbuf -> unit
+
 
 val read_space : lexer_state -> Lexing.lexbuf -> unit
 val read_eof : Lexing.lexbuf -> bool
@@ -160,6 +164,7 @@ val read_int : lexer_state -> Lexing.lexbuf -> int
 val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
 val read_string : lexer_state -> Lexing.lexbuf -> string
 val read_ident : lexer_state -> Lexing.lexbuf -> string
+val skip_ident : lexer_state -> Lexing.lexbuf -> unit
 
 val read_sequence :
   ('a -> lexer_state -> Lexing.lexbuf -> 'a) ->
@@ -205,7 +210,7 @@ val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
 val read_colon : lexer_state -> Lexing.lexbuf -> unit
 
 val read_json : lexer_state -> Lexing.lexbuf -> json
-
+val skip_json : lexer_state -> Lexing.lexbuf -> unit
 
 (* end undocumented section *)
 (**/**)
