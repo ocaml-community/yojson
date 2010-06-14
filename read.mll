@@ -384,6 +384,20 @@ and read_int v = parse
   | _                    { lexer_error "Expected integer but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
+and read_int32 v = parse
+    '-'? positive_int    { try Int32.of_string (Lexing.lexeme lexbuf)
+			   with _ ->
+			     lexer_error "Int32 overflow" v lexbuf }
+  | _                    { lexer_error "Expected int32 but found" v lexbuf }
+  | eof                  { custom_error "Unexpected end of input" v lexbuf }
+
+and read_int64 v = parse
+    '-'? positive_int    { try Int64.of_string (Lexing.lexeme lexbuf)
+			   with _ ->
+			     lexer_error "Int32 overflow" v lexbuf }
+  | _                    { lexer_error "Expected int64 but found" v lexbuf }
+  | eof                  { custom_error "Unexpected end of input" v lexbuf }
+
 and read_number v = parse
   | "NaN"       { `Float nan }
   | "Infinity"  { `Float infinity }
@@ -534,6 +548,16 @@ and read_colon v = parse
   | _        { lexer_error "Expected ':' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
+and read_lt v = parse
+    '<'      { () }
+  | _        { lexer_error "Expected '<' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_gt v = parse
+    '>'      { () }
+  | _        { lexer_error "Expected '>' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
 
 (*** And now pretty much the same thing repeated, 
      only for the purpose of skipping ignored field values ***)
@@ -650,6 +674,13 @@ and skip_ident v = parse
 
 {
   let _ = (read_json : lexer_state -> Lexing.lexbuf -> json)
+
+  let read_int8 v lexbuf =
+    let n = read_int v lexbuf in
+    if n < 0 || n > 255 then
+      lexer_error "Int8 overflow" v lexbuf
+    else
+      char_of_int n
 
   let read_list read_cell v lexbuf =
     List.rev (read_list_rev read_cell v lexbuf)

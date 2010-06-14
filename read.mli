@@ -161,6 +161,9 @@ val read_eof : Lexing.lexbuf -> bool
 val read_null : lexer_state -> Lexing.lexbuf -> unit
 val read_bool : lexer_state -> Lexing.lexbuf -> bool
 val read_int : lexer_state -> Lexing.lexbuf -> int
+val read_int8 : lexer_state -> Lexing.lexbuf -> char
+val read_int32 : lexer_state -> Lexing.lexbuf -> int32
+val read_int64 : lexer_state -> Lexing.lexbuf -> int64
 val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
 val read_string : lexer_state -> Lexing.lexbuf -> string
 val read_ident : lexer_state -> Lexing.lexbuf -> string
@@ -208,6 +211,9 @@ val read_fields :
 val read_object_end : Lexing.lexbuf -> unit
 val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
 val read_colon : lexer_state -> Lexing.lexbuf -> unit
+
+val read_lt : lexer_state -> Lexing.lexbuf -> unit
+val read_gt : lexer_state -> Lexing.lexbuf -> unit
 
 val read_json : lexer_state -> Lexing.lexbuf -> json
 val skip_json : lexer_state -> Lexing.lexbuf -> unit
