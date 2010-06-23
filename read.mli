@@ -1,7 +1,12 @@
 (* $Id$ *)
 
-(** {2 JSON readers} *)
 
+val prettify : ?std:bool -> string -> string
+  (** Combined parser and pretty-printer.
+      See [to_string] for the role of the optional [std] argument. *)
+
+
+(** {2 JSON readers} *)
 
 val from_string :
   ?buf:Buffer.t ->
@@ -164,7 +169,7 @@ val read_int : lexer_state -> Lexing.lexbuf -> int
 val read_int8 : lexer_state -> Lexing.lexbuf -> char
 val read_int32 : lexer_state -> Lexing.lexbuf -> int32
 val read_int64 : lexer_state -> Lexing.lexbuf -> int64
-val read_number : lexer_state -> Lexing.lexbuf -> [> `Float of float ]
+val read_number : lexer_state -> Lexing.lexbuf -> float
 val read_string : lexer_state -> Lexing.lexbuf -> string
 val read_ident : lexer_state -> Lexing.lexbuf -> string
 val skip_ident : lexer_state -> Lexing.lexbuf -> unit
@@ -199,6 +204,7 @@ val read_tuple :
   lexer_state ->
   Lexing.lexbuf -> 'a
 
+val read_lpar : lexer_state -> Lexing.lexbuf -> unit
 val read_tuple_end : Lexing.lexbuf -> unit
 val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
 
@@ -208,6 +214,7 @@ val read_fields :
   lexer_state ->
   Lexing.lexbuf -> 'a
 
+val read_lcurl : lexer_state -> Lexing.lexbuf -> unit
 val read_object_end : Lexing.lexbuf -> unit
 val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
 val read_colon : lexer_state -> Lexing.lexbuf -> unit

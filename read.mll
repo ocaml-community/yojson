@@ -399,10 +399,10 @@ and read_int64 v = parse
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_number v = parse
-  | "NaN"       { `Float nan }
-  | "Infinity"  { `Float infinity }
-  | "-Infinity" { `Float neg_infinity }
-  | number      { `Float (float_of_string (lexeme lexbuf)) }
+  | "NaN"       { nan }
+  | "Infinity"  { infinity }
+  | "-Infinity" { neg_infinity }
+  | number      { float_of_string (lexeme lexbuf) }
   | _           { lexer_error "Expected number but found" v lexbuf }
   | eof         { custom_error "Unexpected end of input" v lexbuf }
 
@@ -533,6 +533,11 @@ and read_fields read_field init_acc v = parse
   | _        { lexer_error "Expected '{' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
+and read_lcurl v = parse
+    '{'      { () }
+  | _        { lexer_error "Expected '{' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
 and read_object_end = parse
     '}'      { raise End_of_object }
   | ""       { () }
@@ -556,6 +561,16 @@ and read_lt v = parse
 and read_gt v = parse
     '>'      { () }
   | _        { lexer_error "Expected '>' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_lpar v = parse
+    '('      { () }
+  | _        { lexer_error "Expected '(' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_rpar v = parse
+    ')'      { () }
+  | _        { lexer_error "Expected ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 
@@ -826,4 +841,7 @@ and skip_ident v = parse
 	| x -> x
     in
     linestream_from_channel ?buf ~fin ?fname ?lnum ic
+
+  let prettify ?std s =
+    pretty_to_string (from_string s)
 }

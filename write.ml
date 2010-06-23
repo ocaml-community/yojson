@@ -98,10 +98,9 @@ let write_int ob x =
     Bi_outbuf.add_char ob '-';
     ob.o_len <- write_digits ob.o_s (ob.o_len + 1) (abs x)
   )
-  else (
-    Bi_outbuf.add_char ob '0';
-    ob.o_len <- ob.o_len + 1
-  )
+  else
+    Bi_outbuf.add_char ob '0'
+
 
 let json_string_of_int i =
   string_of_int i

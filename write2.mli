@@ -1,5 +1,7 @@
 (* $Id$ *)
 
+(** {2 JSON pretty-printing} *)
+
 val pretty_format : ?std:bool -> json -> Easy_format.t
   (** Convert into a pretty-printable tree.
       See [to_string] for the role of the optional [std] argument.
