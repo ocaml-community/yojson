@@ -123,10 +123,13 @@ let float_needs_period s =
     false
 
 (*
-  string_of_float function that guarantees that a sufficient number
-  of digits is printed in order to allow reversibility.
+  Both write_float_fast and write_float guarantee
+  that a sufficient number of digits are printed in order to 
+  allow reversibility.
+
+  The _fast version is faster but often produces unnecessarily long numbers.
 *)
-let write_float ob x =
+let write_float_fast ob x =
   match classify_float x with
     FP_nan ->
       Bi_outbuf.add_string ob "NaN"
@@ -138,10 +141,28 @@ let write_float ob x =
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
 	
+let write_float ob x =
+  match classify_float x with
+    FP_nan ->
+      Bi_outbuf.add_string ob "NaN"
+  | FP_infinite ->
+      Bi_outbuf.add_string ob (if x > 0. then "Infinity" else "-Infinity")
+  | _ ->
+      let s1 = Printf.sprintf "%.16g" x in
+      let s =
+        if float_of_string s1 = x then s1
+        else Printf.sprintf "%.17g" x
+      in
+      Bi_outbuf.add_string ob s;
+      if float_needs_period s then
+	Bi_outbuf.add_string ob ".0"
+
+
 let json_string_of_float x =
   let ob = Bi_outbuf.create 20 in
   write_float ob x;
   Bi_outbuf.contents ob
+
 
 
 let write_std_float ob x =
