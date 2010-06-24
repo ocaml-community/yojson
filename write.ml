@@ -11,12 +11,12 @@ let hex n =
   )
 
 let write_special src start stop ob str =
-  Bi_outbuf.blit src !start (stop - !start) ob;
+  Bi_outbuf.add_substring ob src !start (stop - !start);
   Bi_outbuf.add_string ob str;
   start := stop + 1
 
 let write_control_char src start stop ob c =
-  Bi_outbuf.blit src !start (stop - !start) ob;
+  Bi_outbuf.add_substring ob src !start (stop - !start);
   let i = Bi_outbuf.alloc ob 6 in
   let dst = ob.o_s in
   String.blit "\\u00" 0 dst i 4;
@@ -26,7 +26,7 @@ let write_control_char src start stop ob c =
 
 let finish_string src start ob =
   try
-    Bi_outbuf.blit src !start (String.length src - !start) ob
+    Bi_outbuf.add_substring ob src !start (String.length src - !start)
   with _ ->
     Printf.eprintf "src=%S start=%i len=%i\n%!"
       src !start (String.length src - !start);

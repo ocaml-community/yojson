@@ -28,7 +28,7 @@
 
 
   type lexer_state = {
-    buf : Buffer.t;
+    buf : Bi_outbuf.t;
       (* Buffer used to accumulate substrings *)
 
     mutable lnum : int;
@@ -148,7 +148,11 @@
 
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    Buffer.add_substring buf lexbuf.lex_buffer lexbuf.lex_start_pos len
+    Bi_outbuf.add_substring buf lexbuf.lex_buffer lexbuf.lex_start_pos len
+
+  let map_lexeme f lexbuf =
+    let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
+    f lexbuf.lex_buffer lexbuf.lex_start_pos len
 }
 
 let space = [' ' '\t' '\r']+
@@ -196,7 +200,7 @@ rule read_json v = parse
                 }
   | '"'         {
                   #ifdef STRING
-	            Buffer.clear v.buf;
+	            Bi_outbuf.clear v.buf;
 		    `String (finish_string v lexbuf)
                   #elif defined STRINGLIT
                     `Stringlit (finish_stringlit v lexbuf)
@@ -293,22 +297,31 @@ rule read_json v = parse
 
 
 and finish_string v = parse
-    '"'           { Buffer.contents v.buf }
+    '"'           { Bi_outbuf.contents v.buf }
   | '\\'          { finish_escaped_char v lexbuf;
 		    finish_string v lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
 		    finish_string v lexbuf }
   | eof           { custom_error "Unexpected end of input" v lexbuf }
 
+and map_string v f = parse
+    '"'           { let b = v.buf in
+                    f b.Bi_outbuf.o_s 0 b.Bi_outbuf.o_len }
+  | '\\'          { finish_escaped_char v lexbuf;
+		    map_string v f lexbuf }
+  | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
+		    map_string v f lexbuf }
+  | eof           { custom_error "Unexpected end of input" v lexbuf }
+
 and finish_escaped_char v = parse 
     '"'
   | '\\'
-  | '/' as c { Buffer.add_char v.buf c }
-  | 'b'  { Buffer.add_char v.buf '\b' }
-  | 'f'  { Buffer.add_char v.buf '\012' }
-  | 'n'  { Buffer.add_char v.buf '\n' }
-  | 'r'  { Buffer.add_char v.buf '\r' }
-  | 't'  { Buffer.add_char v.buf '\t' }
+  | '/' as c { Bi_outbuf.add_char v.buf c }
+  | 'b'  { Bi_outbuf.add_char v.buf '\b' }
+  | 'f'  { Bi_outbuf.add_char v.buf '\012' }
+  | 'n'  { Bi_outbuf.add_char v.buf '\n' }
+  | 'r'  { Bi_outbuf.add_char v.buf '\r' }
+  | 't'  { Bi_outbuf.add_char v.buf '\t' }
   | 'u' (hex as a) (hex as b) (hex as c) (hex as d)
          { utf8_of_bytes v.buf (hex a) (hex b) (hex c) (hex d) }
   | _    { lexer_error "Invalid escape sequence" v lexbuf }
@@ -407,16 +420,24 @@ and read_number v = parse
   | eof         { custom_error "Unexpected end of input" v lexbuf }
 
 and read_string v = parse
-    '"'      { Buffer.clear v.buf;
+    '"'      { Bi_outbuf.clear v.buf;
 	       finish_string v lexbuf }
   | _        { lexer_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
-    '"'      { Buffer.clear v.buf;
+    '"'      { Bi_outbuf.clear v.buf;
 	       finish_string v lexbuf }
   | ident as s
              { s }
+  | _        { lexer_error "Expected string or identifier but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and map_ident v f = parse
+    '"'      { Bi_outbuf.clear v.buf;
+	       map_string v f lexbuf }
+  | ident
+             { map_lexeme f lexbuf }
   | _        { lexer_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -725,7 +746,7 @@ and skip_ident v = parse
   let init_lexer ?buf ?fname ?(lnum = 1) () =
     let buf =
       match buf with
-	  None -> Buffer.create 256
+	  None -> Bi_outbuf.create 256
 	| Some buf -> buf
     in
     {
@@ -818,7 +839,7 @@ and skip_ident v = parse
       ?buf ?(fin = fun () -> ()) ?fname ?lnum:(lnum0 = 1) ic =
     let buf =
       match buf with
-	  None -> Some (Buffer.create 256)
+	  None -> Some (Bi_outbuf.create 256)
 	| Some _ -> buf
     in
     let f i =

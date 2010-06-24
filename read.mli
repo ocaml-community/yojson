@@ -9,7 +9,7 @@ val prettify : ?std:bool -> string -> string
 (** {2 JSON readers} *)
 
 val from_string :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> json
@@ -22,7 +22,7 @@ val from_string :
   *)
 
 val from_channel :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   in_channel -> json
@@ -30,7 +30,7 @@ val from_channel :
       See [from_string] for the meaning of the optional arguments. *)
 
 val from_file :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> json
@@ -39,7 +39,7 @@ val from_file :
 
 
 type lexer_state = {
-  buf : Buffer.t;
+  buf : Bi_outbuf.t;
     (** Buffer used to accumulate substrings *)
   
   mutable lnum : int;
@@ -54,7 +54,7 @@ type lexer_state = {
 }
 
 val init_lexer :
-  ?buf: Buffer.t ->
+  ?buf: Bi_outbuf.t ->
   ?fname: string ->
   ?lnum: int -> 
   unit -> lexer_state
@@ -73,7 +73,7 @@ val from_lexbuf :
       the end of the JSON value and the end of the input. *)
 
 val stream_from_string :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> json Stream.t
@@ -82,7 +82,7 @@ val stream_from_string :
       See [from_string] for the meaning of the optional arguments. *)
 
 val stream_from_channel :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
@@ -96,7 +96,7 @@ val stream_from_channel :
       See [from_string] for the meaning of the other optional arguments. *)
 
 val stream_from_file :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> json Stream.t
@@ -121,7 +121,7 @@ type json_line = [ `Json of json | `Exn of exn ]
     (** The type of values resulting from a parsing attempt of a JSON value. *)
 
 val linestream_from_channel :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
@@ -135,7 +135,7 @@ val linestream_from_channel :
       See [from_string] for the meaning of the other optional arguments. *)
 
 val linestream_from_file :
-  ?buf:Buffer.t ->
+  ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> json_line Stream.t
@@ -152,6 +152,18 @@ val linestream_from_file :
 (* begin undocumented section *)
 
 val finish_string : lexer_state -> Lexing.lexbuf -> string
+
+val read_string : lexer_state -> Lexing.lexbuf -> string
+val read_ident : lexer_state -> Lexing.lexbuf -> string
+
+val map_string :
+  lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
+  (* equivalent to finish_string *)
+
+val map_ident :
+  lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
+  (* equivalent to read_ident *)
+
 val finish_stringlit : lexer_state -> Lexing.lexbuf -> string
 val finish_skip_stringlit : lexer_state -> Lexing.lexbuf -> unit
 val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
@@ -170,8 +182,6 @@ val read_int8 : lexer_state -> Lexing.lexbuf -> char
 val read_int32 : lexer_state -> Lexing.lexbuf -> int32
 val read_int64 : lexer_state -> Lexing.lexbuf -> int64
 val read_number : lexer_state -> Lexing.lexbuf -> float
-val read_string : lexer_state -> Lexing.lexbuf -> string
-val read_ident : lexer_state -> Lexing.lexbuf -> string
 val skip_ident : lexer_state -> Lexing.lexbuf -> unit
 
 val read_sequence :
