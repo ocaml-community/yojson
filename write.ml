@@ -165,7 +165,7 @@ let json_string_of_float x =
 
 
 
-let write_std_float ob x =
+let write_std_float_fast ob x =
   match classify_float x with
     FP_nan ->
       json_error "NaN value not allowed in standard JSON"
@@ -177,6 +177,26 @@ let write_std_float ob x =
 	   "-Infinity value not allowed in standard JSON")
   | _ ->
       let s = Printf.sprintf "%.17g" x in
+      Bi_outbuf.add_string ob s;
+      if float_needs_period s then
+	Bi_outbuf.add_string ob ".0"
+	
+let write_std_float ob x =
+  match classify_float x with
+    FP_nan ->
+      json_error "NaN value not allowed in standard JSON"
+  | FP_infinite ->
+      json_error 
+	(if x > 0. then
+	   "Infinity value not allowed in standard JSON"
+	 else
+	   "-Infinity value not allowed in standard JSON")
+  | _ ->
+      let s1 = Printf.sprintf "%.16g" x in
+      let s =
+        if float_of_string s1 = x then s1
+        else Printf.sprintf "%.17g" x
+      in
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
