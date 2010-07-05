@@ -164,12 +164,18 @@ val map_ident :
   lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
   (* equivalent to read_ident *)
 
+
+type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
+val start_any_variant : lexer_state -> Lexing.lexbuf -> variant_kind
+val finish_variant : lexer_state -> Lexing.lexbuf -> json option
+val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
+val read_lt : lexer_state -> Lexing.lexbuf -> unit
+val read_gt : lexer_state -> Lexing.lexbuf -> unit
+
+
 val finish_stringlit : lexer_state -> Lexing.lexbuf -> string
 val finish_skip_stringlit : lexer_state -> Lexing.lexbuf -> unit
 val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
-val finish_variant : lexer_state -> Lexing.lexbuf -> json option
-val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
-val close_variant : lexer_state -> Lexing.lexbuf -> unit
 val finish_comment : lexer_state -> Lexing.lexbuf -> unit
 
 
@@ -214,6 +220,8 @@ val read_tuple :
   lexer_state ->
   Lexing.lexbuf -> 'a
 
+type tuple_kind = [ `Parenthesis | `Square_bracket ]
+val start_any_tuple : lexer_state -> Lexing.lexbuf -> tuple_kind
 val read_lpar : lexer_state -> Lexing.lexbuf -> unit
 val read_tuple_end : Lexing.lexbuf -> unit
 val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
@@ -228,9 +236,6 @@ val read_lcurl : lexer_state -> Lexing.lexbuf -> unit
 val read_object_end : Lexing.lexbuf -> unit
 val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
 val read_colon : lexer_state -> Lexing.lexbuf -> unit
-
-val read_lt : lexer_state -> Lexing.lexbuf -> unit
-val read_gt : lexer_state -> Lexing.lexbuf -> unit
 
 val read_json : lexer_state -> Lexing.lexbuf -> json
 val skip_json : lexer_state -> Lexing.lexbuf -> unit

@@ -153,6 +153,9 @@
   let map_lexeme f lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     f lexbuf.lex_buffer lexbuf.lex_start_pos len
+
+  type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
+  type tuple_kind = [ `Parenthesis | `Square_bracket ]
 }
 
 let space = [' ' '\t' '\r']+
@@ -343,16 +346,28 @@ and finish_stringlit v = parse
 and finish_variant v = parse 
     ':'  { let x = read_json v lexbuf in
 	   read_space v lexbuf;
-	   close_variant v lexbuf;
+	   read_gt v lexbuf;
 	   Some x }
   | '>'  { None }
   | _    { lexer_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and close_variant v = parse
+and read_lt v = parse
+    '<'      { () }
+  | _        { lexer_error "Expected '<' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_gt v = parse
     '>'  { () }
   | _    { lexer_error "Expected '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and start_any_variant v = parse
+    '<'      { `Edgy_bracket }
+  | '"'      { `Double_quote }
+  | '['      { `Square_bracket }
+  | _        { lexer_error "Expected '<', '\"' or '[' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_comment v = parse
   | "*/" { () }
@@ -574,14 +589,10 @@ and read_colon v = parse
   | _        { lexer_error "Expected ':' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
-and read_lt v = parse
-    '<'      { () }
-  | _        { lexer_error "Expected '<' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
-and read_gt v = parse
-    '>'      { () }
-  | _        { lexer_error "Expected '>' but found" v lexbuf }
+and start_any_tuple v = parse
+    '('      { `Parenthesis }
+  | '['      { `Square_bracket }
+  | _        { lexer_error "Expected '(' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lpar v = parse
@@ -696,7 +707,7 @@ and finish_skip_stringlit v = parse
 and finish_skip_variant v = parse 
     ':'  { skip_json v lexbuf;
 	   read_space v lexbuf;
-	   close_variant v lexbuf }
+	   read_gt v lexbuf }
   | '>'  { () }
   | _    { lexer_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
