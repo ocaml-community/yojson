@@ -6,7 +6,7 @@ FLAGS = -dtypes
 PACKS = easy-format,biniou
 
 .PHONY: default all opt install doc
-default: all opt
+default: META all opt
 all: yojson.cmo
 opt: yojson.cmx ydump
 
