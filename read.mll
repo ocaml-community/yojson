@@ -362,9 +362,15 @@ and read_gt v = parse
   | _    { lexer_error "Expected '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
+and read_comma v = parse
+    ','  { () }
+  | _    { lexer_error "Expected ',' but found" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
 and start_any_variant v = parse
     '<'      { `Edgy_bracket }
-  | '"'      { `Double_quote }
+  | '"'      { Bi_outbuf.clear v.buf;
+	       `Double_quote }
   | '['      { `Square_bracket }
   | _        { lexer_error "Expected '<', '\"' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
@@ -536,9 +542,33 @@ and read_tuple_end = parse
     ')'      { raise End_of_tuple }
   | ""       { () }
 
+and read_tuple_end2 v std = parse
+    ')'      { if std then 
+                 lexer_error "Expected ')' or '' but found" v lexbuf
+               else
+                 raise End_of_tuple }
+  | ']'      { if std then 
+                 raise End_of_tuple
+               else
+                 lexer_error "Expected ']' or '' but found" v lexbuf }
+  | ""       { () }
+
 and read_tuple_sep v = parse
     ','      { () }
   | ')'      { raise End_of_tuple }
+  | _        { lexer_error "Expected ',' or ')' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_tuple_sep2 v std = parse
+    ','      { () }
+  | ')'      { if std then 
+                 lexer_error "Expected ',' or ']' but found" v lexbuf
+               else
+                 raise End_of_tuple }
+  | ']'      { if std then 
+                 raise End_of_tuple
+               else
+                 lexer_error "Expected ',' or ')' but found" v lexbuf }
   | _        { lexer_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -590,8 +620,8 @@ and read_colon v = parse
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and start_any_tuple v = parse
-    '('      { `Parenthesis }
-  | '['      { `Square_bracket }
+    '('      { false }
+  | '['      { true }
   | _        { lexer_error "Expected '(' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -605,6 +635,15 @@ and read_rpar v = parse
   | _        { lexer_error "Expected ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
+and read_lbr v = parse
+    '['      { () }
+  | _        { lexer_error "Expected '[' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and read_rbr v = parse
+    ']'      { () }
+  | _        { lexer_error "Expected ']' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 (*** And now pretty much the same thing repeated, 
      only for the purpose of skipping ignored field values ***)

@@ -171,7 +171,7 @@ val finish_variant : lexer_state -> Lexing.lexbuf -> json option
 val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
 val read_lt : lexer_state -> Lexing.lexbuf -> unit
 val read_gt : lexer_state -> Lexing.lexbuf -> unit
-
+val read_comma : lexer_state -> Lexing.lexbuf -> unit
 
 val finish_stringlit : lexer_state -> Lexing.lexbuf -> string
 val finish_skip_stringlit : lexer_state -> Lexing.lexbuf -> unit
@@ -220,11 +220,15 @@ val read_tuple :
   lexer_state ->
   Lexing.lexbuf -> 'a
 
-type tuple_kind = [ `Parenthesis | `Square_bracket ]
-val start_any_tuple : lexer_state -> Lexing.lexbuf -> tuple_kind
+val start_any_tuple : lexer_state -> Lexing.lexbuf -> bool
 val read_lpar : lexer_state -> Lexing.lexbuf -> unit
+val read_rpar : lexer_state -> Lexing.lexbuf -> unit
 val read_tuple_end : Lexing.lexbuf -> unit
+val read_tuple_end2 : lexer_state -> bool -> Lexing.lexbuf -> unit
 val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
+val read_tuple_sep2 : lexer_state -> bool -> Lexing.lexbuf -> unit
+val read_lbr : lexer_state -> Lexing.lexbuf -> unit
+val read_rbr : lexer_state -> Lexing.lexbuf -> unit
 
 val read_fields :
   ('a -> string -> lexer_state -> Lexing.lexbuf -> 'a) ->
