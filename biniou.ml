@@ -1,7 +1,7 @@
 (* $Id$ *)
 
 let rec biniou_of_json = function
-    `Null -> failwith "Cannot convert null to biniou"
+    `Null -> `Unit
   | `Bool b -> `Bool b
   | `Int i -> `Svint i
   | `Intlit i -> failwith "Cannot convert big int to biniou"
@@ -43,7 +43,8 @@ let rec biniou_of_json = function
 
 
 let rec json_of_biniou = function
-    `Bool b -> `Bool b
+    `Unit -> `Null
+  | `Bool b -> `Bool b
   | `Int8 _ -> failwith "Cannot convert int8 to JSON"
   | `Int16 _ -> failwith "Cannot convert int16 to JSON"
   | `Int32 _ -> failwith "Cannot convert int32 to JSON"
