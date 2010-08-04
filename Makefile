@@ -91,6 +91,8 @@ archive:
 		exit 1; \
 	fi
 	$(MAKE) && ./ydump -help > $$WWW/ydump-help.txt
+	mkdir -p $$WWW/yojson-doc
+	$(MAKE) doc && cp doc/* $$WWW/yojson-doc/
 	rm -rf /tmp/yojson /tmp/yojson-$(VERSION) && \
 		cd /tmp && \
 		svn co "$(SVNURL)" && \
