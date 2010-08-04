@@ -75,3 +75,45 @@ clean:
 	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
 		read.ml yojson.mli yojson.ml META
 	rm -rf doc
+
+SUBDIRS = 
+SVNURL = svn://svn.forge.ocamlcore.org/svnroot/yojson/trunk/yojson
+
+.PHONY: archive
+archive:
+	@echo "Making archive for version $(VERSION)"
+	@if [ -z "$$WWW" ]; then \
+		echo '*** Environment variable WWW is undefined ***' >&2; \
+		exit 1; \
+	fi
+	@if [ -n "$$(svn status -q)" ]; then \
+		echo "*** There are uncommitted changes, aborting. ***" >&2; \
+		exit 1; \
+	fi
+	$(MAKE) && ./ydump -help > $$WWW/ydump-help.txt
+	rm -rf /tmp/yojson /tmp/yojson-$(VERSION) && \
+		cd /tmp && \
+		svn co "$(SVNURL)" && \
+		for x in "." $(SUBDIRS); do \
+			rm -rf /tmp/yojson/$$x/.svn; \
+		done && \
+		cd /tmp && cp -r yojson yojson-$(VERSION) && \
+		tar czf yojson.tar.gz yojson && \
+		tar cjf yojson.tar.bz2 yojson && \
+		tar czf yojson-$(VERSION).tar.gz yojson-$(VERSION) && \
+		tar cjf yojson-$(VERSION).tar.bz2 yojson-$(VERSION)
+	mv /tmp/yojson.tar.gz /tmp/yojson.tar.bz2 ../releases
+	mv /tmp/yojson-$(VERSION).tar.gz \
+		/tmp/yojson-$(VERSION).tar.bz2 ../releases
+	cp ../releases/yojson.tar.gz $$WWW/
+	cp ../releases/yojson.tar.bz2 $$WWW/
+	cp ../releases/yojson-$(VERSION).tar.gz $$WWW/
+	cp ../releases/yojson-$(VERSION).tar.bz2 $$WWW/
+	cd ../releases && \
+		svn add yojson.tar.gz yojson.tar.bz2 \
+			yojson-$(VERSION).tar.gz yojson-$(VERSION).tar.bz2 && \
+		svn commit -m "yojson version $(VERSION)"
+	cp LICENSE $$WWW/yojson-license.txt
+	cp Changes $$WWW/yojson-changes.txt
+	echo 'let yojson_version = "$(VERSION)"' \
+		> $$WWW/yojson-version.ml
