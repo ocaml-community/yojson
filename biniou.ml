@@ -42,42 +42,46 @@ let rec biniou_of_json = function
       `Variant (Some s, Bi_io.hash_name s, o)
 
 
-let rec json_of_biniou = function
-    `Unit -> `Null
-  | `Bool b -> `Bool b
-  | `Int8 _ -> failwith "Cannot convert int8 to JSON"
-  | `Int16 _ -> failwith "Cannot convert int16 to JSON"
-  | `Int32 _ -> failwith "Cannot convert int32 to JSON"
-  | `Int64 _ -> failwith "Cannot convert int64 to JSON"
-  | `Float64 f -> `Float f
-  | `Uvint i -> failwith "Cannot convert uvint to JSON"
-  | `Svint i -> `Int i
-  | `String s -> `String s
-  | `Array None -> `List []
-  | `Array (Some (_, a)) -> `List (Array.to_list (Array.map json_of_biniou a))
-  | `Tuple a -> `Tuple (Array.to_list (Array.map json_of_biniou a))
-  | `Record a -> 
-      `Assoc (
-	Array.to_list (
-	  Array.map (
-	    function 
-		(Some s, _, x) -> (s, json_of_biniou x)
-	      | (None, _, _) ->
-		  failwith "Cannot convert hashed field name to JSON"
-	  ) a
-	)
-      )
+let rec json_of_biniou (x : Bi_io.tree) =
+  match x with
+      `Unit -> `Null
+    | `Bool b -> `Bool b
+    | `Int8 _ -> failwith "Cannot convert int8 to JSON"
+    | `Int16 _ -> failwith "Cannot convert int16 to JSON"
+    | `Int32 _ -> failwith "Cannot convert int32 to JSON"
+    | `Int64 _ -> failwith "Cannot convert int64 to JSON"
+    | `Float64 f -> `Float f
+    | `Uvint i -> failwith "Cannot convert uvint to JSON"
+    | `Svint i -> `Int i
+    | `String s -> `String s
+    | `Array None -> `List []
+    | `Array (Some (_, a)) -> `List (Array.to_list (Array.map json_of_biniou a))
+    | `Tuple a -> `Tuple (Array.to_list (Array.map json_of_biniou a))
+    | `Record a -> 
+        `Assoc (
+	  Array.to_list (
+	    Array.map (
+	      function 
+		  (Some s, _, x) -> (s, json_of_biniou x)
+	        | (None, _, _) ->
+		    failwith "Cannot convert hashed field name to JSON"
+	    ) a
+	  )
+        )
+          
+    | `Num_variant _ -> failwith "Cannot convert num_variant to JSON"
+    | `Variant (Some s, _, Some x) -> `Variant (s, Some (json_of_biniou x))
+    | `Variant (Some s, _, None) -> `Variant (s, None)
+    | `Variant (None, _, _) ->
+        failwith "Cannot convert hashed variant name to JSON"
+          
+    | `Table None -> `List [] (* not reversible *)
+    | `Table (Some (header, rows)) -> (* not reversible *)
+        `List (Array.to_list (Array.map (json_of_row header) rows))
 
-  | `Num_variant _ -> failwith "Cannot convert num_variant to JSON"
-  | `Variant (Some s, _, Some x) -> `Variant (s, Some (json_of_biniou x))
-  | `Variant (Some s, _, None) -> `Variant (s, None)
-  | `Variant (None, _, _) ->
-      failwith "Cannot convert hashed variant name to JSON"
+    | `Shared _ -> failwith "Cannot convert shared node to JSON"
 
-  | `Table None -> `List [] (* not reversible *)
-  | `Table (Some (header, rows)) -> (* not reversible *)
-      `List (Array.to_list (Array.map (json_of_row header) rows))
-
+          
 and json_of_row header a =
   let n = Array.length header in
   if Array.length a <> n then
