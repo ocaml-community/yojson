@@ -1,5 +1,14 @@
 Releases of yojson
 ==================
 
-2010-09-13 0.8.1: added INSTALL file
+!!! = some incompatibilities
+opt = optimizations
++ui = additions in the user interface
+-ui = restrictions in the user interface
+bug = bug or security fix
+doc = major changes in the documentation
+pkg = changes in the structure of the package or in the installation procedure
+
+2010-12-04 1.0.0: [!!!] now requires biniou version 1.0.0 or higher
+2010-09-13 0.8.1: [doc] added INSTALL file
 2010-08-04 0.8.0: first release
