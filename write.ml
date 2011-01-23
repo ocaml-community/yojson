@@ -95,8 +95,10 @@ let write_int ob x =
   if x > 0 then
     ob.o_len <- write_digits ob.o_s ob.o_len x
   else if x < 0 then (
-    Bi_outbuf.add_char ob '-';
-    ob.o_len <- write_digits ob.o_s (ob.o_len + 1) (abs x)
+    let s = ob.o_s in
+    let pos = ob.o_len in
+    s.[pos] <- '-';
+    ob.o_len <- write_digits s (pos + 1) (abs x)
   )
   else
     Bi_outbuf.add_char ob '0'
