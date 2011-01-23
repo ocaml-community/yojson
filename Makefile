@@ -77,7 +77,7 @@ clean:
 	rm -rf doc
 
 SUBDIRS = 
-SVNURL = svn://svn.forge.ocamlcore.org/svnroot/yojson/trunk/yojson
+SVNURL = svn://scm.ocamlcore.org/svn/yojson/trunk/yojson
 
 .PHONY: archive
 archive:
