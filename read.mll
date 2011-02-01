@@ -79,6 +79,15 @@
       (sprintf "%s '%s'" descr (Lexing.lexeme lexbuf))
       v lexbuf
 
+  let read_junk = ref (fun _ -> assert false)
+
+  let long_error descr v lexbuf =
+    let junk = Lexing.lexeme lexbuf in
+    let extra_junk = !read_junk lexbuf in
+    custom_error 
+      (sprintf "%s '%s%s'" descr junk extra_junk)
+      v lexbuf
+
   let min10 = min_int / 10 - (if min_int mod 10 = 0 then 0 else 1)
   let max10 = max_int / 10 + (if max_int mod 10 = 0 then 0 else 1)
 
@@ -175,6 +184,10 @@ let hex = [ '0'-'9' 'a'-'f' 'A'-'F' ]
 
 let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
 
+let optjunk4 = (eof | _ (eof | _ (eof | _ (eof | _))))
+let optjunk8 = (eof | _ (eof | _ (eof | _ (eof | optjunk4))))
+let optjunk12 = (eof | _ (eof | _ (eof | _ (eof | optjunk8))))
+let junk = _ optjunk12
 
 rule read_json v = parse
   | "true"      { `Bool true }
@@ -276,7 +289,7 @@ rule read_json v = parse
 		     with End_of_tuple ->
 		       `Tuple (List.rev !acc)
 	           #else
-		     lexer_error "Invalid token" v lexbuf
+		     long_error "Invalid token" v lexbuf
                    #endif
 		 }
 
@@ -287,7 +300,7 @@ rule read_json v = parse
 		     read_space v lexbuf;
 		     `Variant (cons, finish_variant v lexbuf)
                    #else
-                     lexer_error "Invalid token" v lexbuf
+                     long_error "Invalid token" v lexbuf
                    #endif
 		 }
 
@@ -296,7 +309,7 @@ rule read_json v = parse
   | "\n"         { newline v lexbuf; read_json v lexbuf }
   | space        { read_json v lexbuf }
   | eof          { custom_error "Unexpected end of input" v lexbuf }
-  | _            { lexer_error "Invalid token" v lexbuf }
+  | _            { long_error "Invalid token" v lexbuf }
 
 
 and finish_string v = parse
@@ -327,7 +340,7 @@ and finish_escaped_char v = parse
   | 't'  { Bi_outbuf.add_char v.buf '\t' }
   | 'u' (hex as a) (hex as b) (hex as c) (hex as d)
          { utf8_of_bytes v.buf (hex a) (hex b) (hex c) (hex d) }
-  | _    { lexer_error "Invalid escape sequence" v lexbuf }
+  | _    { long_error "Invalid escape sequence" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 
@@ -340,7 +353,7 @@ and finish_stringlit v = parse
 	   String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
 	   s
 	 }
-  | _    { lexer_error "Invalid string literal" v lexbuf }
+  | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_variant v = parse 
@@ -349,22 +362,22 @@ and finish_variant v = parse
 	   read_gt v lexbuf;
 	   Some x }
   | '>'  { None }
-  | _    { lexer_error "Expected ':' or '>' but found" v lexbuf }
+  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lt v = parse
     '<'      { () }
-  | _        { lexer_error "Expected '<' but found" v lexbuf }
+  | _        { long_error "Expected '<' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_gt v = parse
     '>'  { () }
-  | _    { lexer_error "Expected '>' but found" v lexbuf }
+  | _    { long_error "Expected '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_comma v = parse
     ','  { () }
-  | _    { lexer_error "Expected ',' but found" v lexbuf }
+  | _    { long_error "Expected ',' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and start_any_variant v = parse
@@ -372,12 +385,12 @@ and start_any_variant v = parse
   | '"'      { Bi_outbuf.clear v.buf;
 	       `Double_quote }
   | '['      { `Square_bracket }
-  | _        { lexer_error "Expected '<', '\"' or '[' but found" v lexbuf }
+  | _        { long_error "Expected '<', '\"' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_comment v = parse
   | "*/" { () }
-  | eof  { lexer_error "Unterminated comment" v lexbuf }
+  | eof  { long_error "Unterminated comment" v lexbuf }
   | '\n' { newline v lexbuf; finish_comment v lexbuf }
   | _    { finish_comment v lexbuf }
 
@@ -399,13 +412,13 @@ and read_space v = parse
 
 and read_null v = parse
     "null"    { () }
-  | _         { lexer_error "Expected 'null' but found" v lexbuf }
+  | _         { long_error "Expected 'null' but found" v lexbuf }
   | eof       { custom_error "Unexpected end of input" v lexbuf }
 
 and read_bool v = parse
     "true"    { true }
   | "false"   { false }
-  | _         { lexer_error "Expected 'true' or 'false' but found" v lexbuf }
+  | _         { long_error "Expected 'true' or 'false' but found" v lexbuf }
   | eof       { custom_error "Unexpected end of input" v lexbuf }
 
 and read_int v = parse
@@ -415,21 +428,21 @@ and read_int v = parse
   | '-' positive_int     { try extract_negative_int lexbuf
 			   with Int_overflow ->
 			     lexer_error "Int overflow" v lexbuf }
-  | _                    { lexer_error "Expected integer but found" v lexbuf }
+  | _                    { long_error "Expected integer but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_int32 v = parse
     '-'? positive_int    { try Int32.of_string (Lexing.lexeme lexbuf)
 			   with _ ->
 			     lexer_error "Int32 overflow" v lexbuf }
-  | _                    { lexer_error "Expected int32 but found" v lexbuf }
+  | _                    { long_error "Expected int32 but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_int64 v = parse
     '-'? positive_int    { try Int64.of_string (Lexing.lexeme lexbuf)
 			   with _ ->
 			     lexer_error "Int32 overflow" v lexbuf }
-  | _                    { lexer_error "Expected int64 but found" v lexbuf }
+  | _                    { long_error "Expected int64 but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_number v = parse
@@ -437,13 +450,13 @@ and read_number v = parse
   | "Infinity"  { infinity }
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
-  | _           { lexer_error "Expected number but found" v lexbuf }
+  | _           { long_error "Expected number but found" v lexbuf }
   | eof         { custom_error "Unexpected end of input" v lexbuf }
 
 and read_string v = parse
     '"'      { Bi_outbuf.clear v.buf;
 	       finish_string v lexbuf }
-  | _        { lexer_error "Expected '\"' but found" v lexbuf }
+  | _        { long_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
@@ -451,7 +464,7 @@ and read_ident v = parse
 	       finish_string v lexbuf }
   | ident as s
              { s }
-  | _        { lexer_error "Expected string or identifier but found" v lexbuf }
+  | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and map_ident v f = parse
@@ -459,7 +472,7 @@ and map_ident v f = parse
 	       map_string v f lexbuf }
   | ident
              { map_lexeme f lexbuf }
-  | _        { lexer_error "Expected string or identifier but found" v lexbuf }
+  | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_sequence read_cell init_acc v = parse
@@ -478,7 +491,7 @@ and read_sequence read_cell init_acc v = parse
 	       with End_of_array ->
 		 !acc
 	     }
-  | _        { lexer_error "Expected '[' but found" v lexbuf }
+  | _        { long_error "Expected '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_list_rev read_cell v = parse
@@ -497,7 +510,7 @@ and read_list_rev read_cell v = parse
 	       with End_of_array ->
 		 !acc
 	     }
-  | _        { lexer_error "Expected '[' but found" v lexbuf }
+  | _        { long_error "Expected '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_array_end = parse
@@ -507,7 +520,7 @@ and read_array_end = parse
 and read_array_sep v = parse
     ','      { () }
   | ']'      { raise End_of_array }
-  | _        { lexer_error "Expected ',' or ']' but found" v lexbuf }
+  | _        { long_error "Expected ',' or ']' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 
@@ -532,10 +545,10 @@ and read_tuple read_cell init_acc v = parse
 		     with End_of_tuple ->
 		       !acc
 	           #else
-		     lexer_error "Invalid token" v lexbuf
+		     long_error "Invalid token" v lexbuf
                    #endif
 		 }
-  | _        { lexer_error "Expected ')' but found" v lexbuf }
+  | _        { long_error "Expected ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_tuple_end = parse
@@ -544,32 +557,32 @@ and read_tuple_end = parse
 
 and read_tuple_end2 v std = parse
     ')'      { if std then 
-                 lexer_error "Expected ')' or '' but found" v lexbuf
+                 long_error "Expected ')' or '' but found" v lexbuf
                else
                  raise End_of_tuple }
   | ']'      { if std then 
                  raise End_of_tuple
                else
-                 lexer_error "Expected ']' or '' but found" v lexbuf }
+                 long_error "Expected ']' or '' but found" v lexbuf }
   | ""       { () }
 
 and read_tuple_sep v = parse
     ','      { () }
   | ')'      { raise End_of_tuple }
-  | _        { lexer_error "Expected ',' or ')' but found" v lexbuf }
+  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_tuple_sep2 v std = parse
     ','      { () }
   | ')'      { if std then 
-                 lexer_error "Expected ',' or ']' but found" v lexbuf
+                 long_error "Expected ',' or ']' but found" v lexbuf
                else
                  raise End_of_tuple }
   | ']'      { if std then 
                  raise End_of_tuple
                else
-                 lexer_error "Expected ',' or ')' but found" v lexbuf }
-  | _        { lexer_error "Expected ',' or ')' but found" v lexbuf }
+                 long_error "Expected ',' or ')' but found" v lexbuf }
+  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_fields read_field init_acc v = parse
@@ -596,12 +609,12 @@ and read_fields read_field init_acc v = parse
 	       with End_of_object ->
 		 !acc
 	     }
-  | _        { lexer_error "Expected '{' but found" v lexbuf }
+  | _        { long_error "Expected '{' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lcurl v = parse
     '{'      { () }
-  | _        { lexer_error "Expected '{' but found" v lexbuf }
+  | _        { long_error "Expected '{' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_object_end = parse
@@ -611,38 +624,38 @@ and read_object_end = parse
 and read_object_sep v = parse
     ','      { () }
   | '}'      { raise End_of_object }
-  | _        { lexer_error "Expected ',' or '}' but found" v lexbuf }
+  | _        { long_error "Expected ',' or '}' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_colon v = parse
     ':'      { () }
-  | _        { lexer_error "Expected ':' but found" v lexbuf }
+  | _        { long_error "Expected ':' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and start_any_tuple v = parse
     '('      { false }
   | '['      { true }
-  | _        { lexer_error "Expected '(' or '[' but found" v lexbuf }
+  | _        { long_error "Expected '(' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lpar v = parse
     '('      { () }
-  | _        { lexer_error "Expected '(' but found" v lexbuf }
+  | _        { long_error "Expected '(' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_rpar v = parse
     ')'      { () }
-  | _        { lexer_error "Expected ')' but found" v lexbuf }
+  | _        { long_error "Expected ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lbr v = parse
     '['      { () }
-  | _        { lexer_error "Expected '[' but found" v lexbuf }
+  | _        { long_error "Expected '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_rbr v = parse
     ']'      { () }
-  | _        { lexer_error "Expected ']' but found" v lexbuf }
+  | _        { long_error "Expected ']' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 (*** And now pretty much the same thing repeated, 
@@ -713,7 +726,7 @@ and skip_json v = parse
 		     with End_of_tuple ->
 		       ()
 	           #else
-		     lexer_error "Invalid token" v lexbuf
+		     long_error "Invalid token" v lexbuf
                    #endif
 		 }
 
@@ -724,7 +737,7 @@ and skip_json v = parse
 		     read_space v lexbuf;
 		     finish_skip_variant v lexbuf
                    #else
-                     lexer_error "Invalid token" v lexbuf
+                     long_error "Invalid token" v lexbuf
                    #endif
 		 }
 
@@ -733,14 +746,14 @@ and skip_json v = parse
   | "\n"         { newline v lexbuf; skip_json v lexbuf }
   | space        { skip_json v lexbuf }
   | eof          { custom_error "Unexpected end of input" v lexbuf }
-  | _            { lexer_error "Invalid token" v lexbuf }
+  | _            { long_error "Invalid token" v lexbuf }
 
 
 and finish_skip_stringlit v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { () }
-  | _    { lexer_error "Invalid string literal" v lexbuf }
+  | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_skip_variant v = parse 
@@ -748,18 +761,23 @@ and finish_skip_variant v = parse
 	   read_space v lexbuf;
 	   read_gt v lexbuf }
   | '>'  { () }
-  | _    { lexer_error "Expected ':' or '>' but found" v lexbuf }
+  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and skip_ident v = parse
     '"'      { finish_skip_stringlit v lexbuf }
   | ident    { () }
-  | _        { lexer_error "Expected string or identifier but found" v lexbuf }
+  | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
+and junk = parse
+    junk     { Lexing.lexeme lexbuf }
 
 {
   let _ = (read_json : lexer_state -> Lexing.lexbuf -> json)
+
+  let () =
+    read_junk := junk
 
   let read_int8 v lexbuf =
     let n = read_int v lexbuf in
