@@ -814,7 +814,7 @@ and junk = parse
   let finish v lexbuf =
     read_space v lexbuf;
     if not (read_eof lexbuf) then
-      custom_error "Junk after end of JSON value" v lexbuf
+      long_error "Junk after end of JSON value:" v lexbuf
 
   let init_lexer ?buf ?fname ?(lnum = 1) () =
     let buf =
