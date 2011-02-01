@@ -185,9 +185,14 @@ let hex = [ '0'-'9' 'a'-'f' 'A'-'F' ]
 let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
 
 let optjunk4 = (eof | _ (eof | _ (eof | _ (eof | _))))
-let optjunk8 = (eof | _ (eof | _ (eof | _ (eof | optjunk4))))
-let optjunk12 = (eof | _ (eof | _ (eof | _ (eof | optjunk8))))
-let junk = _ optjunk12
+let optjunk8 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk4)))))
+let optjunk12 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk8)))))
+let optjunk16 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk12)))))
+let optjunk20 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk16)))))
+let optjunk24 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk20)))))
+let optjunk28 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk24)))))
+let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
+let junk = _ optjunk32
 
 rule read_json v = parse
   | "true"      { `Bool true }
