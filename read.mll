@@ -26,22 +26,13 @@
   open Printf
   open Lexing
 
-
-  type lexer_state = {
+  (* see description in common.mli *)
+  type lexer_state = Lexer_state.t = {
     buf : Bi_outbuf.t;
-      (* Buffer used to accumulate substrings *)
-
     mutable lnum : int;
-      (* Current line number (starting from 1) *)
-
     mutable bol : int;
-      (* Absolute position of the first character of the current line 
-	 (starting from 0) *)
-
     mutable fname : string option;
-      (* Name describing the input file *)
   }
-
 
   let dec c =
     Char.code c - 48
@@ -816,18 +807,7 @@ and junk = parse
     if not (read_eof lexbuf) then
       long_error "Junk after end of JSON value:" v lexbuf
 
-  let init_lexer ?buf ?fname ?(lnum = 1) () =
-    let buf =
-      match buf with
-	  None -> Bi_outbuf.create 256
-	| Some buf -> buf
-    in
-    {
-      buf = buf;
-      lnum = lnum;
-      bol = 0;
-      fname = fname
-    }
+  let init_lexer = init_lexer
 
   let from_lexbuf v ?(stream = false) lexbuf =
     read_space v lexbuf;

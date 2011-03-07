@@ -38,27 +38,23 @@ val from_file :
       See [from_string] for the meaning of the optional arguments. *)
 
 
-type lexer_state = {
+type lexer_state = Lexer_state.t = {
   buf : Bi_outbuf.t;
-    (** Buffer used to accumulate substrings *)
-  
   mutable lnum : int;
-    (** Current line number (counting from 1) *)
-
   mutable bol : int;
-    (** Absolute position of the first character of the current line
-        (counting from 0) *)
-
   mutable fname : string option;
-    (** Name referencing the input file in error messages *)
 }
+    (** This alias is provided for backward compatibility.
+        New code should refer to {!Yojson.lexer_state} directly.
+    *)
 
 val init_lexer :
   ?buf: Bi_outbuf.t ->
   ?fname: string ->
   ?lnum: int -> 
   unit -> lexer_state
-  (** Create a fresh lexer_state record. *)
+  (** This alias is provided for backward compatibility.
+      New code should use {!Yojson.init_lexer} directly. *)
 
 val from_lexbuf :
   lexer_state ->

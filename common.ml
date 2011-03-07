@@ -39,3 +39,41 @@ let is_object_or_array x =
     | `Assoc _ -> true
     | _ -> false
 
+
+type lexer_state = {
+  buf : Bi_outbuf.t;
+    (* Buffer used to accumulate substrings *)
+
+  mutable lnum : int;
+    (* Current line number (starting from 1) *)
+
+  mutable bol : int;
+    (* Absolute position of the first character of the current line 
+       (starting from 0) *)
+
+  mutable fname : string option;
+    (* Name describing the input file *)
+}
+
+module Lexer_state =
+struct
+  type t = lexer_state = {
+    buf : Bi_outbuf.t;
+    mutable lnum : int;
+    mutable bol : int;
+    mutable fname : string option;
+  }
+end
+
+let init_lexer ?buf ?fname ?(lnum = 1) () =
+  let buf =
+    match buf with
+	None -> Bi_outbuf.create 256
+      | Some buf -> buf
+  in
+  {
+    buf = buf;
+    lnum = lnum;
+    bol = 0;
+    fname = fname
+  }
