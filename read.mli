@@ -178,6 +178,7 @@ val finish_comment : lexer_state -> Lexing.lexbuf -> unit
 val read_space : lexer_state -> Lexing.lexbuf -> unit
 val read_eof : Lexing.lexbuf -> bool
 val read_null : lexer_state -> Lexing.lexbuf -> unit
+val read_null_if_possible : lexer_state -> Lexing.lexbuf -> bool
 val read_bool : lexer_state -> Lexing.lexbuf -> bool
 val read_int : lexer_state -> Lexing.lexbuf -> int
 val read_int8 : lexer_state -> Lexing.lexbuf -> char

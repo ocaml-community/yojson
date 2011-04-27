@@ -411,6 +411,10 @@ and read_null v = parse
   | _         { long_error "Expected 'null' but found" v lexbuf }
   | eof       { custom_error "Unexpected end of input" v lexbuf }
 
+and read_null_if_possible v = parse
+    "null"    { true }
+  | ""        { false }
+
 and read_bool v = parse
     "true"    { true }
   | "false"   { false }
