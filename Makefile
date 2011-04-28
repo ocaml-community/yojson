@@ -1,6 +1,6 @@
 # $Id$
 
-VERSION = 1.0.1
+VERSION = 1.0.2
 
 FLAGS = -dtypes
 PACKS = easy-format,biniou

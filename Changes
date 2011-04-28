@@ -9,6 +9,9 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
+2011-04-27 1.0.2: [+ui] improved error messages showing several lookahead bytes
+                  [+ui] factored out lexer_state and init_lexer definitions
+                  [+ui] added read_null_if_possible function (used by atdgen)
 2011-01-22 1.0.1: [bug] fixed serialization of negative ints using the
                         write_int function (affects atdgen)
 2010-12-04 1.0.0: [!!!] now requires biniou version 1.0.0 or higher
