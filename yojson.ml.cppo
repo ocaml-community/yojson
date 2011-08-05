@@ -50,6 +50,7 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "safe.ml"
 #include "write.ml"
 #include "write2.ml"
 #include "read.ml"

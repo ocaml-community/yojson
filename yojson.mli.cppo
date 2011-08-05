@@ -72,6 +72,7 @@ sig
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "safe.mli"
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"

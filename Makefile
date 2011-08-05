@@ -38,12 +38,12 @@ read.ml: read.mll
 	ocamllex read.mll
 
 yojson.mli: yojson.mli.cppo \
-            common.mli type.ml write.mli pretty.mli write2.mli read.mli \
-            biniou.mli
+            common.mli type.ml safe.mli write.mli pretty.mli write2.mli \
+            read.mli biniou.mli
 	cppo -n yojson.mli.cppo -o yojson.mli
 
 yojson.ml: yojson.ml.cppo \
-           common.ml type.ml write.ml pretty.ml write2.ml read.ml \
+           common.ml type.ml safe.ml write.ml pretty.ml write2.ml read.ml \
            biniou.ml
 	cppo yojson.ml.cppo -o yojson.ml
 
