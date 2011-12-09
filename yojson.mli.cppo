@@ -46,6 +46,7 @@ sig
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
+#include "util.mli"
 #undef INT
 #undef FLOAT
 #undef STRING
