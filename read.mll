@@ -1,4 +1,3 @@
-(* $Id$ *)
 {
   module Lexing =
     (*
@@ -428,6 +427,20 @@ and read_int v = parse
   | '-' positive_int     { try extract_negative_int lexbuf
 			   with Int_overflow ->
 			     lexer_error "Int overflow" v lexbuf }
+  | '"'                  { (* Support for double-quoted "ints" *)
+                           Bi_outbuf.clear v.buf;
+                           let s = finish_string v lexbuf in
+                           try
+                             (* Any OCaml-compliant int will pass,
+                                including hexadecimal and octal notations,
+                                and embedded underscores *)
+                             int_of_string s
+                           with _ ->
+                             custom_error
+                               "Expected an integer but found a string that \
+                                doesn't even represent an integer"
+                               v lexbuf
+                         }
   | _                    { long_error "Expected integer but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
@@ -435,6 +448,20 @@ and read_int32 v = parse
     '-'? positive_int    { try Int32.of_string (Lexing.lexeme lexbuf)
 			   with _ ->
 			     lexer_error "Int32 overflow" v lexbuf }
+  | '"'                  { (* Support for double-quoted "ints" *)
+                           Bi_outbuf.clear v.buf;
+                           let s = finish_string v lexbuf in
+                           try
+                             (* Any OCaml-compliant int will pass,
+                                including hexadecimal and octal notations,
+                                and embedded underscores *)
+                             Int32.of_string s
+                           with _ ->
+                             custom_error
+                               "Expected an int32 but found a string that \
+                                doesn't even represent an integer"
+                               v lexbuf
+                         }
   | _                    { long_error "Expected int32 but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
@@ -442,6 +469,20 @@ and read_int64 v = parse
     '-'? positive_int    { try Int64.of_string (Lexing.lexeme lexbuf)
 			   with _ ->
 			     lexer_error "Int32 overflow" v lexbuf }
+  | '"'                  { (* Support for double-quoted "ints" *)
+                           Bi_outbuf.clear v.buf;
+                           let s = finish_string v lexbuf in
+                           try
+                             (* Any OCaml-compliant int will pass,
+                                including hexadecimal and octal notations,
+                                and embedded underscores *)
+                             Int64.of_string s
+                           with _ ->
+                             custom_error
+                               "Expected an int64 but found a string that \
+                                doesn't even represent an integer"
+                               v lexbuf
+                         }
   | _                    { long_error "Expected int64 but found" v lexbuf }
   | eof                  { custom_error "Unexpected end of input" v lexbuf }
 
@@ -450,6 +491,24 @@ and read_number v = parse
   | "Infinity"  { infinity }
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
+  | '"'         { Bi_outbuf.clear v.buf;
+	          let s = finish_string v lexbuf in
+                  try
+                    (* Any OCaml-compliant float will pass,
+                       including hexadecimal and octal notations,
+                       and embedded underscores. *)
+                    float_of_string s
+                  with _ ->
+                    match s with
+                        "NaN" -> nan
+                      | "Infinity" -> infinity
+                      | "-Infinity" -> neg_infinity
+                      | _ ->
+                          custom_error
+                            "Expected a number but found a string that \
+                             doesn't even represent a number"
+                            v lexbuf
+                }
   | _           { long_error "Expected number but found" v lexbuf }
   | eof         { custom_error "Unexpected end of input" v lexbuf }
 
