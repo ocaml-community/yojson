@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 #include "common.ml"
 
 #define INT
@@ -36,7 +34,10 @@ struct
 #include "write.ml"
 #include "write2.ml"
 #include "read.ml"
-#include "util.ml"
+module Util =
+struct
+  #include "util.ml"
+end
 #undef INT
 #undef FLOAT
 #undef STRING
