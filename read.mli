@@ -1,8 +1,9 @@
-(* $Id$ *)
-
-
 val prettify : ?std:bool -> string -> string
   (** Combined parser and pretty-printer.
+      See [to_string] for the role of the optional [std] argument. *)
+
+val compact : ?std:bool -> string -> string
+  (** Combined parser and printer.
       See [to_string] for the role of the optional [std] argument. *)
 
 

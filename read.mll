@@ -980,5 +980,8 @@ and junk = parse
     linestream_from_channel ?buf ~fin ?fname ?lnum ic
 
   let prettify ?std s =
-    pretty_to_string (from_string s)
+    pretty_to_string ?std (from_string s)
+
+  let compact ?std s =
+    to_string (from_string s)
 }
