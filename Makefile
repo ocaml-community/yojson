@@ -99,17 +99,9 @@ archive:
 		tar cjf yojson.tar.bz2 yojson && \
 		tar czf yojson-$(VERSION).tar.gz yojson-$(VERSION) && \
 		tar cjf yojson-$(VERSION).tar.bz2 yojson-$(VERSION)
-	mv /tmp/yojson.tar.gz /tmp/yojson.tar.bz2 ../releases
+	mv /tmp/yojson.tar.gz /tmp/yojson.tar.bz2 $$WWW/
 	mv /tmp/yojson-$(VERSION).tar.gz \
-		/tmp/yojson-$(VERSION).tar.bz2 ../releases
-	cp ../releases/yojson.tar.gz $$WWW/
-	cp ../releases/yojson.tar.bz2 $$WWW/
-	cp ../releases/yojson-$(VERSION).tar.gz $$WWW/
-	cp ../releases/yojson-$(VERSION).tar.bz2 $$WWW/
-	cd ../releases && \
-		svn add yojson.tar.gz yojson.tar.bz2 \
-			yojson-$(VERSION).tar.gz yojson-$(VERSION).tar.bz2 && \
-		svn commit -m "yojson version $(VERSION)"
+		/tmp/yojson-$(VERSION).tar.bz2 $$WWW/
 	cp LICENSE $$WWW/yojson-license.txt
 	cp Changes $$WWW/yojson-changes.txt
 	echo 'let yojson_version = "$(VERSION)"' \
