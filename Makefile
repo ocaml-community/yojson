@@ -1,6 +1,4 @@
-# $Id$
-
-VERSION = 1.0.2
+VERSION = 1.0.3
 
 FLAGS = -dtypes
 PACKS = easy-format,biniou
@@ -76,17 +74,16 @@ clean:
 		read.ml yojson.mli yojson.ml META
 	rm -rf doc
 
-SUBDIRS = 
-SVNURL = svn://scm.ocamlcore.org/svn/yojson/trunk/yojson
+GITURL = git@github.com:mjambon/yojson.git
 
 .PHONY: archive
 archive:
 	@echo "Making archive for version $(VERSION)"
 	@if [ -z "$$WWW" ]; then \
-		echo '*** Environment variable WWW is undefined ***' >&2; \
+		echo '*** Environment variable WWW is undefined. ***' >&2; \
 		exit 1; \
 	fi
-	@if [ -n "$$(svn status -q)" ]; then \
+	@if [ -n "$$(git diff)" ]; then \
 		echo "*** There are uncommitted changes, aborting. ***" >&2; \
 		exit 1; \
 	fi
@@ -95,10 +92,8 @@ archive:
 	$(MAKE) doc && cp doc/* $$WWW/yojson-doc/
 	rm -rf /tmp/yojson /tmp/yojson-$(VERSION) && \
 		cd /tmp && \
-		svn co "$(SVNURL)" && \
-		for x in "." $(SUBDIRS); do \
-			rm -rf /tmp/yojson/$$x/.svn; \
-		done && \
+		git clone $(GITURL) && \
+		rm -rf /tmp/yojson/$$x/.git && \
 		cd /tmp && cp -r yojson yojson-$(VERSION) && \
 		tar czf yojson.tar.gz yojson && \
 		tar cjf yojson.tar.bz2 yojson && \
