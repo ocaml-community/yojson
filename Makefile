@@ -1,6 +1,6 @@
 VERSION = 1.0.3
 
-FLAGS = -dtypes
+FLAGS = -dtypes -g
 PACKS = easy-format,biniou
 
 .PHONY: default all opt install doc
@@ -55,7 +55,7 @@ yojson.cmx: yojson.cmi yojson.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson.ml
 
 ydump: yojson.cmx ydump.ml
-	ocamlfind ocamlopt -o ydump -package $(PACKS) -linkpkg \
+	ocamlfind ocamlopt -o ydump $(FLAGS) -package $(PACKS) -linkpkg \
 		yojson.cmx ydump.ml
 
 doc: doc/index.html
