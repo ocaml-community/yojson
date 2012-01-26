@@ -1,12 +1,14 @@
 VERSION = 1.0.3
 
 FLAGS = -dtypes -g
+CMO = yojson.cmo yojson_biniou.cmo
+CMX = yojson.cmx yojson_biniou.cmx
 PACKS = easy-format,biniou
 
 .PHONY: default all opt install doc
 default: META all opt
-all: yojson.cmo
-opt: yojson.cmx ydump
+all: $(CMO)
+opt: $(CMX) ydump
 
 ifndef PREFIX
   PREFIX = $(shell dirname $$(dirname $$(which ocamlfind)))
@@ -25,7 +27,10 @@ install: META
 	test ! -f ydump || cp ydump $(BINDIR)/
 	test ! -f ydump.exe || cp ydump.exe $(BINDIR)/
 	ocamlfind install yojson META \
-          $$(ls yojson.mli yojson.cmi yojson.cmo yojson.cmx yojson.o)
+          $$(ls yojson.mli yojson_biniou.mli \
+		yojson.cmi yojson_biniou.cmi \
+		$(CMO) $(CMX) \
+		yojson.o yojson_biniou.o)
 
 uninstall:
 	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
@@ -37,12 +42,11 @@ read.ml: read.mll
 
 yojson.mli: yojson.mli.cppo \
             common.mli type.ml safe.mli write.mli pretty.mli write2.mli \
-            read.mli biniou.mli
+            read.mli
 	cppo -n yojson.mli.cppo -o yojson.mli
 
 yojson.ml: yojson.ml.cppo \
-           common.ml type.ml safe.ml write.ml pretty.ml write2.ml read.ml \
-           biniou.ml
+           common.ml type.ml safe.ml write.ml pretty.ml write2.ml read.ml
 	cppo yojson.ml.cppo -o yojson.ml
 
 yojson.cmi: yojson.mli
@@ -54,9 +58,18 @@ yojson.cmo: yojson.cmi yojson.ml
 yojson.cmx: yojson.cmi yojson.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson.ml
 
-ydump: yojson.cmx ydump.ml
+yojson_biniou.cmi: yojson_biniou.mli
+	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson_biniou.mli
+
+yojson_biniou.cmo: yojson_biniou.cmi yojson_biniou.ml
+	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
+
+yojson_biniou.cmx: yojson_biniou.cmi yojson_biniou.ml
+	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
+
+ydump: yojson.cmx yojson_biniou.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump $(FLAGS) -package $(PACKS) -linkpkg \
-		yojson.cmx ydump.ml
+		$(CMX) ydump.ml
 
 doc: doc/index.html
 doc/index.html: yojson.mli

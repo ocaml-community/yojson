@@ -96,7 +96,7 @@ let cat output_biniou std compact streaming in_file out_file =
       
   else
     let write_one oc x =
-      output_string oc (Bi_io.string_of_tree (Yojson.Biniou.biniou_of_json x))
+      output_string oc (Bi_io.string_of_tree (Yojson_biniou.biniou_of_json x))
     in
     polycat write_one streaming in_file out_file
 
