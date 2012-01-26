@@ -136,10 +136,3 @@ type json_max = json
 #undef TUPLE
 #undef VARIANT
 
-
-(** {1 Conversions between JSON and biniou} *)
-
-module Biniou :
-sig
-#include "biniou.mli"
-end

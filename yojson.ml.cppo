@@ -81,8 +81,3 @@ struct
 #undef TUPLE
 #undef VARIANT
 end
-
-module Biniou =
-struct
-#include "biniou.ml"
-end

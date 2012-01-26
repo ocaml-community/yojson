@@ -4,3 +4,10 @@ description = "JSON parsing and printing (successor of json-wheel)"
 requires = "easy-format,biniou"
 archive(byte) = "yojson.cmo"
 archive(native) = "yojson.cmx"
+package "biniou" (
+ version = "@@VERSION@@"
+ description = "JSON <=> Biniou conversion"
+ requires = "easy-format,biniou"
+ archive(byte) = "yojson_biniou.cmo"
+ archive(native) = "yojson_biniou.cmx"
+)
