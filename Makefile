@@ -1,4 +1,4 @@
-VERSION = 1.0.3
+VERSION = 1.1.0
 
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
@@ -72,9 +72,10 @@ ydump: yojson.cmx yojson_biniou.cmx ydump.ml
 		$(CMX) ydump.ml
 
 doc: doc/index.html
-doc/index.html: yojson.mli
+doc/index.html: yojson.mli yojson_biniou.mli
 	mkdir -p doc
-	ocamlfind ocamldoc -d doc -html -package biniou yojson.mli
+	ocamlfind ocamldoc -d doc -html -package biniou \
+		yojson.mli yojson_biniou.mli
 
 bench: bench.ml yojson.cmx META
 	ocamlfind ocamlopt -o bench \
