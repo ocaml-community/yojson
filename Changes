@@ -9,6 +9,10 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
+2012-02-07 1.1.1: [!!!] ydump now implies -s i.e. multiple whitespace-separated
+                        records are accepted.
+2012-01-26 1.1.0: [!!!] Yojson.Biniou becomes Yojson_biniou,
+                        package yojson.biniou
 2011-04-27 1.0.2: [+ui] improved error messages showing several lookahead bytes
                   [+ui] factored out lexer_state and init_lexer definitions
                   [+ui] added read_null_if_possible function (used by atdgen)
