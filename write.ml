@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 (* included: type.ml *)
 
 open Bi_outbuf

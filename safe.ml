@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 let rec to_basic : json -> Basic.json = function
     `Null
   | `Bool _

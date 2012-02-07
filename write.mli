@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 (** {2 JSON writers} *)
 
 val to_string :

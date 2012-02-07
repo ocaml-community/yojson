@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 (** {2 JSON pretty-printing} *)
 
 val pretty_format : ?std:bool -> json -> Easy_format.t

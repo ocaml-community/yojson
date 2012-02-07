@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 val to_basic : json -> Basic.json
   (**
      Tuples are converted to JSON arrays,

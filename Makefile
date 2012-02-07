@@ -1,11 +1,11 @@
-VERSION = 1.1.0
+VERSION = 1.1.1
 
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
 PACKS = easy-format,biniou
 
-.PHONY: default all opt install doc
+.PHONY: default all opt install uninstall reinstall doc
 default: META all opt
 all: $(CMO)
 opt: $(CMX) ydump
@@ -36,6 +36,10 @@ uninstall:
 	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
 	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe 
 	ocamlfind remove yojson
+
+reinstall:
+	$(MAKE) BINDIR=$(BINDIR) uninstall
+	$(MAKE) BINDIR=$(BINDIR) install
 
 read.ml: read.mll
 	ocamllex read.mll

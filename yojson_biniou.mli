@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 (** Conversions between JSON and biniou *)
 
 val biniou_of_json : Yojson.Safe.json -> Bi_io.tree

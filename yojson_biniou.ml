@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 let rec biniou_of_json = function
     `Null -> `Unit
   | `Bool b -> `Bool b

@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 open Printf
 
 let data =

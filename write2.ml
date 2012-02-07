@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 let pretty_format ?std (x : json) =
   Pretty.format ?std (x :> json_max)
 

@@ -1,51 +1,4 @@
-(* $Id$ *)
-
 open Printf
-
-(*
-let cat std compact stream in_file out_file =
-  let ic, fname =
-    match in_file with
-	`Stdin -> stdin, "<stdin>"
-      | `File s -> open_in s, s
-  in
-  let oc =
-    match out_file with
-	`Stdout -> stdout
-      | `File s -> open_out s
-  in
-  let finally () =
-    if oc != stdout then
-      close_out_noerr oc;
-    if ic != stdin then
-      close_in_noerr ic
-  in
-  let print x =
-    if compact then
-      Yojson.Safe.to_channel ~std oc x
-    else
-      Yojson.Safe.pretty_to_channel ~std oc x;
-    output_char oc '\n'
-  in
-  try
-    if stream then
-      Stream.iter print (Yojson.Safe.stream_from_channel ~fname ic)
-    else
-      print (Yojson.Safe.from_channel ~fname ic);
-    finally ();
-    true
-  with e ->
-    finally ();
-    eprintf "Error:\n";
-    (match e with
-	 Yojson.Json_error s ->
-	   eprintf "%s\n%!" s
-       | e ->
-	   eprintf "%s\n%!" (Printexc.to_string e)
-    );
-    false
-*)
-
 
 let polycat write_one streaming in_file out_file =
   let ic, fname =
@@ -106,7 +59,7 @@ let parse_cmdline () =
   let out = ref None in
   let std = ref false in
   let compact = ref false in
-  let streaming = ref false in
+  let streaming = ref true in
   let output_biniou = ref false in
   let options = [
     "-o", Arg.String (fun s -> out := Some s), 
@@ -126,7 +79,12 @@ let parse_cmdline () =
     "-s", Arg.Set streaming,
     "
           Streaming mode: read and write a sequence of JSON values instead of
-          just one.";
+          just one (default).";
+
+    "-u", Arg.Clear streaming,
+    "
+          A single JSON record is expected.
+          (no longer the default since 1.1.1)";
 
     "-ob", Arg.Set output_biniou,
     "     Experimental";

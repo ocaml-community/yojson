@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 open Printf
 open Easy_format
   

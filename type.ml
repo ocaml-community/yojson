@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 (** {3 Type of the JSON tree} *)
 
 type json =

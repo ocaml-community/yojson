@@ -1,5 +1,3 @@
-(* $Id$ *)
-
 exception Json_error of string
 
 let json_error s = raise (Json_error s)
