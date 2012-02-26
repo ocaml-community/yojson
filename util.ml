@@ -41,6 +41,10 @@ let to_assoc = function
   | `Assoc obj -> obj
   | js -> typerr "Expected object, got " js
 
+let to_option f = function
+  | `Null -> None
+  | x -> Some (f x)
+
 let to_bool = function
   | `Bool b -> b
   | js -> typerr "Expected bool, got " js
@@ -49,6 +53,17 @@ let to_bool_option = function
   | `Bool b -> Some b
   | `Null -> None
   | js -> typerr "Expected bool or null, got " js
+
+let to_number = function
+  | `Int i -> float i
+  | `Float f -> f
+  | js -> typerr "Expected number, got " js
+
+let to_number_option = function
+  | `Int i -> Some (float i)
+  | `Float f -> Some f
+  | `Null -> None
+  | js -> typerr "Expected number or null, got " js
 
 let to_float = function
   | `Float f -> f

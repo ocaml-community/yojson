@@ -46,11 +46,12 @@ read.ml: read.mll
 
 yojson.mli: yojson.mli.cppo \
             common.mli type.ml safe.mli write.mli pretty.mli write2.mli \
-            read.mli
+            read.mli util.mli
 	cppo -n yojson.mli.cppo -o yojson.mli
 
 yojson.ml: yojson.ml.cppo \
-           common.ml type.ml safe.ml write.ml pretty.ml write2.ml read.ml
+           common.ml type.ml safe.ml write.ml pretty.ml write2.ml \
+           read.ml util.ml
 	cppo yojson.ml.cppo -o yojson.ml
 
 yojson.cmi: yojson.mli
@@ -91,36 +92,3 @@ clean:
 	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
 		read.ml yojson.mli yojson.ml META
 	rm -rf doc
-
-GITURL = git@github.com:mjambon/yojson.git
-
-.PHONY: archive
-archive:
-	@echo "Making archive for version $(VERSION)"
-	@if [ -z "$$WWW" ]; then \
-		echo '*** Environment variable WWW is undefined. ***' >&2; \
-		exit 1; \
-	fi
-	@if [ -n "$$(git diff)" ]; then \
-		echo "*** There are uncommitted changes, aborting. ***" >&2; \
-		exit 1; \
-	fi
-	$(MAKE) && ./ydump -help > $$WWW/ydump-help.txt
-	mkdir -p $$WWW/yojson-doc
-	$(MAKE) doc && cp doc/* $$WWW/yojson-doc/
-	rm -rf /tmp/yojson /tmp/yojson-$(VERSION) && \
-		cd /tmp && \
-		git clone $(GITURL) && \
-		rm -rf /tmp/yojson/$$x/.git && \
-		cd /tmp && cp -r yojson yojson-$(VERSION) && \
-		tar czf yojson.tar.gz yojson && \
-		tar cjf yojson.tar.bz2 yojson && \
-		tar czf yojson-$(VERSION).tar.gz yojson-$(VERSION) && \
-		tar cjf yojson-$(VERSION).tar.bz2 yojson-$(VERSION)
-	mv /tmp/yojson.tar.gz /tmp/yojson.tar.bz2 $$WWW/
-	mv /tmp/yojson-$(VERSION).tar.gz \
-		/tmp/yojson-$(VERSION).tar.bz2 $$WWW/
-	cp LICENSE $$WWW/yojson-license.txt
-	cp Changes $$WWW/yojson-changes.txt
-	echo 'let yojson_version = "$(VERSION)"' \
-		> $$WWW/yojson-version.ml
