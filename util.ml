@@ -99,3 +99,94 @@ let to_string_option = function
 let convert_each f = function
   | `List l -> List.map f l
   | js -> typerr "Can't convert each element of non-array type " js
+
+
+let rec rev_filter_map f acc l =
+  match l with
+      [] -> acc
+    | x :: tl ->
+        match f x with
+            None -> rev_filter_map f acc tl
+          | Some y -> rev_filter_map f (y :: acc) tl
+
+let filter_map f l =
+  List.rev (rev_filter_map f [] l)
+
+let rec rev_flatten acc l =
+  match l with
+      [] -> acc
+    | x :: tl ->
+        match x with
+            `List l2 -> rev_flatten (List.rev_append l2 acc) tl
+          | _ -> rev_flatten acc tl
+
+let flatten l =
+  List.rev (rev_flatten [] l)
+
+let filter_index i l =
+  filter_map (
+    function
+        `List l ->
+          (try Some (List.nth l i)
+           with _ -> None)
+      | _ -> None
+  ) l
+
+let filter_list l =
+  filter_map (
+    function
+        `List l -> Some l
+      | _ -> None
+  ) l
+
+let filter_member k l =
+  filter_map (
+    function
+        `Assoc l ->
+          (try Some (List.assoc k l)
+           with _ -> None)
+      | _ -> None
+  ) l
+
+let filter_assoc l =
+  filter_map (
+    function
+        `Assoc l -> Some l
+      | _ -> None
+  ) l
+
+let filter_bool l =
+  filter_map (
+    function
+        `Bool x -> Some x
+      | _ -> None
+  ) l
+
+let filter_int l =
+  filter_map (
+    function
+        `Int x -> Some x
+      | _ -> None
+  ) l
+
+let filter_float l =
+  filter_map (
+    function
+        `Float x -> Some x
+      | _ -> None
+  ) l
+
+let filter_number l =
+  filter_map (
+    function
+        `Int x -> Some (float x)
+      | `Float x -> Some x
+      | _ -> None
+  ) l
+
+let filter_string l =
+  filter_map (
+    function
+        `String x -> Some x
+      | _ -> None
+  ) l

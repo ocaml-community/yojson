@@ -92,3 +92,4 @@ clean:
 	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
 		read.ml yojson.mli yojson.ml META
 	rm -rf doc
+	cd examples; $(MAKE) clean

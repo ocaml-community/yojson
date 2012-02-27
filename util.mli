@@ -1,4 +1,62 @@
-(** {2 Utility functions for data access} *)
+(**
+   This module provides combinators for extracting fields from JSON
+   values. This approach is recommended for reading a few fields
+   from data returned by public APIs. However for more complex applications 
+   we recommend {{:https://github.com/MyLifeLabs/atdgen}Atdgen}.
+
+   Here is some sample JSON data:
+{v
+\{
+  "id": "398eb027",
+  "name": "John Doe",
+  "pages": [
+    \{
+      "id": 1,
+      "title": "The Art of Flipping Coins",
+      "url": "http://example.com/398eb027/1"
+    },
+    \{
+      "id": 2,
+      "deleted": true
+    },
+    \{
+      "id": 3,
+      "title": "Artichoke Salad",
+      "url": "http://example.com/398eb027/3"
+    },
+    \{
+      "id": 4,
+      "title": "Flying Bananas",
+      "url": "http://example.com/398eb027/4"
+    }
+  ]
+}
+v}
+
+   In order to extract the "id" field, assuming it is mandatory,
+   we would use the following OCaml code that operates on single JSON
+   nodes:
+{v
+open Yojson.Basic.Util
+...
+  let id = json |> member "id" |> to_string in
+  ...
+v}
+
+   In order to extract all the "title" fields, we would write the following
+   OCaml code that operates on lists of JSON nodes, skipping
+   undefined nodes and nodes of unexpected type:
+{v
+open Yojson.Basic.Util
+
+let extract_titles (json : Yojson.Basic.json) : string list =
+  [json]
+    |> filter_member "pages"
+    |> flatten
+    |> filter_member "title"
+    |> filter_string
+v}
+*)
 
 exception Type_error of string * json
   (** Raised when the JSON value is not of the correct type to support an
@@ -84,3 +142,51 @@ val convert_each : (json -> 'a) -> json -> 'a list
   (** The conversion functions above cannot be used with [map], because they do
       not return JSON values. This convenience function [convert_each to_f arr]
       is equivalent to [List.map to_f (to_list arr)]. *)
+
+
+(** {3 Exception-free filters} *)
+
+(**
+   The following functions operate on lists of JSON nodes.
+   None of them raises an exception when a certain kind of node is expected
+   but no node or the wrong kind of node is found.
+   Instead of raising an exception, nodes that are not as expected
+   are simply ignored.
+*)
+
+val filter_map : ('a -> 'b option) -> 'a list -> 'b list
+  (** [filter_map f l] maps each element of the list [l] to an optional value
+      using function [f] and unwraps the resulting values. *)
+
+val flatten : json list -> json list
+  (** Expects JSON arrays and returns all their elements as a single
+      list. [flatten l] is equivalent to [List.flatten (filter_list l)]. *)
+
+val filter_index : int -> json list -> json list
+  (** Expects JSON arrays and returns all their elements existing at the given
+      position. *)
+
+val filter_list : json list -> json list list
+  (** Expects JSON arrays and unwraps them. *)
+
+val filter_member : string -> json list -> json list
+  (** Expects JSON objects and returns all the fields of the given name
+      (at most one field per object). *)
+
+val filter_assoc : json list -> (string * json) list list
+  (** Expects JSON objects and unwraps them. *)
+
+val filter_bool : json list -> bool list
+  (** Expects JSON booleans and unwraps them. *)
+
+val filter_int : json list -> int list
+  (** Expects JSON integers (JSON number without a period) and unwraps them. *)
+
+val filter_float : json list -> float list
+  (** Expects JSON floats (JSON number with a period) and unwraps them. *)
+
+val filter_number : json list -> float list
+  (** Expects JSON numbers and unwraps them. Ints are converted to floats. *)
+
+val filter_string : json list -> string list
+  (** Expects JSON strings and unwraps them. *)
