@@ -180,13 +180,14 @@ val filter_bool : json list -> bool list
   (** Expects JSON booleans and unwraps them. *)
 
 val filter_int : json list -> int list
-  (** Expects JSON integers (JSON number without a period) and unwraps them. *)
+  (** Expects JSON integers ([`Int] nodes) and unwraps them. *)
 
 val filter_float : json list -> float list
-  (** Expects JSON floats (JSON number with a period) and unwraps them. *)
+  (** Expects JSON floats ([`Float] nodes) and unwraps them. *)
 
 val filter_number : json list -> float list
-  (** Expects JSON numbers and unwraps them. Ints are converted to floats. *)
+  (** Expects JSON numbers ([`Int] or [`Float]) and unwraps them.
+      Ints are converted to floats. *)
 
 val filter_string : json list -> string list
   (** Expects JSON strings and unwraps them. *)
