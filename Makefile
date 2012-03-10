@@ -52,7 +52,7 @@ yojson.mli: yojson.mli.cppo \
 yojson.ml: yojson.ml.cppo \
            common.ml type.ml safe.ml write.ml pretty.ml write2.ml \
            read.ml util.ml
-	cppo yojson.ml.cppo -o yojson.ml
+	cppo -D "VERSION $(VERSION)" yojson.ml.cppo -o yojson.ml
 
 yojson.cmi: yojson.mli
 	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson.mli
