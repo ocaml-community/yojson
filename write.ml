@@ -411,6 +411,15 @@ let to_channel ?buf ?len ?std oc x =
   to_outbuf ?std ob x;
   Bi_outbuf.flush_channel_writer ob
   
+let to_output ?buf ?len ?std out x =
+  let ob =
+    match buf with
+	None -> Bi_outbuf.create_output_writer ?len out
+      | Some ob -> ob
+  in
+  to_outbuf ?std ob x;
+  Bi_outbuf.flush_output_writer ob
+
 let to_file ?len ?std file x =
   let oc = open_out file in
   try

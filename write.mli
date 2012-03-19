@@ -31,6 +31,20 @@ val to_channel :
 
       See [to_string] for the role of the other optional arguments. *)
 
+val to_output :
+  ?buf:Bi_outbuf.t ->
+  ?len:int ->
+  ?std:bool ->
+  < output : string -> int -> int -> int; .. > -> json -> unit
+  (** Write a compact JSON value to an OO channel.
+      @param buf allows to reuse an existing buffer created with 
+      [Bi_outbuf.create_output_writer] on the same channel.
+      [buf] is flushed right
+      before [to_output] returns but the channel itself is
+      not flushed automatically.
+
+      See [to_string] for the role of the other optional arguments. *)
+
 val to_file :
   ?len:int ->
   ?std:bool ->
