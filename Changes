@@ -9,6 +9,9 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
+2012-03-19 1.1.2: [+ui] new function Yojson.to_output for writing to an OO
+                        channel; requires biniou >= 1.0.2
+
 2012-02-07 1.1.1: [!!!] ydump now implies -s i.e. multiple whitespace-separated
                         records are accepted.
 2012-01-26 1.1.0: [!!!] Yojson.Biniou becomes Yojson_biniou,
