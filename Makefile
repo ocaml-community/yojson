@@ -1,4 +1,4 @@
-VERSION = 1.1.2
+VERSION = 1.1.3
 
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
