@@ -10,12 +10,13 @@ endif
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
+CMXS = yojson.cmxs
 PACKS = easy-format,biniou
 
 .PHONY: default all opt install uninstall reinstall doc install-doc
 default: META all opt
 all: $(CMO)
-opt: $(CMX) ydump$(EXE)
+opt: $(CMX) $(CMXS) ydump$(EXE)
 
 ifndef PREFIX
   PREFIX = $(shell dirname $$(dirname $$(which ocamlfind)))
@@ -36,7 +37,7 @@ install: META
 	ocamlfind install yojson META \
           $$(ls yojson.mli yojson_biniou.mli \
 		yojson.cmi yojson_biniou.cmi \
-		$(CMO) $(CMX) \
+		$(CMO) $(CMX) $(CMXS) \
 		yojson.o yojson_biniou.o)
 
 uninstall:
@@ -69,6 +70,9 @@ yojson.cmo: yojson.cmi yojson.ml
 
 yojson.cmx: yojson.cmi yojson.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson.ml
+
+yojson.cmxs: yojson.cmx
+	ocamlopt -shared -linkall -I . -o yojson.cmxs yojson.cmx
 
 yojson_biniou.cmi: yojson_biniou.mli
 	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson_biniou.mli
