@@ -1,5 +1,12 @@
 VERSION = 1.1.3
 
+ifeq "$(shell ocamlc -config |grep os_type)" "os_type: Win32"
+EXE=.exe
+else
+EXE=
+endif
+
+
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
@@ -8,7 +15,7 @@ PACKS = easy-format,biniou
 .PHONY: default all opt install uninstall reinstall doc
 default: META all opt
 all: $(CMO)
-opt: $(CMX) ydump
+opt: $(CMX) ydump$(EXE)
 
 ifndef PREFIX
   PREFIX = $(shell dirname $$(dirname $$(which ocamlfind)))
@@ -72,8 +79,8 @@ yojson_biniou.cmo: yojson_biniou.cmi yojson_biniou.ml
 yojson_biniou.cmx: yojson_biniou.cmi yojson_biniou.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
 
-ydump: yojson.cmx yojson_biniou.cmx ydump.ml
-	ocamlfind ocamlopt -o ydump $(FLAGS) -package $(PACKS) -linkpkg \
+ydump$(EXE): yojson.cmx yojson_biniou.cmx ydump.ml
+	ocamlfind ocamlopt -o ydump$(EXE) $(FLAGS) -package $(PACKS) -linkpkg \
 		$(CMX) ydump.ml
 
 doc: doc/index.html
