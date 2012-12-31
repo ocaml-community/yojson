@@ -9,6 +9,8 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
+2012-12-31 1.1.4: [bug] proper support for escaped code points above U+FFFF
+
 2012-03-19 1.1.3: [+ui] new function Yojson.to_output for writing to an OO
                         channel; requires biniou >= 1.0.2
 
