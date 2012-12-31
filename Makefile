@@ -12,7 +12,7 @@ CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
 PACKS = easy-format,biniou
 
-.PHONY: default all opt install uninstall reinstall doc
+.PHONY: default all opt install uninstall reinstall doc install-doc
 default: META all opt
 all: $(CMO)
 opt: $(CMX) ydump$(EXE)
@@ -88,6 +88,9 @@ doc/index.html: yojson.mli yojson_biniou.mli
 	mkdir -p doc
 	ocamlfind ocamldoc -d doc -html -package biniou \
 		yojson.mli yojson_biniou.mli
+
+install-doc:
+	cp doc/* $$WWW/yojson-doc/
 
 bench: bench.ml yojson.cmx META
 	ocamlfind ocamlopt -o bench \
