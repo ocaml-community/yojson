@@ -334,10 +334,31 @@ and finish_escaped_char v = parse
   | 'r'  { Bi_outbuf.add_char v.buf '\r' }
   | 't'  { Bi_outbuf.add_char v.buf '\t' }
   | 'u' (hex as a) (hex as b) (hex as c) (hex as d)
-         { utf8_of_bytes v.buf (hex a) (hex b) (hex c) (hex d) }
+         { let x =
+             (hex a lsl 12) lor (hex b lsl 8) lor (hex c lsl 4) lor hex d
+           in
+           if x >= 0xD800 && x <= 0xDBFF then
+             finish_surrogate_pair v x lexbuf
+           else
+             utf8_of_code v.buf x
+         }
   | _    { long_error "Invalid escape sequence" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
+and finish_surrogate_pair v x = parse
+  | "\\u" (hex as a) (hex as b) (hex as c) (hex as d)
+         { let y =
+             (hex a lsl 12) lor (hex b lsl 8) lor (hex c lsl 4) lor hex d
+           in
+           if y >= 0xDC00 && y <= 0xDFFF then
+             utf8_of_surrogate_pair v.buf x y
+           else
+             long_error "Invalid low surrogate for code point beyond U+FFFF"
+               v lexbuf
+         }
+  | _    { long_error "Missing escape sequence representing low surrogate \
+                       for code point beyond U+FFFF" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_stringlit v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
