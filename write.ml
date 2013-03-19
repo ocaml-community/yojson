@@ -124,7 +124,7 @@ let float_needs_period s =
 
 (*
   Both write_float_fast and write_float guarantee
-  that a sufficient number of digits are printed in order to 
+  that a sufficient number of digits are printed in order to
   allow reversibility.
 
   The _fast version is faster but often produces unnecessarily long numbers.
@@ -140,7 +140,7 @@ let write_float_fast ob x =
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
-	
+
 let write_float ob x =
   match classify_float x with
     FP_nan ->
@@ -410,7 +410,7 @@ let to_channel ?buf ?len ?std oc x =
   in
   to_outbuf ?std ob x;
   Bi_outbuf.flush_channel_writer ob
-  
+
 let to_output ?buf ?len ?std out x =
   let ob =
     match buf with
@@ -453,7 +453,7 @@ let stream_to_channel ?buf ?len ?std oc st =
   in
   stream_to_outbuf ?std ob st;
   Bi_outbuf.flush_channel_writer ob
-  
+
 let stream_to_file ?len ?std file st =
   let oc = open_out file in
   try
@@ -462,3 +462,23 @@ let stream_to_file ?len ?std file st =
   with e ->
     close_out_noerr oc;
     raise e
+
+
+let rec sort = function
+  | `Assoc l ->
+      let l = List.rev (List.rev_map (fun (k, v) -> (k, sort v)) l) in
+      `Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l)
+  | `List l ->
+      `List (List.rev (List.rev_map sort l))
+#ifdef TUPLE
+  | `Tuple l ->
+      `Tuple (List.rev (List.rev_map sort l))
+#endif
+#ifdef VARIANT
+  | `Variant (k, Some v) as x ->
+      let v' = sort v in
+      if v == v' then x
+      else
+        `Variant (k, Some v')
+#endif
+  | x -> x

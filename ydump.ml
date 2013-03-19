@@ -63,9 +63,14 @@ let polycat write_one streaming in_file out_file =
     false
 
 
-let cat output_biniou std compact streaming in_file out_file =
+let cat sort output_biniou std compact streaming in_file out_file =
   if not output_biniou then
     let write_one oc x =
+      let x =
+        if sort then
+          Yojson.Safe.sort x
+        else x
+      in
       if compact then
 	Yojson.Safe.to_channel ~std oc x
       else
@@ -73,7 +78,7 @@ let cat output_biniou std compact streaming in_file out_file =
       output_char oc '\n'
     in
     polycat write_one streaming in_file out_file
-      
+
   else
     let write_one oc x =
       output_string oc (Bi_io.string_of_tree (Yojson_biniou.biniou_of_json x))
@@ -87,6 +92,7 @@ let parse_cmdline () =
   let std = ref false in
   let compact = ref false in
   let streaming = ref true in
+  let sort = ref false in
   let output_biniou = ref false in
   let options = [
     "-o", Arg.String (fun s -> out := Some s), 
@@ -113,6 +119,10 @@ let parse_cmdline () =
           A single JSON record is expected.
           (no longer the default since 1.1.1)";
 
+    "-sort", Arg.Set sort,
+    "
+          Sort object fields (default: preserve field order)";
+
     "-ob", Arg.Set output_biniou,
     "\
           Experimental";
@@ -124,7 +134,7 @@ let parse_cmdline () =
   ]
   in
   let files = ref [] in
-  let anon_fun s = 
+  let anon_fun s =
     files := s :: !files
   in
   let msg =
@@ -152,13 +162,14 @@ Usage: %s [input file]"
 	None -> `Stdout
       | Some x -> `File x
   in
-  !output_biniou, !std, !compact, !streaming, in_file, out_file
+  !sort, !output_biniou, !std, !compact, !streaming, in_file, out_file
 
 
 let () =
-  let output_biniou, std, compact, streaming, in_file, out_file =
+  let sort, output_biniou, std, compact, streaming, in_file, out_file =
     parse_cmdline () in
-  let success = cat output_biniou std compact streaming in_file out_file in
+  let success =
+    cat sort output_biniou std compact streaming in_file out_file in
   if success then
     exit 0
   else

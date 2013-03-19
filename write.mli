@@ -92,6 +92,12 @@ val stream_to_outbuf :
       an existing buffer.
       See [to_string] for the role of the optional arguments. *)
 
+(** {2 Miscellaneous} *)
+
+val sort : json -> json
+  (** Sort object fields (stable sort, comparing field names
+      and treating them as byte sequences) *)
+
 
 
 (**/**)
