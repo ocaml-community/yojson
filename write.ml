@@ -161,22 +161,22 @@ let write_normal_float_prec max_decimal_places ob x =
   let open Printf in
   let s =
     match max_decimal_places with
-        1 -> sprintf "%.1g" x
-      | 2 -> sprintf "%.2g" x
-      | 3 -> sprintf "%.3g" x
-      | 4 -> sprintf "%.4g" x
-      | 5 -> sprintf "%.5g" x
-      | 6 -> sprintf "%.6g" x
-      | 7 -> sprintf "%.7g" x
-      | 8 -> sprintf "%.8g" x
-      | 9 -> sprintf "%.9g" x
-      | 10 -> sprintf "%.10g" x
-      | 11 -> sprintf "%.11g" x
-      | 12 -> sprintf "%.12g" x
-      | 13 -> sprintf "%.13g" x
-      | 14 -> sprintf "%.14g" x
-      | 15 -> sprintf "%.15g" x
-      | 16 -> sprintf "%.16g" x
+        1 -> sprintf "%.1f" x
+      | 2 -> sprintf "%.2f" x
+      | 3 -> sprintf "%.3f" x
+      | 4 -> sprintf "%.4f" x
+      | 5 -> sprintf "%.5f" x
+      | 6 -> sprintf "%.6f" x
+      | 7 -> sprintf "%.7f" x
+      | 8 -> sprintf "%.8f" x
+      | 9 -> sprintf "%.9f" x
+      | 10 -> sprintf "%.10f" x
+      | 11 -> sprintf "%.11f" x
+      | 12 -> sprintf "%.12f" x
+      | 13 -> sprintf "%.13f" x
+      | 14 -> sprintf "%.14f" x
+      | 15 -> sprintf "%.15f" x
+      | 16 -> sprintf "%.16f" x
       | _ -> sprintf "%.17g" x
   in
   Bi_outbuf.add_string ob s;
