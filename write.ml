@@ -161,8 +161,7 @@ let write_normal_float_prec max_decimal_places ob x =
   let open Printf in
   let s =
     match max_decimal_places with
-        0 -> sprintf "%.0g" x
-      | 1 -> sprintf "%.1g" x
+        1 -> sprintf "%.1g" x
       | 2 -> sprintf "%.2g" x
       | 3 -> sprintf "%.3g" x
       | 4 -> sprintf "%.4g" x
