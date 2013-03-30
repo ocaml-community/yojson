@@ -113,6 +113,8 @@ val write_float : Bi_outbuf.t -> float -> unit
 val write_std_float : Bi_outbuf.t -> float -> unit
 val write_float_fast : Bi_outbuf.t -> float -> unit
 val write_std_float_fast : Bi_outbuf.t -> float -> unit
+val write_float_prec : int -> Bi_outbuf.t -> float -> unit
+val write_std_float_prec : int -> Bi_outbuf.t -> float -> unit
 #endif
 #ifdef STRING
 val write_string : Bi_outbuf.t -> string -> unit

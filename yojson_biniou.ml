@@ -48,6 +48,7 @@ let rec json_of_biniou (x : Bi_io.tree) =
     | `Int16 _ -> failwith "Cannot convert int16 to JSON"
     | `Int32 _ -> failwith "Cannot convert int32 to JSON"
     | `Int64 _ -> failwith "Cannot convert int64 to JSON"
+    | `Float32 f
     | `Float64 f -> `Float f
     | `Uvint i -> failwith "Cannot convert uvint to JSON"
     | `Svint i -> `Int i

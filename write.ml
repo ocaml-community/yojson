@@ -157,6 +157,41 @@ let write_float ob x =
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
 
+let write_normal_float_prec max_decimal_places ob x =
+  let open Printf in
+  let s =
+    match max_decimal_places with
+        0 -> sprintf "%.0g" x
+      | 1 -> sprintf "%.1g" x
+      | 2 -> sprintf "%.2g" x
+      | 3 -> sprintf "%.3g" x
+      | 4 -> sprintf "%.4g" x
+      | 5 -> sprintf "%.5g" x
+      | 6 -> sprintf "%.6g" x
+      | 7 -> sprintf "%.7g" x
+      | 8 -> sprintf "%.8g" x
+      | 9 -> sprintf "%.9g" x
+      | 10 -> sprintf "%.10g" x
+      | 11 -> sprintf "%.11g" x
+      | 12 -> sprintf "%.12g" x
+      | 13 -> sprintf "%.13g" x
+      | 14 -> sprintf "%.14g" x
+      | 15 -> sprintf "%.15g" x
+      | 16 -> sprintf "%.16g" x
+      | _ -> sprintf "%.17g" x
+  in
+  Bi_outbuf.add_string ob s;
+  if float_needs_period s then
+    Bi_outbuf.add_string ob ".0"
+
+let write_float_prec max_decimal_places ob x =
+  match classify_float x with
+    FP_nan ->
+      Bi_outbuf.add_string ob "NaN"
+  | FP_infinite ->
+      Bi_outbuf.add_string ob (if x > 0. then "Infinity" else "-Infinity")
+  | _ ->
+      write_normal_float_prec max_decimal_places ob x
 
 let json_string_of_float x =
   let ob = Bi_outbuf.create 20 in
@@ -164,13 +199,12 @@ let json_string_of_float x =
   Bi_outbuf.contents ob
 
 
-
 let write_std_float_fast ob x =
   match classify_float x with
     FP_nan ->
       json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
-      json_error 
+      json_error
 	(if x > 0. then
 	   "Infinity value not allowed in standard JSON"
 	 else
@@ -180,13 +214,13 @@ let write_std_float_fast ob x =
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
-	
+
 let write_std_float ob x =
   match classify_float x with
     FP_nan ->
       json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
-      json_error 
+      json_error
 	(if x > 0. then
 	   "Infinity value not allowed in standard JSON"
 	 else
@@ -200,7 +234,20 @@ let write_std_float ob x =
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
 	Bi_outbuf.add_string ob ".0"
-	
+
+let write_std_float_prec max_decimal_places ob x =
+  match classify_float x with
+    FP_nan ->
+      json_error "NaN value not allowed in standard JSON"
+  | FP_infinite ->
+      json_error
+	(if x > 0. then
+	   "Infinity value not allowed in standard JSON"
+	 else
+	   "-Infinity value not allowed in standard JSON")
+  | _ ->
+      write_normal_float_prec max_decimal_places ob x
+
 let std_json_string_of_float x =
   let ob = Bi_outbuf.create 20 in
   write_std_float ob x;
