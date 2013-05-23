@@ -436,10 +436,15 @@ and read_null_if_possible v = parse
   | ""        { false }
 
 and read_bool v = parse
-    "true"    { true }
-  | "false"   { false }
-  | _         { long_error "Expected 'true' or 'false' but found" v lexbuf }
-  | eof       { custom_error "Unexpected end of input" v lexbuf }
+    "true"      { true }
+  | "false"     { false }
+
+  (* tolerate booleans passed as strings without \u obfuscation *)
+  | "\"true\""  { true }
+  | "\"false\"" { false }
+
+  | _           { long_error "Expected 'true' or 'false' but found" v lexbuf }
+  | eof         { custom_error "Unexpected end of input" v lexbuf }
 
 and read_int v = parse
     positive_int         { try extract_positive_int lexbuf
