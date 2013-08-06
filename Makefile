@@ -7,10 +7,14 @@ EXE=
 endif
 
 
+NATDYNLINK := $(shell if [ -f `ocamlc -where`/dynlink.cmxa ]; then echo YES; else echo NO; fi)
+
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
-CMXS = yojson.cmxs
+ifeq "${NATDYNLINK}" "YES"
+CMXS = yojson.cmxs yojson_biniou.cmxs
+endif
 PACKS = easy-format,biniou
 
 .PHONY: default all opt install uninstall reinstall doc install-doc
@@ -42,7 +46,7 @@ install: META
 
 uninstall:
 	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
-	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe 
+	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe
 	ocamlfind remove yojson
 
 reinstall:
@@ -82,6 +86,9 @@ yojson_biniou.cmo: yojson_biniou.cmi yojson_biniou.ml
 
 yojson_biniou.cmx: yojson_biniou.cmi yojson_biniou.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
+
+yojson_biniou.cmxs: yojson_biniou.cmx
+	ocamlopt -shared -linkall -I . -o yojson_biniou.cmxs yojson_biniou.cmx
 
 ydump$(EXE): yojson.cmx yojson_biniou.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump$(EXE) $(FLAGS) -package $(PACKS) -linkpkg \
