@@ -86,7 +86,7 @@ val map : (json -> json) -> json -> json
       [arr], and returns a JSON array containing the results. *)
 
 val to_assoc : json -> (string * json) list
-  (** Extract the items of a JSON array or raise [Type_error]. *)
+  (** Extract the items of a JSON object or raise [Type_error]. *)
 
 val to_option : (json -> 'a) -> json -> 'a option
   (** Return [None] if the JSON value is null or map the JSON value
