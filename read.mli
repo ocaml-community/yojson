@@ -241,6 +241,7 @@ val read_colon : lexer_state -> Lexing.lexbuf -> unit
 
 val read_json : lexer_state -> Lexing.lexbuf -> json
 val skip_json : lexer_state -> Lexing.lexbuf -> unit
+val buffer_json : lexer_state -> Lexing.lexbuf -> unit
 
 (* end undocumented section *)
 (**/**)
