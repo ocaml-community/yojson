@@ -9,12 +9,16 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
+trunk      1.1.9: [+ui] new function Yojson.Safe.buffer_json for saving
+                        a raw JSON string while parsing in order to
+                        parse later
+
 2014-01-19 1.1.8: [pkg] cmxs is now generated for supported platforms
 
-2014-05-24 1.1.7: [bug] tolerate double quoted boolean "true" and
+2013-05-24 1.1.7: [bug] tolerate double quoted boolean "true" and
                         "false" when a boolean is expected
 
-2014-05-16 1.1.6: [bug] fix a bug in float printing. now print number
+2013-05-16 1.1.6: [bug] fix a bug in float printing. now print number
                         of significant figures rather than decimal
                         places for write_float_prec and
                         write_std_float_prec

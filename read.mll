@@ -743,7 +743,7 @@ and read_rbr v = parse
   | _        { long_error "Expected ']' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
-(*** And now pretty much the same thing repeated, 
+(*** And now pretty much the same thing repeated,
      only for the purpose of skipping ignored field values ***)
 
 and skip_json v = parse
@@ -841,7 +841,7 @@ and finish_skip_stringlit v = parse
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_skip_variant v = parse 
+and finish_skip_variant v = parse
     ':'  { skip_json v lexbuf;
 	   read_space v lexbuf;
 	   read_gt v lexbuf }
@@ -854,6 +854,199 @@ and skip_ident v = parse
   | ident    { () }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+(*** And now pretty much the same thing repeated,
+     only for the purpose of buffering deferred field values ***)
+
+and buffer_json v = parse
+  | "true"
+  | "false"
+  | "null"
+  | "NaN"
+  | "Infinity"
+  | "-Infinity"
+  | '-'? positive_int
+  | float       { add_lexeme v.buf lexbuf }
+
+  | '"'         { finish_buffer_stringlit v lexbuf }
+  | '{'          { try
+                     Bi_outbuf.add_char v.buf '{';
+		     buffer_space v lexbuf;
+		     buffer_object_end v lexbuf;
+		     buffer_ident v lexbuf;
+		     buffer_space v lexbuf;
+		     buffer_colon v lexbuf;
+		     buffer_space v lexbuf;
+		     buffer_json v lexbuf;
+		     while true do
+		       buffer_space v lexbuf;
+		       buffer_object_sep v lexbuf;
+		       buffer_space v lexbuf;
+		       buffer_ident v lexbuf;
+		       buffer_space v lexbuf;
+		       buffer_colon v lexbuf;
+		       buffer_space v lexbuf;
+		       buffer_json v lexbuf;
+		     done;
+		     assert false
+		   with End_of_object ->
+		     ()
+		 }
+
+  | '['          { try
+                     Bi_outbuf.add_char v.buf '[';
+		     buffer_space v lexbuf;
+		     buffer_array_end v lexbuf;
+		     buffer_json v lexbuf;
+		     while true do
+		       buffer_space v lexbuf;
+		       buffer_array_sep v lexbuf;
+		       buffer_space v lexbuf;
+		       buffer_json v lexbuf;
+		     done;
+		     assert false
+		   with End_of_array ->
+		     ()
+		 }
+
+  | '('          {
+                   #ifdef TUPLE
+                     try
+                       Bi_outbuf.add_char v.buf '(';
+		       buffer_space v lexbuf;
+		       buffer_tuple_end v lexbuf;
+		       buffer_json v lexbuf;
+		       while true do
+			 buffer_space v lexbuf;
+			 buffer_tuple_sep v lexbuf;
+			 buffer_space v lexbuf;
+			 buffer_json v lexbuf;
+		       done;
+		       assert false
+		     with End_of_tuple ->
+		       ()
+	           #else
+		     long_error "Invalid token" v lexbuf
+                   #endif
+		 }
+
+  | '<'          {
+                   #ifdef VARIANT
+                     Bi_outbuf.add_char v.buf '<';
+                     buffer_space v lexbuf;
+                     buffer_ident v lexbuf;
+		     buffer_space v lexbuf;
+		     finish_buffer_variant v lexbuf
+                   #else
+                     long_error "Invalid token" v lexbuf
+                   #endif
+		 }
+
+  | "//"[^'\n']* { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
+  | "/*"         { Bi_outbuf.add_string v.buf "/*";
+                   finish_buffer_comment v lexbuf;
+                   buffer_json v lexbuf }
+  | "\n"         { Bi_outbuf.add_char v.buf '\n';
+                   newline v lexbuf;
+                   buffer_json v lexbuf }
+  | space        { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
+  | eof          { custom_error "Unexpected end of input" v lexbuf }
+  | _            { long_error "Invalid token" v lexbuf }
+
+
+and finish_buffer_stringlit v = parse
+    ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
+    | [^'"' '\\'] )* '"'
+         { Bi_outbuf.add_char v.buf '"';
+           add_lexeme v.buf lexbuf
+	 }
+  | _    { long_error "Invalid string literal" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and finish_buffer_variant v = parse
+    ':'  { Bi_outbuf.add_char v.buf ':';
+           buffer_json v lexbuf;
+	   buffer_space v lexbuf;
+	   buffer_gt v lexbuf }
+  | '>'  { Bi_outbuf.add_char v.buf '>' }
+  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_ident v = parse
+    '"'      { finish_buffer_stringlit v lexbuf }
+  | ident    { add_lexeme v.buf lexbuf }
+  | _        { long_error "Expected string or identifier but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_space v = parse
+  | "//"[^'\n']* ('\n'|eof)  {
+    add_lexeme v.buf lexbuf;
+    newline v lexbuf;
+    buffer_space v lexbuf }
+  | "/*"                     {
+    Bi_outbuf.add_string v.buf "/*";
+    finish_buffer_comment v lexbuf;
+    buffer_space v lexbuf }
+  | '\n'                     {
+    Bi_outbuf.add_char v.buf '\n';
+    newline v lexbuf;
+    buffer_space v lexbuf }
+  | [' ' '\t' '\r']+         {
+    add_lexeme v.buf lexbuf;
+    buffer_space v lexbuf }
+  | ""                       { () }
+
+and buffer_object_end v = parse
+    '}'      {
+      Bi_outbuf.add_char v.buf '}';
+      raise End_of_object }
+  | ""       { () }
+
+and buffer_object_sep v = parse
+    ','      { Bi_outbuf.add_char v.buf ',' }
+  | '}'      { Bi_outbuf.add_char v.buf '}'; raise End_of_object }
+  | _        { long_error "Expected ',' or '}' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_array_end v = parse
+    ']'      { Bi_outbuf.add_char v.buf ']'; raise End_of_array }
+  | ""       { () }
+
+and buffer_array_sep v = parse
+    ','      { Bi_outbuf.add_char v.buf ',' }
+  | ']'      { Bi_outbuf.add_char v.buf ']'; raise End_of_array }
+  | _        { long_error "Expected ',' or ']' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_tuple_end v = parse
+    ')'      {
+      Bi_outbuf.add_char v.buf ')';
+      raise End_of_tuple }
+  | ""       { () }
+
+and buffer_tuple_sep v = parse
+    ','      { Bi_outbuf.add_char v.buf ',' }
+  | ')'      { Bi_outbuf.add_char v.buf ')'; raise End_of_tuple }
+  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_colon v = parse
+    ':'      { Bi_outbuf.add_char v.buf ':' }
+  | _        { long_error "Expected ':' but found" v lexbuf }
+  | eof      { custom_error "Unexpected end of input" v lexbuf }
+
+and buffer_gt v = parse
+    '>'  { Bi_outbuf.add_char v.buf '>' }
+  | _    { long_error "Expected '>' but found" v lexbuf }
+  | eof  { custom_error "Unexpected end of input" v lexbuf }
+
+and finish_buffer_comment v = parse
+  | "*/" { Bi_outbuf.add_string v.buf "*/" }
+  | eof  { long_error "Unterminated comment" v lexbuf }
+  | '\n' { Bi_outbuf.add_char v.buf '\n';
+           newline v lexbuf;
+           finish_buffer_comment v lexbuf }
+  | _    { add_lexeme v.buf lexbuf; finish_buffer_comment v lexbuf }
 
 and junk = parse
     junk     { Lexing.lexeme lexbuf }
