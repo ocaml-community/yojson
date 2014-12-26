@@ -9,7 +9,7 @@ bug = bug or security fix
 doc = major changes in the documentation
 pkg = changes in the structure of the package or in the installation procedure
 
-trunk      1.1.9: [+ui] new function Yojson.Safe.buffer_json for saving
+2014-12-26 1.2.0: [+ui] new function Yojson.Safe.buffer_json for saving
                         a raw JSON string while parsing in order to
                         parse later
 
