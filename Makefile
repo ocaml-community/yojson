@@ -1,13 +1,13 @@
 VERSION = 1.2.0
 
-ifeq "$(shell ocamlc -config |grep os_type)" "os_type: Win32"
+ifeq "$(shell ocamlfind ocamlc -config |grep os_type)" "os_type: Win32"
 EXE=.exe
 else
 EXE=
 endif
 
 
-NATDYNLINK := $(shell if [ -f `ocamlc -where`/dynlink.cmxa ]; then echo YES; else echo NO; fi)
+NATDYNLINK := $(shell if [ -f `ocamlfind ocamlc -where`/dynlink.cmxa ]; then echo YES; else echo NO; fi)
 
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
@@ -76,7 +76,7 @@ yojson.cmx: yojson.cmi yojson.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson.ml
 
 yojson.cmxs: yojson.cmx
-	ocamlopt -shared -linkall -I . -o yojson.cmxs yojson.cmx
+	ocamlfind ocamlopt -shared -linkall -I . -o yojson.cmxs yojson.cmx
 
 yojson_biniou.cmi: yojson_biniou.mli
 	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson_biniou.mli
@@ -88,7 +88,7 @@ yojson_biniou.cmx: yojson_biniou.cmi yojson_biniou.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
 
 yojson_biniou.cmxs: yojson_biniou.cmx
-	ocamlopt -shared -linkall -I . -o yojson_biniou.cmxs yojson_biniou.cmx
+	ocamlfind ocamlopt -shared -linkall -I . -o yojson_biniou.cmxs yojson_biniou.cmx
 
 ydump$(EXE): yojson.cmx yojson_biniou.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump$(EXE) $(FLAGS) -package $(PACKS) -linkpkg \
