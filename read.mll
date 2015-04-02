@@ -44,10 +44,10 @@
       | _ -> assert false
 
   let custom_error descr v lexbuf =
-    let offs = lexbuf.lex_abs_pos in
+    let offs = lexbuf.lex_abs_pos - 1 in
     let bol = v.bol in
-    let pos1 = offs + lexbuf.lex_start_pos - bol in
-    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol - 1) in
+    let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
+    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
     let file_line =
       match v.fname with
 	  None -> "Line"
