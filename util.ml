@@ -190,3 +190,7 @@ let filter_string l =
         `String x -> Some x
       | _ -> None
   ) l
+
+let keys o =
+  let names = to_assoc o in
+  List.map (fun (key, _) -> key) names
