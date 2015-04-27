@@ -1,7 +1,7 @@
 (**
    This module provides combinators for extracting fields from JSON
    values. This approach is recommended for reading a few fields
-   from data returned by public APIs. However for more complex applications 
+   from data returned by public APIs. However for more complex applications
    we recommend {{:https://github.com/MyLifeLabs/atdgen}Atdgen}.
 
    Here is some sample JSON data:
@@ -72,6 +72,9 @@ val ( |> ) : 'a -> ('a -> 'b) -> 'b
   (** Forward pipe operator; useful for composing JSON access functions
       without too many parentheses *)
 
+val keys: json -> string list
+  (** Returns all the key names in the given JSON object *)
+
 val member : string -> json -> json
   (** [member k obj] returns the value associated with the key [k] in the JSON
       object [obj], or [`Null] if [k] is not present in [obj]. *)
@@ -96,7 +99,7 @@ val to_bool : json -> bool
   (** Extract a boolean value or raise [Type_error]. *)
 
 val to_bool_option : json -> bool option
-  (** Extract [Some] boolean value, 
+  (** Extract [Some] boolean value,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
@@ -104,7 +107,7 @@ val to_number : json -> float
   (** Extract a number or raise [Type_error]. *)
 
 val to_number_option : json -> float option
-  (** Extract [Some] number, 
+  (** Extract [Some] number,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
@@ -113,7 +116,7 @@ val to_float : json -> float
       [to_number] is generally preferred as it also works with int literals. *)
 
 val to_float_option : json -> float option
-  (** Extract [Some] float value, 
+  (** Extract [Some] float value,
       return [None] if the value is null,
       or raise [Type_error] otherwise.
       [to_number_option] is generally preferred as it also works
@@ -123,7 +126,7 @@ val to_int : json -> int
   (** Extract an int from a JSON int or raise [Type_error]. *)
 
 val to_int_option : json -> int option
-  (** Extract [Some] int from a JSON int, 
+  (** Extract [Some] int from a JSON int,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
@@ -134,7 +137,7 @@ val to_string : json -> string
   (** Extract a string from a JSON string or raise [Type_error]. *)
 
 val to_string_option : json -> string option
-  (** Extract [Some] string from a JSON string, 
+  (** Extract [Some] string from a JSON string,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
