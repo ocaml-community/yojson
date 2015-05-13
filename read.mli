@@ -229,10 +229,17 @@ val read_lbr : lexer_state -> Lexing.lexbuf -> unit
 val read_rbr : lexer_state -> Lexing.lexbuf -> unit
 
 val read_fields :
-  ('a -> string -> lexer_state -> Lexing.lexbuf -> 'a) ->
-  'a ->
+  ('acc -> string -> lexer_state -> Lexing.lexbuf -> 'acc) ->
+  'acc ->
   lexer_state ->
-  Lexing.lexbuf -> 'a
+  Lexing.lexbuf -> 'acc
+
+val read_abstract_fields :
+  (lexer_state -> Lexing.lexbuf -> 'key) ->
+  ('acc -> 'key -> lexer_state -> Lexing.lexbuf -> 'acc) ->
+  'acc ->
+  lexer_state ->
+  Lexing.lexbuf -> 'acc
 
 val read_lcurl : lexer_state -> Lexing.lexbuf -> unit
 val read_object_end : Lexing.lexbuf -> unit

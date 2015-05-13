@@ -670,12 +670,13 @@ and read_tuple_sep2 v std = parse
   | _        { long_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
-and read_fields read_field init_acc v = parse
+(* Read a JSON object, reading the keys using a custom parser *)
+and read_abstract_fields read_key read_field init_acc v = parse
     '{'      { let acc = ref init_acc in
 	       try
 		 read_space v lexbuf;
 		 read_object_end lexbuf;
-		 let field_name = read_ident v lexbuf in
+		 let field_name = read_key v lexbuf in
 		 read_space v lexbuf;
 		 read_colon v lexbuf;
 		 read_space v lexbuf;
@@ -684,7 +685,7 @@ and read_fields read_field init_acc v = parse
 		   read_space v lexbuf;
 		   read_object_sep v lexbuf;
 		   read_space v lexbuf;
-		   let field_name = read_ident v lexbuf in
+		   let field_name = read_key v lexbuf in
 		   read_space v lexbuf;
 		   read_colon v lexbuf;
 		   read_space v lexbuf;
@@ -1083,6 +1084,11 @@ and junk = parse
   let read_array read_cell v lexbuf =
     let l = read_list_rev read_cell v lexbuf in
     array_of_rev_list l
+
+  (* Read a JSON object, reading the keys into OCaml strings
+     (provided for backward compatibility) *)
+  let read_fields read_field init_acc v =
+    read_abstract_fields read_ident read_field init_acc v
 
   let finish v lexbuf =
     read_space v lexbuf;
