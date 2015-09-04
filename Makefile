@@ -1,4 +1,4 @@
-VERSION = 1.2.2
+VERSION = 1.2.3
 
 ifeq "$(shell ocamlfind ocamlc -config |grep os_type)" "os_type: Win32"
 EXE=.exe
@@ -7,7 +7,8 @@ EXE=
 endif
 
 
-NATDYNLINK := $(shell if [ -f `ocamlfind ocamlc -where`/dynlink.cmxa ]; then echo YES; else echo NO; fi)
+NATDYNLINK := $(shell if [ -f `ocamlfind ocamlc -where`/dynlink.cmxa ]; \
+                      then echo YES; else echo NO; fi)
 
 FLAGS = -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
@@ -17,7 +18,8 @@ CMXS = yojson.cmxs yojson_biniou.cmxs
 endif
 PACKS = easy-format,biniou
 
-.PHONY: default all opt install uninstall reinstall doc install-doc
+.PHONY: default all opt install uninstall install-lib uninstall-lib \
+        reinstall doc install-doc
 default: META all opt
 all: $(CMO)
 opt: $(CMX) $(CMXS) ydump$(EXE)
@@ -35,18 +37,22 @@ endif
 META: META.in Makefile
 	sed -e 's:@@VERSION@@:$(VERSION):' META.in > META
 
-install: META
+install: META install-lib
 	test ! -f ydump || cp ydump $(BINDIR)/
 	test ! -f ydump.exe || cp ydump.exe $(BINDIR)/
+
+install-lib:
 	ocamlfind install yojson META \
           $$(ls yojson.mli yojson_biniou.mli \
 		yojson.cmi yojson_biniou.cmi \
 		$(CMO) $(CMX) $(CMXS) \
 		yojson.o yojson_biniou.o)
 
-uninstall:
+uninstall: uninstall-lib
 	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
 	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe
+
+uninstall-lib:
 	ocamlfind remove yojson
 
 reinstall:
@@ -88,7 +94,8 @@ yojson_biniou.cmx: yojson_biniou.cmi yojson_biniou.ml
 	ocamlfind ocamlopt -c $(FLAGS) -package $(PACKS) yojson_biniou.ml
 
 yojson_biniou.cmxs: yojson_biniou.cmx
-	ocamlfind ocamlopt -shared -linkall -I . -o yojson_biniou.cmxs yojson_biniou.cmx
+	ocamlfind ocamlopt -shared -linkall -I . -o yojson_biniou.cmxs \
+		yojson_biniou.cmx
 
 ydump$(EXE): yojson.cmx yojson_biniou.cmx ydump.ml
 	ocamlfind ocamlopt -o ydump$(EXE) $(FLAGS) -package $(PACKS) -linkpkg \
