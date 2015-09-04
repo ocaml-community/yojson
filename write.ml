@@ -85,7 +85,7 @@ let rec write_digits s pos x =
   else
     let d = x mod 10 in
     let pos = write_digits s pos (x / 10) in
-    s.[pos] <- dec d;
+    s.[pos] <- dec (abs d);
     pos + 1
 
 let write_int ob x =
@@ -96,7 +96,7 @@ let write_int ob x =
     let s = ob.o_s in
     let pos = ob.o_len in
     s.[pos] <- '-';
-    ob.o_len <- write_digits s (pos + 1) (abs x)
+    ob.o_len <- write_digits s (pos + 1) x
   )
   else
     Bi_outbuf.add_char ob '0'

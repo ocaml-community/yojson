@@ -13,5 +13,6 @@
   ],
   "'NULL' U+0000": "\u0000",
   "'VULGAR FRACTION ONE HALF' U+00BD": "\u00BD",
-  "'PILE OF POO' U+1F4A9": "\uD83D\uDCA9"
+  "'PILE OF POO' U+1F4A9": "\uD83D\uDCA9",
+  "min_int": "-4611686018427387904"
 }
