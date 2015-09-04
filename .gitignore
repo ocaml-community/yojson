@@ -1,0 +1,14 @@
+*.cmi
+*.cmo
+*.cmx
+*.cmxs
+*.o
+*.a
+*.annot
+META
+basic.mli
+out.html
+read.ml
+ydump
+yojson.ml
+yojson.mli
