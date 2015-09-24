@@ -71,6 +71,9 @@ exception Undefined of string * json
 val keys : json -> string list
   (** Returns all the key names in the given JSON object *)
 
+val values : json -> json list
+  (** Return all the value in the given JSON object *)
+
 val combine : json -> json -> json
   (** Combine two JSON Objects together *)
 

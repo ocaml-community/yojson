@@ -190,8 +190,10 @@ let filter_string l =
   ) l
 
 let keys o =
-  let names = to_assoc o in
-  List.map (fun (key, _) -> key) names
+  to_assoc o |> List.map (fun (key, _) -> key)
+
+let values o =
+  to_assoc o |> List.map (fun (_, value) -> value)
 
 let combine (first : json) (second : json) =
   match (first, second) with
