@@ -194,3 +194,8 @@ let filter_string l =
 let keys o =
   let names = to_assoc o in
   List.map (fun (key, _) -> key) names
+
+let combine (first : json) (second : json) =
+  match (first, second) with
+  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  json)
+  | (a, b) -> raise (Invalid_argument "Expected two objects, check inputs")
