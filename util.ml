@@ -13,8 +13,6 @@ let typerr msg js = raise (Type_error (msg ^ typeof js, js))
 
 exception Undefined of string * json
 
-let ( |> ) x f = f x
-
 let assoc name obj =
   try List.assoc name obj
   with Not_found -> `Null
