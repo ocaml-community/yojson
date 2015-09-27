@@ -13,7 +13,7 @@ let typerr msg js = raise (Type_error (msg ^ typeof js, js))
 
 exception Undefined of string * json
 
-let ( |> ) x f = f x
+let ( |> ) = ( |> )
 
 let assoc name obj =
   try List.assoc name obj
@@ -192,5 +192,12 @@ let filter_string l =
   ) l
 
 let keys o =
-  let names = to_assoc o in
-  List.map (fun (key, _) -> key) names
+  to_assoc o |> List.map (fun (key, _) -> key)
+
+let values o =
+  to_assoc o |> List.map (fun (_, value) -> value)
+
+let combine (first : json) (second : json) =
+  match (first, second) with
+  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  json)
+  | (a, b) -> raise (Invalid_argument "Expected two objects, check inputs")
