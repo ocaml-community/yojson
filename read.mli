@@ -250,5 +250,12 @@ val read_json : lexer_state -> Lexing.lexbuf -> json
 val skip_json : lexer_state -> Lexing.lexbuf -> unit
 val buffer_json : lexer_state -> Lexing.lexbuf -> unit
 
+val validate_json : 'path -> json -> 'error option
+  (* always returns [None].
+     Provided so that atdgen users can write:
+
+       type json <ocaml module="Yojson.Safe"> = abstract
+  *)
+
 (* end undocumented section *)
 (**/**)

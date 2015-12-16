@@ -1209,4 +1209,6 @@ and junk = parse
 
   let compact ?std s =
     to_string (from_string s)
+
+  let validate_json _path _value = None
 }
