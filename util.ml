@@ -8,6 +8,9 @@ let typeof = function
   | `List _ -> "array"
   | `Null -> "null"
   | `String _ -> "string"
+  | `Intlit _ -> "intlit"
+  | `Tuple _ -> "tuple"
+  | `Variant _ -> "variant"
 
 let typerr msg js = raise (Type_error (msg ^ typeof js, js))
 
