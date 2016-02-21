@@ -4,7 +4,7 @@ val to_basic : json -> Basic.json
      Variants are converted to JSON strings or arrays of a string (constructor)
      and a json value (argument).
      Long integers are converted to JSON strings.
-     
+
      Examples:
 {v
 `Tuple [ `Int 1; `Float 2.3 ]   ->    `List [ `Int 1; `Float 2.3 ]

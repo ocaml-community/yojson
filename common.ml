@@ -87,7 +87,7 @@ type lexer_state = {
     (* Current line number (starting from 1) *)
 
   mutable bol : int;
-    (* Absolute position of the first character of the current line 
+    (* Absolute position of the first character of the current line
        (starting from 0) *)
 
   mutable fname : string option;

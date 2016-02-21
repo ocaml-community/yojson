@@ -34,7 +34,7 @@ let write_string_body ob s =
   let start = ref 0 in
   for i = 0 to String.length s - 1 do
     match s.[i] with
-	'"' -> write_special s start i ob "\\\""
+        '"' -> write_special s start i ob "\\\""
       | '\\' -> write_special s start i ob "\\\\"
       | '\b' -> write_special s start i ob "\\b"
       | '\012' -> write_special s start i ob "\\f"
@@ -115,8 +115,8 @@ let float_needs_period s =
   try
     for i = 0 to String.length s - 1 do
       match s.[i] with
-	  '0'..'9' | '-' -> ()
-	| _ -> raise Exit
+          '0'..'9' | '-' -> ()
+        | _ -> raise Exit
     done;
     true
   with Exit ->
@@ -139,7 +139,7 @@ let write_float_fast ob x =
       let s = Printf.sprintf "%.17g" x in
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
-	Bi_outbuf.add_string ob ".0"
+        Bi_outbuf.add_string ob ".0"
 
 let write_float ob x =
   match classify_float x with
@@ -155,7 +155,7 @@ let write_float ob x =
       in
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
-	Bi_outbuf.add_string ob ".0"
+        Bi_outbuf.add_string ob ".0"
 
 let write_normal_float_prec significant_figures ob x =
   let open Printf in
@@ -204,15 +204,15 @@ let write_std_float_fast ob x =
       json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
       json_error
-	(if x > 0. then
-	   "Infinity value not allowed in standard JSON"
-	 else
-	   "-Infinity value not allowed in standard JSON")
+        (if x > 0. then
+           "Infinity value not allowed in standard JSON"
+         else
+           "-Infinity value not allowed in standard JSON")
   | _ ->
       let s = Printf.sprintf "%.17g" x in
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
-	Bi_outbuf.add_string ob ".0"
+        Bi_outbuf.add_string ob ".0"
 
 let write_std_float ob x =
   match classify_float x with
@@ -220,10 +220,10 @@ let write_std_float ob x =
       json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
       json_error
-	(if x > 0. then
-	   "Infinity value not allowed in standard JSON"
-	 else
-	   "-Infinity value not allowed in standard JSON")
+        (if x > 0. then
+           "Infinity value not allowed in standard JSON"
+         else
+           "-Infinity value not allowed in standard JSON")
   | _ ->
       let s1 = Printf.sprintf "%.16g" x in
       let s =
@@ -232,7 +232,7 @@ let write_std_float ob x =
       in
       Bi_outbuf.add_string ob s;
       if float_needs_period s then
-	Bi_outbuf.add_string ob ".0"
+        Bi_outbuf.add_string ob ".0"
 
 let write_std_float_prec significant_figures ob x =
   match classify_float x with
@@ -240,10 +240,10 @@ let write_std_float_prec significant_figures ob x =
       json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
       json_error
-	(if x > 0. then
-	   "Infinity value not allowed in standard JSON"
-	 else
-	   "-Infinity value not allowed in standard JSON")
+        (if x > 0. then
+           "Infinity value not allowed in standard JSON"
+         else
+           "-Infinity value not allowed in standard JSON")
   | _ ->
       write_normal_float_prec significant_figures ob x
 
@@ -262,7 +262,7 @@ let test_float () =
   let l = l @ List.map (fun x -> x *. 1.23e50) l in
   let l = l @ [ infinity; neg_infinity ] in
   List.iter (
-    fun x -> 
+    fun x ->
       let s = Printf.sprintf "%.17g" x in
       let y = float_of_string s in
       Printf.printf "%g %g %S %B\n" x y s (x = y)
@@ -353,8 +353,8 @@ and write_variant ob s o =
   (match o with
        None -> ()
      | Some x ->
-	 Bi_outbuf.add_char ob ':';
-	 write_json ob x
+         Bi_outbuf.add_char ob ':';
+         write_json ob x
   );
   Bi_outbuf.add_char ob '>'
 #endif
@@ -416,11 +416,11 @@ and write_std_variant ob s o =
   match o with
       None -> write_string ob s
     | Some x ->
-	Bi_outbuf.add_char ob '[';
-	write_string ob s;
-	Bi_outbuf.add_char ob ',';
-	write_std_json ob x;
-	Bi_outbuf.add_char ob ']'
+        Bi_outbuf.add_char ob '[';
+        write_string ob s;
+        Bi_outbuf.add_char ob ',';
+        write_std_json ob x;
+        Bi_outbuf.add_char ob ']'
 #endif
 
 
@@ -438,10 +438,10 @@ let to_outbuf ?(std = false) ob x =
 let to_string ?buf ?(len = 256) ?std x =
   let ob =
     match buf with
-	None -> Bi_outbuf.create len
+        None -> Bi_outbuf.create len
       | Some ob ->
-	  Bi_outbuf.clear ob;
-	  ob
+          Bi_outbuf.clear ob;
+          ob
   in
   to_outbuf ?std ob x;
   let s = Bi_outbuf.contents ob in
@@ -451,7 +451,7 @@ let to_string ?buf ?(len = 256) ?std x =
 let to_channel ?buf ?len ?std oc x =
   let ob =
     match buf with
-	None -> Bi_outbuf.create_channel_writer ?len oc
+        None -> Bi_outbuf.create_channel_writer ?len oc
       | Some ob -> ob
   in
   to_outbuf ?std ob x;
@@ -460,7 +460,7 @@ let to_channel ?buf ?len ?std oc x =
 let to_output ?buf ?len ?std out x =
   let ob =
     match buf with
-	None -> Bi_outbuf.create_output_writer ?len out
+        None -> Bi_outbuf.create_output_writer ?len out
       | Some ob -> ob
   in
   to_outbuf ?std ob x;
@@ -481,10 +481,10 @@ let stream_to_outbuf ?std ob st =
 let stream_to_string ?buf ?(len = 256) ?std st =
   let ob =
     match buf with
-	None -> Bi_outbuf.create len
+        None -> Bi_outbuf.create len
       | Some ob ->
-	  Bi_outbuf.clear ob;
-	  ob
+          Bi_outbuf.clear ob;
+          ob
   in
   stream_to_outbuf ?std ob st;
   let s = Bi_outbuf.contents ob in
@@ -494,7 +494,7 @@ let stream_to_string ?buf ?(len = 256) ?std st =
 let stream_to_channel ?buf ?len ?std oc st =
   let ob =
     match buf with
-	None -> Bi_outbuf.create_channel_writer ?len oc
+        None -> Bi_outbuf.create_channel_writer ?len oc
       | Some ob -> ob
   in
   stream_to_outbuf ?std ob st;

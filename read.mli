@@ -52,7 +52,7 @@ type lexer_state = Lexer_state.t = {
 val init_lexer :
   ?buf: Bi_outbuf.t ->
   ?fname: string ->
-  ?lnum: int -> 
+  ?lnum: int ->
   unit -> lexer_state
   (** This alias is provided for backward compatibility.
       New code should use {!Yojson.init_lexer} directly. *)
@@ -99,7 +99,7 @@ val stream_from_file :
   string -> json Stream.t
   (** Input a sequence of JSON values from a file.
       Whitespace between JSON values is fine but not required.
-      
+
       See [from_string] for the meaning of the optional arguments. *)
 
 val stream_from_lexbuf :
@@ -109,7 +109,7 @@ val stream_from_lexbuf :
   (** Input a sequence of JSON values from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       Whitespace between JSON values is fine but not required.
-      
+
       See [stream_from_channel] for the meaning of the optional [fin]
       argument. *)
 

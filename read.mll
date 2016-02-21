@@ -14,9 +14,9 @@
       let result = c_engine tbl state buf in
       (*
       if result >= 0 then begin
-	buf.lex_start_p <- buf.lex_curr_p;
-	buf.lex_curr_p <- {buf.lex_curr_p
-			   with pos_cnum = buf.lex_abs_pos + buf.lex_curr_pos};
+        buf.lex_start_p <- buf.lex_curr_p;
+        buf.lex_curr_p <- {buf.lex_curr_p
+                           with pos_cnum = buf.lex_abs_pos + buf.lex_curr_pos};
       end;
       *)
       result
@@ -38,7 +38,7 @@
 
   let hex c =
     match c with
-	'0'..'9' -> int_of_char c - int_of_char '0'
+        '0'..'9' -> int_of_char c - int_of_char '0'
       | 'a'..'f' -> int_of_char c - int_of_char 'a' + 10
       | 'A'..'F' -> int_of_char c - int_of_char 'A' + 10
       | _ -> assert false
@@ -50,22 +50,22 @@
     let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
     let file_line =
       match v.fname with
-	  None -> "Line"
-	| Some s ->
-	    sprintf "File %s, line" s
+          None -> "Line"
+        | Some s ->
+            sprintf "File %s, line" s
     in
     let bytes =
       if pos1 = pos2 then
-	sprintf "byte %i" (pos1+1)
+        sprintf "byte %i" (pos1+1)
       else
-	sprintf "bytes %i-%i" (pos1+1) (pos2+1)
+        sprintf "bytes %i-%i" (pos1+1) (pos2+1)
     in
     let msg = sprintf "%s %i, %s:\n%s" file_line v.lnum bytes descr in
     json_error msg
 
 
   let lexer_error descr v lexbuf =
-    custom_error 
+    custom_error
       (sprintf "%s '%s'" descr (Lexing.lexeme lexbuf))
       v lexbuf
 
@@ -74,7 +74,7 @@
   let long_error descr v lexbuf =
     let junk = Lexing.lexeme lexbuf in
     let extra_junk = !read_junk lexbuf in
-    custom_error 
+    custom_error
       (sprintf "%s '%s%s'" descr junk extra_junk)
       v lexbuf
 
@@ -90,9 +90,9 @@
     let n = ref 0 in
     for i = start to stop - 1 do
       if !n >= max10 then
-	raise Int_overflow
+        raise Int_overflow
       else
-	n := 10 * !n + dec s.[i]
+        n := 10 * !n + dec s.[i]
     done;
     if !n < 0 then
       raise Int_overflow
@@ -105,7 +105,7 @@
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-	`Intlit (lexeme lexbuf)
+        `Intlit (lexeme lexbuf)
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -117,9 +117,9 @@
     let n = ref 0 in
     for i = start to stop - 1 do
       if !n <= min10 then
-	raise Int_overflow
+        raise Int_overflow
       else
-	n := 10 * !n - dec s.[i]
+        n := 10 * !n - dec s.[i]
     done;
     if !n > 0 then
       raise Int_overflow
@@ -132,7 +132,7 @@
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-	`Intlit (lexeme lexbuf)
+        `Intlit (lexeme lexbuf)
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -211,8 +211,8 @@ rule read_json v = parse
                 }
   | '"'         {
                   #ifdef STRING
-	            Bi_outbuf.clear v.buf;
-		    `String (finish_string v lexbuf)
+                    Bi_outbuf.clear v.buf;
+                    `String (finish_string v lexbuf)
                   #elif defined STRINGLIT
                     `Stringlit (finish_stringlit v lexbuf)
                   #endif
@@ -228,76 +228,76 @@ rule read_json v = parse
                  }
 
   | '{'          { let acc = ref [] in
-		   try
-		     read_space v lexbuf;
-		     read_object_end lexbuf;
-		     let field_name = read_ident v lexbuf in
-		     read_space v lexbuf;
-		     read_colon v lexbuf;
-		     read_space v lexbuf;
-		     acc := (field_name, read_json v lexbuf) :: !acc;
-		     while true do
-		       read_space v lexbuf;
-		       read_object_sep v lexbuf;
-		       read_space v lexbuf;
-		       let field_name = read_ident v lexbuf in
-		       read_space v lexbuf;
-		       read_colon v lexbuf;
-		       read_space v lexbuf;
-		       acc := (field_name, read_json v lexbuf) :: !acc;
-		     done;
-		     assert false
-		   with End_of_object ->
-		     `Assoc (List.rev !acc)
-		 }
+                   try
+                     read_space v lexbuf;
+                     read_object_end lexbuf;
+                     let field_name = read_ident v lexbuf in
+                     read_space v lexbuf;
+                     read_colon v lexbuf;
+                     read_space v lexbuf;
+                     acc := (field_name, read_json v lexbuf) :: !acc;
+                     while true do
+                       read_space v lexbuf;
+                       read_object_sep v lexbuf;
+                       read_space v lexbuf;
+                       let field_name = read_ident v lexbuf in
+                       read_space v lexbuf;
+                       read_colon v lexbuf;
+                       read_space v lexbuf;
+                       acc := (field_name, read_json v lexbuf) :: !acc;
+                     done;
+                     assert false
+                   with End_of_object ->
+                     `Assoc (List.rev !acc)
+                 }
 
   | '['          { let acc = ref [] in
-		   try
-		     read_space v lexbuf;
-		     read_array_end lexbuf;
-		     acc := read_json v lexbuf :: !acc;
-		     while true do
-		       read_space v lexbuf;
-		       read_array_sep v lexbuf;
-		       read_space v lexbuf;
-		       acc := read_json v lexbuf :: !acc;
-		     done;
-		     assert false
-		   with End_of_array ->
-		     `List (List.rev !acc)
-		 }
+                   try
+                     read_space v lexbuf;
+                     read_array_end lexbuf;
+                     acc := read_json v lexbuf :: !acc;
+                     while true do
+                       read_space v lexbuf;
+                       read_array_sep v lexbuf;
+                       read_space v lexbuf;
+                       acc := read_json v lexbuf :: !acc;
+                     done;
+                     assert false
+                   with End_of_array ->
+                     `List (List.rev !acc)
+                 }
 
   | '('          {
                    #ifdef TUPLE
                      let acc = ref [] in
-		     try
-		       read_space v lexbuf;
-		       read_tuple_end lexbuf;
-		       acc := read_json v lexbuf :: !acc;
-		       while true do
-			 read_space v lexbuf;
-			 read_tuple_sep v lexbuf;
-			 read_space v lexbuf;
-			 acc := read_json v lexbuf :: !acc;
-		       done;
-		       assert false
-		     with End_of_tuple ->
-		       `Tuple (List.rev !acc)
-	           #else
-		     long_error "Invalid token" v lexbuf
+                     try
+                       read_space v lexbuf;
+                       read_tuple_end lexbuf;
+                       acc := read_json v lexbuf :: !acc;
+                       while true do
+                         read_space v lexbuf;
+                         read_tuple_sep v lexbuf;
+                         read_space v lexbuf;
+                         acc := read_json v lexbuf :: !acc;
+                       done;
+                       assert false
+                     with End_of_tuple ->
+                       `Tuple (List.rev !acc)
+                   #else
+                     long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | '<'          {
                    #ifdef VARIANT
                      read_space v lexbuf;
                      let cons = read_ident v lexbuf in
-		     read_space v lexbuf;
-		     `Variant (cons, finish_variant v lexbuf)
+                     read_space v lexbuf;
+                     `Variant (cons, finish_variant v lexbuf)
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | "//"[^'\n']* { read_json v lexbuf }
   | "/*"         { finish_comment v lexbuf; read_json v lexbuf }
@@ -310,21 +310,21 @@ rule read_json v = parse
 and finish_string v = parse
     '"'           { Bi_outbuf.contents v.buf }
   | '\\'          { finish_escaped_char v lexbuf;
-		    finish_string v lexbuf }
+                    finish_string v lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
-		    finish_string v lexbuf }
+                    finish_string v lexbuf }
   | eof           { custom_error "Unexpected end of input" v lexbuf }
 
 and map_string v f = parse
     '"'           { let b = v.buf in
                     f b.Bi_outbuf.o_s 0 b.Bi_outbuf.o_len }
   | '\\'          { finish_escaped_char v lexbuf;
-		    map_string v f lexbuf }
+                    map_string v f lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
-		    map_string v f lexbuf }
+                    map_string v f lexbuf }
   | eof           { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_escaped_char v = parse 
+and finish_escaped_char v = parse
     '"'
   | '\\'
   | '/' as c { Bi_outbuf.add_char v.buf c }
@@ -364,19 +364,19 @@ and finish_stringlit v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-	   let s = String.create (len+1) in
-	   s.[0] <- '"';
-	   String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
-	   s
-	 }
+           let s = String.create (len+1) in
+           s.[0] <- '"';
+           String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
+           s
+         }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_variant v = parse 
+and finish_variant v = parse
     ':'  { let x = read_json v lexbuf in
-	   read_space v lexbuf;
-	   read_gt v lexbuf;
-	   Some x }
+           read_space v lexbuf;
+           read_gt v lexbuf;
+           Some x }
   | '>'  { None }
   | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
@@ -399,7 +399,7 @@ and read_comma v = parse
 and start_any_variant v = parse
     '<'      { `Edgy_bracket }
   | '"'      { Bi_outbuf.clear v.buf;
-	       `Double_quote }
+               `Double_quote }
   | '['      { `Square_bracket }
   | _        { long_error "Expected '<', '\"' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
@@ -448,11 +448,11 @@ and read_bool v = parse
 
 and read_int v = parse
     positive_int         { try extract_positive_int lexbuf
-			   with Int_overflow ->
-			     lexer_error "Int overflow" v lexbuf }
+                           with Int_overflow ->
+                             lexer_error "Int overflow" v lexbuf }
   | '-' positive_int     { try extract_negative_int lexbuf
-			   with Int_overflow ->
-			     lexer_error "Int overflow" v lexbuf }
+                           with Int_overflow ->
+                             lexer_error "Int overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
                            let s = finish_string v lexbuf in
@@ -472,8 +472,8 @@ and read_int v = parse
 
 and read_int32 v = parse
     '-'? positive_int    { try Int32.of_string (Lexing.lexeme lexbuf)
-			   with _ ->
-			     lexer_error "Int32 overflow" v lexbuf }
+                           with _ ->
+                             lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
                            let s = finish_string v lexbuf in
@@ -493,8 +493,8 @@ and read_int32 v = parse
 
 and read_int64 v = parse
     '-'? positive_int    { try Int64.of_string (Lexing.lexeme lexbuf)
-			   with _ ->
-			     lexer_error "Int32 overflow" v lexbuf }
+                           with _ ->
+                             lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
                            let s = finish_string v lexbuf in
@@ -518,7 +518,7 @@ and read_number v = parse
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
   | '"'         { Bi_outbuf.clear v.buf;
-	          let s = finish_string v lexbuf in
+                  let s = finish_string v lexbuf in
                   try
                     (* Any OCaml-compliant float will pass,
                        including hexadecimal and octal notations,
@@ -540,13 +540,13 @@ and read_number v = parse
 
 and read_string v = parse
     '"'      { Bi_outbuf.clear v.buf;
-	       finish_string v lexbuf }
+               finish_string v lexbuf }
   | _        { long_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
     '"'      { Bi_outbuf.clear v.buf;
-	       finish_string v lexbuf }
+               finish_string v lexbuf }
   | ident as s
              { s }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
@@ -554,7 +554,7 @@ and read_ident v = parse
 
 and map_ident v f = parse
     '"'      { Bi_outbuf.clear v.buf;
-	       map_string v f lexbuf }
+               map_string v f lexbuf }
   | ident
              { map_lexeme f lexbuf }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
@@ -562,39 +562,39 @@ and map_ident v f = parse
 
 and read_sequence read_cell init_acc v = parse
     '['      { let acc = ref init_acc in
-	       try
-		 read_space v lexbuf;
-		 read_array_end lexbuf;
-		 acc := read_cell !acc v lexbuf;
-		 while true do
-		   read_space v lexbuf;
-		   read_array_sep v lexbuf;
-		   read_space v lexbuf;
-		   acc := read_cell !acc v lexbuf;
-		 done;
-		 assert false
-	       with End_of_array ->
-		 !acc
-	     }
+               try
+                 read_space v lexbuf;
+                 read_array_end lexbuf;
+                 acc := read_cell !acc v lexbuf;
+                 while true do
+                   read_space v lexbuf;
+                   read_array_sep v lexbuf;
+                   read_space v lexbuf;
+                   acc := read_cell !acc v lexbuf;
+                 done;
+                 assert false
+               with End_of_array ->
+                 !acc
+             }
   | _        { long_error "Expected '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_list_rev read_cell v = parse
     '['      { let acc = ref [] in
-	       try
-		 read_space v lexbuf;
-		 read_array_end lexbuf;
-		 acc := read_cell v lexbuf :: !acc;
-		 while true do
-		   read_space v lexbuf;
-		   read_array_sep v lexbuf;
-		   read_space v lexbuf;
-		   acc := read_cell v lexbuf :: !acc;
-		 done;
-		 assert false
-	       with End_of_array ->
-		 !acc
-	     }
+               try
+                 read_space v lexbuf;
+                 read_array_end lexbuf;
+                 acc := read_cell v lexbuf :: !acc;
+                 while true do
+                   read_space v lexbuf;
+                   read_array_sep v lexbuf;
+                   read_space v lexbuf;
+                   acc := read_cell v lexbuf :: !acc;
+                 done;
+                 assert false
+               with End_of_array ->
+                 !acc
+             }
   | _        { long_error "Expected '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -614,25 +614,25 @@ and read_tuple read_cell init_acc v = parse
                    #ifdef TUPLE
                      let pos = ref 0 in
                      let acc = ref init_acc in
-		     try
-		       read_space v lexbuf;
-		       read_tuple_end lexbuf;
-		       acc := read_cell !pos !acc v lexbuf;
-		       incr pos;
-		       while true do
-			 read_space v lexbuf;
-			 read_tuple_sep v lexbuf;
-			 read_space v lexbuf;
-			 acc := read_cell !pos !acc v lexbuf;
-			 incr pos;
-		       done;
-		       assert false
-		     with End_of_tuple ->
-		       !acc
-	           #else
-		     long_error "Invalid token" v lexbuf
+                     try
+                       read_space v lexbuf;
+                       read_tuple_end lexbuf;
+                       acc := read_cell !pos !acc v lexbuf;
+                       incr pos;
+                       while true do
+                         read_space v lexbuf;
+                         read_tuple_sep v lexbuf;
+                         read_space v lexbuf;
+                         acc := read_cell !pos !acc v lexbuf;
+                         incr pos;
+                       done;
+                       assert false
+                     with End_of_tuple ->
+                       !acc
+                   #else
+                     long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
   | _        { long_error "Expected ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -641,11 +641,11 @@ and read_tuple_end = parse
   | ""       { () }
 
 and read_tuple_end2 v std = parse
-    ')'      { if std then 
+    ')'      { if std then
                  long_error "Expected ')' or '' but found" v lexbuf
                else
                  raise End_of_tuple }
-  | ']'      { if std then 
+  | ']'      { if std then
                  raise End_of_tuple
                else
                  long_error "Expected ']' or '' but found" v lexbuf }
@@ -659,11 +659,11 @@ and read_tuple_sep v = parse
 
 and read_tuple_sep2 v std = parse
     ','      { () }
-  | ')'      { if std then 
+  | ')'      { if std then
                  long_error "Expected ',' or ']' but found" v lexbuf
                else
                  raise End_of_tuple }
-  | ']'      { if std then 
+  | ']'      { if std then
                  raise End_of_tuple
                else
                  long_error "Expected ',' or ')' but found" v lexbuf }
@@ -673,28 +673,28 @@ and read_tuple_sep2 v std = parse
 (* Read a JSON object, reading the keys using a custom parser *)
 and read_abstract_fields read_key read_field init_acc v = parse
     '{'      { let acc = ref init_acc in
-	       try
-		 read_space v lexbuf;
-		 read_object_end lexbuf;
-		 let field_name = read_key v lexbuf in
-		 read_space v lexbuf;
-		 read_colon v lexbuf;
-		 read_space v lexbuf;
-		 acc := read_field !acc field_name v lexbuf;
-		 while true do
-		   read_space v lexbuf;
-		   read_object_sep v lexbuf;
-		   read_space v lexbuf;
-		   let field_name = read_key v lexbuf in
-		   read_space v lexbuf;
-		   read_colon v lexbuf;
-		   read_space v lexbuf;
-		   acc := read_field !acc field_name v lexbuf;
-		 done;
-		 assert false
-	       with End_of_object ->
-		 !acc
-	     }
+               try
+                 read_space v lexbuf;
+                 read_object_end lexbuf;
+                 let field_name = read_key v lexbuf in
+                 read_space v lexbuf;
+                 read_colon v lexbuf;
+                 read_space v lexbuf;
+                 acc := read_field !acc field_name v lexbuf;
+                 while true do
+                   read_space v lexbuf;
+                   read_object_sep v lexbuf;
+                   read_space v lexbuf;
+                   let field_name = read_key v lexbuf in
+                   read_space v lexbuf;
+                   read_colon v lexbuf;
+                   read_space v lexbuf;
+                   acc := read_field !acc field_name v lexbuf;
+                 done;
+                 assert false
+               with End_of_object ->
+                 !acc
+             }
   | _        { long_error "Expected '{' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
@@ -759,73 +759,73 @@ and skip_json v = parse
   | float       { () }
 
   | '{'          { try
-		     read_space v lexbuf;
-		     read_object_end lexbuf;
-		     skip_ident v lexbuf;
-		     read_space v lexbuf;
-		     read_colon v lexbuf;
-		     read_space v lexbuf;
-		     skip_json v lexbuf;
-		     while true do
-		       read_space v lexbuf;
-		       read_object_sep v lexbuf;
-		       read_space v lexbuf;
-		       skip_ident v lexbuf;
-		       read_space v lexbuf;
-		       read_colon v lexbuf;
-		       read_space v lexbuf;
-		       skip_json v lexbuf;
-		     done;
-		     assert false
-		   with End_of_object ->
-		     ()
-		 }
+                     read_space v lexbuf;
+                     read_object_end lexbuf;
+                     skip_ident v lexbuf;
+                     read_space v lexbuf;
+                     read_colon v lexbuf;
+                     read_space v lexbuf;
+                     skip_json v lexbuf;
+                     while true do
+                       read_space v lexbuf;
+                       read_object_sep v lexbuf;
+                       read_space v lexbuf;
+                       skip_ident v lexbuf;
+                       read_space v lexbuf;
+                       read_colon v lexbuf;
+                       read_space v lexbuf;
+                       skip_json v lexbuf;
+                     done;
+                     assert false
+                   with End_of_object ->
+                     ()
+                 }
 
   | '['          { try
-		     read_space v lexbuf;
-		     read_array_end lexbuf;
-		     skip_json v lexbuf;
-		     while true do
-		       read_space v lexbuf;
-		       read_array_sep v lexbuf;
-		       read_space v lexbuf;
-		       skip_json v lexbuf;
-		     done;
-		     assert false
-		   with End_of_array ->
-		     ()
-		 }
+                     read_space v lexbuf;
+                     read_array_end lexbuf;
+                     skip_json v lexbuf;
+                     while true do
+                       read_space v lexbuf;
+                       read_array_sep v lexbuf;
+                       read_space v lexbuf;
+                       skip_json v lexbuf;
+                     done;
+                     assert false
+                   with End_of_array ->
+                     ()
+                 }
 
   | '('          {
                    #ifdef TUPLE
                      try
-		       read_space v lexbuf;
-		       read_tuple_end lexbuf;
-		       skip_json v lexbuf;
-		       while true do
-			 read_space v lexbuf;
-			 read_tuple_sep v lexbuf;
-			 read_space v lexbuf;
-			 skip_json v lexbuf;
-		       done;
-		       assert false
-		     with End_of_tuple ->
-		       ()
-	           #else
-		     long_error "Invalid token" v lexbuf
+                       read_space v lexbuf;
+                       read_tuple_end lexbuf;
+                       skip_json v lexbuf;
+                       while true do
+                         read_space v lexbuf;
+                         read_tuple_sep v lexbuf;
+                         read_space v lexbuf;
+                         skip_json v lexbuf;
+                       done;
+                       assert false
+                     with End_of_tuple ->
+                       ()
+                   #else
+                     long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | '<'          {
                    #ifdef VARIANT
                      read_space v lexbuf;
                      skip_ident v lexbuf;
-		     read_space v lexbuf;
-		     finish_skip_variant v lexbuf
+                     read_space v lexbuf;
+                     finish_skip_variant v lexbuf
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | "//"[^'\n']* { skip_json v lexbuf }
   | "/*"         { finish_comment v lexbuf; skip_json v lexbuf }
@@ -844,8 +844,8 @@ and finish_skip_stringlit v = parse
 
 and finish_skip_variant v = parse
     ':'  { skip_json v lexbuf;
-	   read_space v lexbuf;
-	   read_gt v lexbuf }
+           read_space v lexbuf;
+           read_gt v lexbuf }
   | '>'  { () }
   | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
@@ -872,76 +872,76 @@ and buffer_json v = parse
   | '"'         { finish_buffer_stringlit v lexbuf }
   | '{'          { try
                      Bi_outbuf.add_char v.buf '{';
-		     buffer_space v lexbuf;
-		     buffer_object_end v lexbuf;
-		     buffer_ident v lexbuf;
-		     buffer_space v lexbuf;
-		     buffer_colon v lexbuf;
-		     buffer_space v lexbuf;
-		     buffer_json v lexbuf;
-		     while true do
-		       buffer_space v lexbuf;
-		       buffer_object_sep v lexbuf;
-		       buffer_space v lexbuf;
-		       buffer_ident v lexbuf;
-		       buffer_space v lexbuf;
-		       buffer_colon v lexbuf;
-		       buffer_space v lexbuf;
-		       buffer_json v lexbuf;
-		     done;
-		     assert false
-		   with End_of_object ->
-		     ()
-		 }
+                     buffer_space v lexbuf;
+                     buffer_object_end v lexbuf;
+                     buffer_ident v lexbuf;
+                     buffer_space v lexbuf;
+                     buffer_colon v lexbuf;
+                     buffer_space v lexbuf;
+                     buffer_json v lexbuf;
+                     while true do
+                       buffer_space v lexbuf;
+                       buffer_object_sep v lexbuf;
+                       buffer_space v lexbuf;
+                       buffer_ident v lexbuf;
+                       buffer_space v lexbuf;
+                       buffer_colon v lexbuf;
+                       buffer_space v lexbuf;
+                       buffer_json v lexbuf;
+                     done;
+                     assert false
+                   with End_of_object ->
+                     ()
+                 }
 
   | '['          { try
                      Bi_outbuf.add_char v.buf '[';
-		     buffer_space v lexbuf;
-		     buffer_array_end v lexbuf;
-		     buffer_json v lexbuf;
-		     while true do
-		       buffer_space v lexbuf;
-		       buffer_array_sep v lexbuf;
-		       buffer_space v lexbuf;
-		       buffer_json v lexbuf;
-		     done;
-		     assert false
-		   with End_of_array ->
-		     ()
-		 }
+                     buffer_space v lexbuf;
+                     buffer_array_end v lexbuf;
+                     buffer_json v lexbuf;
+                     while true do
+                       buffer_space v lexbuf;
+                       buffer_array_sep v lexbuf;
+                       buffer_space v lexbuf;
+                       buffer_json v lexbuf;
+                     done;
+                     assert false
+                   with End_of_array ->
+                     ()
+                 }
 
   | '('          {
                    #ifdef TUPLE
                      try
                        Bi_outbuf.add_char v.buf '(';
-		       buffer_space v lexbuf;
-		       buffer_tuple_end v lexbuf;
-		       buffer_json v lexbuf;
-		       while true do
-			 buffer_space v lexbuf;
-			 buffer_tuple_sep v lexbuf;
-			 buffer_space v lexbuf;
-			 buffer_json v lexbuf;
-		       done;
-		       assert false
-		     with End_of_tuple ->
-		       ()
-	           #else
-		     long_error "Invalid token" v lexbuf
+                       buffer_space v lexbuf;
+                       buffer_tuple_end v lexbuf;
+                       buffer_json v lexbuf;
+                       while true do
+                         buffer_space v lexbuf;
+                         buffer_tuple_sep v lexbuf;
+                         buffer_space v lexbuf;
+                         buffer_json v lexbuf;
+                       done;
+                       assert false
+                     with End_of_tuple ->
+                       ()
+                   #else
+                     long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | '<'          {
                    #ifdef VARIANT
                      Bi_outbuf.add_char v.buf '<';
                      buffer_space v lexbuf;
                      buffer_ident v lexbuf;
-		     buffer_space v lexbuf;
-		     finish_buffer_variant v lexbuf
+                     buffer_space v lexbuf;
+                     finish_buffer_variant v lexbuf
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
-		 }
+                 }
 
   | "//"[^'\n']* { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
   | "/*"         { Bi_outbuf.add_string v.buf "/*";
@@ -960,15 +960,15 @@ and finish_buffer_stringlit v = parse
     | [^'"' '\\'] )* '"'
          { Bi_outbuf.add_char v.buf '"';
            add_lexeme v.buf lexbuf
-	 }
+         }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_buffer_variant v = parse
     ':'  { Bi_outbuf.add_char v.buf ':';
            buffer_json v lexbuf;
-	   buffer_space v lexbuf;
-	   buffer_gt v lexbuf }
+           buffer_space v lexbuf;
+           buffer_gt v lexbuf }
   | '>'  { Bi_outbuf.add_char v.buf '>' }
   | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
@@ -1070,16 +1070,16 @@ and junk = parse
 
   let array_of_rev_list l =
     match l with
-	[] -> [| |]
+        [] -> [| |]
       | x :: tl ->
-	  let len = List.length l in
-	  let a = Array.make len x in
-	  let r = ref tl in
-	  for i = len - 2 downto 0 do
-	    a.(i) <- List.hd !r;
-	    r := List.tl !r
-	  done;
-	  a
+          let len = List.length l in
+          let a = Array.make len x in
+          let r = ref tl in
+          for i = len - 2 downto 0 do
+            a.(i) <- List.hd !r;
+            r := List.tl !r
+          done;
+          a
 
   let read_array read_cell v lexbuf =
     let l = read_list_rev read_cell v lexbuf in
@@ -1102,9 +1102,9 @@ and junk = parse
 
     let x =
       if read_eof lexbuf then
-	raise End_of_input
+        raise End_of_input
       else
-	read_json v lexbuf
+        read_json v lexbuf
     in
 
     if not stream then
@@ -1144,12 +1144,12 @@ and junk = parse
     let f i =
       try Some (from_lexbuf v ?stream lexbuf)
       with
-	  End_of_input ->
-	    fin ();
-	    None
-	| e ->
-	    (try fin () with _ -> ());
-	    raise e
+          End_of_input ->
+            fin ();
+            None
+        | e ->
+            (try fin () with _ -> ());
+            raise e
     in
     Stream.from f
 
@@ -1167,8 +1167,8 @@ and junk = parse
     let fin () = close_in ic in
     let fname =
       match fname with
-	  None -> Some file
-	| x -> x
+          None -> Some file
+        | x -> x
     in
     let lexbuf = Lexing.from_channel ic in
     let v = init_lexer ?buf ?fname ?lnum () in
@@ -1180,17 +1180,17 @@ and junk = parse
       ?buf ?(fin = fun () -> ()) ?fname ?lnum:(lnum0 = 1) ic =
     let buf =
       match buf with
-	  None -> Some (Bi_outbuf.create 256)
-	| Some _ -> buf
+          None -> Some (Bi_outbuf.create 256)
+        | Some _ -> buf
     in
     let f i =
-      try 
-	let line = input_line ic in
-	let lnum = lnum0 + i in
-	Some (`Json (from_string ?buf ?fname ~lnum line))
+      try
+        let line = input_line ic in
+        let lnum = lnum0 + i in
+        Some (`Json (from_string ?buf ?fname ~lnum line))
       with
-	  End_of_file -> fin (); None
-	| e -> Some (`Exn e)
+          End_of_file -> fin (); None
+        | e -> Some (`Exn e)
     in
     Stream.from f
 
@@ -1199,8 +1199,8 @@ and junk = parse
     let fin () = close_in ic in
     let fname =
       match fname with
-	  None -> Some file
-	| x -> x
+          None -> Some file
+        | x -> x
     in
     linestream_from_channel ?buf ~fin ?fname ?lnum ic
 
