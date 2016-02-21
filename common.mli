@@ -7,7 +7,7 @@ val json_error : string -> 'a
 type lexer_state = {
   buf : Bi_outbuf.t;
     (** Buffer used to accumulate substrings *)
-  
+
   mutable lnum : int;
     (** Current line number (counting from 1) *)
 
@@ -32,7 +32,7 @@ end
 val init_lexer :
   ?buf: Bi_outbuf.t ->
   ?fname: string ->
-  ?lnum: int -> 
+  ?lnum: int ->
   unit -> lexer_state
   (** Create a fresh lexer_state record. *)
 

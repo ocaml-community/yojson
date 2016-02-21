@@ -6,7 +6,7 @@ val to_string :
   ?std:bool ->
   json -> string
   (** Write a compact JSON value to a string.
-      @param buf allows to reuse an existing buffer created with 
+      @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create]. The buffer is cleared of all contents
       before starting and right before returning.
       @param len initial length of the output buffer.
@@ -23,7 +23,7 @@ val to_channel :
   ?std:bool ->
   out_channel -> json -> unit
   (** Write a compact JSON value to a channel.
-      @param buf allows to reuse an existing buffer created with 
+      @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create_channel_writer] on the same channel.
       [buf] is flushed right
       before [to_channel] returns but the [out_channel] is
@@ -37,7 +37,7 @@ val to_output :
   ?std:bool ->
   < output : string -> int -> int -> int; .. > -> json -> unit
   (** Write a compact JSON value to an OO channel.
-      @param buf allows to reuse an existing buffer created with 
+      @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create_output_writer] on the same channel.
       [buf] is flushed right
       before [to_output] returns but the channel itself is
