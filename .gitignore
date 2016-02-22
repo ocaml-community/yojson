@@ -5,6 +5,8 @@
 *.o
 *.a
 *.annot
+*.cmt
+*.cmti
 META
 basic.mli
 out.html
