@@ -10,7 +10,7 @@ endif
 NATDYNLINK := $(shell if [ -f `ocamlfind ocamlc -where`/dynlink.cmxa ]; \
                       then echo YES; else echo NO; fi)
 
-FLAGS = -dtypes -g
+FLAGS = -bin-annot -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
 ifeq "${NATDYNLINK}" "YES"
@@ -43,7 +43,8 @@ install: META install-lib
 
 install-lib:
 	ocamlfind install yojson META \
-          $$(ls yojson.mli yojson_biniou.mli \
+	  $(wildcard *.cmt) $(wildcard *.cmti) $(wildcard *.mli) \
+	  $$(ls yojson.mli yojson_biniou.mli \
 		yojson.cmi yojson_biniou.cmi \
 		$(CMO) $(CMX) $(CMXS) \
 		yojson.o yojson_biniou.o)
