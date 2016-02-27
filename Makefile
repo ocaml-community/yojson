@@ -1,19 +1,11 @@
+include $(shell ocamlc -where)/Makefile.config
+
 VERSION = 1.3.1
-
-ifeq "$(shell ocamlfind ocamlc -config |grep os_type)" "os_type: Win32"
-EXE=.exe
-else
-EXE=
-endif
-
-
-NATDYNLINK := $(shell if [ -f `ocamlfind ocamlc -where`/dynlink.cmxa ]; \
-                      then echo YES; else echo NO; fi)
 
 FLAGS = -bin-annot -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
 CMX = yojson.cmx yojson_biniou.cmx
-ifeq "${NATDYNLINK}" "YES"
+ifeq ($(NATDYNLINK),true)
 CMXS = yojson.cmxs yojson_biniou.cmxs
 endif
 PACKS = easy-format,biniou
@@ -38,20 +30,16 @@ META: META.in Makefile
 	sed -e 's:@@VERSION@@:$(VERSION):' META.in > META
 
 install: META install-lib
-	test ! -f ydump || cp ydump $(BINDIR)/
-	test ! -f ydump.exe || cp ydump.exe $(BINDIR)/
+	test ! -f ydump$(EXE) || cp ydump $(BINDIR)/
 
 install-lib:
 	ocamlfind install yojson META \
 	  $(wildcard *.cmt) $(wildcard *.cmti) $(wildcard *.mli) \
-	  $$(ls yojson.mli yojson_biniou.mli \
-		yojson.cmi yojson_biniou.cmi \
-		$(CMO) $(CMX) $(CMXS) \
-		yojson.o yojson_biniou.o)
+	  $(wildcard *.cmi) $(wildcard *$(EXT_LIB)) $(wildcard *.cmo) \
+	  $(wildcard *$(EXT_OBJ)) $(wildcard *.cmx) $(wildcard *.cmxs)
 
 uninstall: uninstall-lib
-	test ! -f $(BINDIR)/ydump || rm $(BINDIR)/ydump
-	test ! -f $(BINDIR)/ydump.exe || rm $(BINDIR)/ydump.exe
+	test ! -f $(BINDIR)/ydump$(EXE) || rm $(BINDIR)/ydump$(EXE)
 
 uninstall-lib:
 	ocamlfind remove yojson
@@ -118,7 +106,7 @@ bench: bench.ml yojson.cmx META
 .PHONY: clean
 
 clean:
-	rm -f *.o *.a *.cm* *~ *.annot ydump ydump.exe \
+	rm -f *.o *.a *.cm* *~ *.annot ydump$(EXE) \
 		read.ml yojson.mli yojson.ml META
 	rm -rf doc
 	cd examples; $(MAKE) clean
