@@ -1,6 +1,6 @@
 include $(shell ocamlc -where)/Makefile.config
 
-VERSION = 1.3.2
+VERSION = 1.3.3
 
 FLAGS = -bin-annot -dtypes -g
 CMO = yojson.cmo yojson_biniou.cmo
