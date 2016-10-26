@@ -182,7 +182,7 @@ let optjunk20 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk16)))))
 let optjunk24 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk20)))))
 let optjunk28 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk24)))))
 let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
-let junk = _ optjunk32
+let junk = optjunk32
 
 rule read_json v = parse
   | "true"      { `Bool true }
