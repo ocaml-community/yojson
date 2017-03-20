@@ -1,8 +1,8 @@
 Yojson: JSON library for OCaml
 ==============================
 
-ocamldoc documentation
-----------------------
+Library documentation
+---------------------
 
 Currently at https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.html
 
