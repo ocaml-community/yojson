@@ -26,8 +26,8 @@ Design goals
 * providing a few non-standard, optional extensions of JSON.
   These extensions will include:
   * optional quotes around "simple" field/constructor names
-  * a syntax for tuples (at least 2 elements): (x, y)
-  * a syntax for variants (0 or 1 arg only): <Foo> <Bar:"abc">
+  * a syntax for tuples (at least 2 elements): `(x, y)`
+  * a syntax for variants (0 or 1 arg only): `<Foo> <Bar:"abc">`
 
 
 Other choices already in json-wheel
@@ -39,7 +39,7 @@ Other choices already in json-wheel
   exchanging binary data:
   * encoding is ASCII except for the contents of string literals
   * string literals may represent arbitrary sequence of bytes
-  * \uABCD escapes in string literals expand to UTF-8
+  * `\uABCD` escapes in string literals expand to UTF-8
 
 
 Miscellaneous
