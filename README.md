@@ -1,8 +1,12 @@
 Yojson: JSON library for OCaml
 ==============================
 
-The main project page is https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.html
-Yojson supersedes json-wheel.
+ocamldoc documentation
+----------------------
+
+Currently at https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.html
+
+_The link above is for the ocamldoc-generated of some past version of yojson. Suggestions on how to keep this documentation updated automatically for each minor release are welcome._
 
 Design goals
 ------------
