@@ -51,15 +51,15 @@ reinstall:
 read.ml: read.mll
 	ocamllex read.mll
 
-yojson.mli: yojson.mli.cppo \
+yojson.mli: yojson.cppo.mli \
             common.mli type.ml safe.mli write.mli pretty.mli write2.mli \
             read.mli util.mli
-	cppo -n yojson.mli.cppo -o yojson.mli
+	cppo -n yojson.cppo.mli -o yojson.mli
 
-yojson.ml: yojson.ml.cppo \
+yojson.ml: yojson.cppo.ml \
            common.ml type.ml safe.ml write.ml pretty.ml write2.ml \
            read.ml util.ml
-	cppo -D "VERSION $(VERSION)" yojson.ml.cppo -o yojson.ml
+	cppo -D "VERSION $(VERSION)" yojson.cppo.ml -o yojson.ml
 
 yojson.cmi: yojson.mli
 	ocamlfind ocamlc -c $(FLAGS) -package $(PACKS) yojson.mli
