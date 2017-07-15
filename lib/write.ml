@@ -17,9 +17,9 @@ let write_control_char src start stop ob c =
   Bi_outbuf.add_substring ob src !start (stop - !start);
   let i = Bi_outbuf.alloc ob 6 in
   let dst = ob.o_s in
-  String.blit "\\u00" 0 dst i 4;
-  dst.[i+4] <- hex (Char.code c lsr 4);
-  dst.[i+5] <- hex (Char.code c land 0xf);
+  Bytes.blit_string "\\u00" 0 dst i 4;
+  Bytes.set dst (i+4) (hex (Char.code c lsr 4));
+  Bytes.set dst (i+5) (hex (Char.code c land 0xf));
   start := stop + 1
 
 let finish_string src start ob =
@@ -58,11 +58,11 @@ let json_string_of_string s =
   Bi_outbuf.contents ob
 
 let test_string () =
-  let s = String.create 256 in
+  let s = Bytes.create 256 in
   for i = 0 to 255 do
-    s.[i] <- Char.chr i
+    Bytes.set s i (Char.chr i)
   done;
-  json_string_of_string s
+  json_string_of_string (Bytes.to_string s)
 
 
 let write_null ob () =
@@ -85,7 +85,7 @@ let rec write_digits s pos x =
   else
     let d = x mod 10 in
     let pos = write_digits s pos (x / 10) in
-    s.[pos] <- dec (abs d);
+    Bytes.set s pos (dec (abs d));
     pos + 1
 
 let write_int ob x =
@@ -95,7 +95,7 @@ let write_int ob x =
   else if x < 0 then (
     let s = ob.o_s in
     let pos = ob.o_len in
-    s.[pos] <- '-';
+    Bytes.set s pos '-';
     ob.o_len <- write_digits s (pos + 1) x
   )
   else

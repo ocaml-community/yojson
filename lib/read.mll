@@ -92,7 +92,7 @@
       if !n >= max10 then
         raise Int_overflow
       else
-        n := 10 * !n + dec s.[i]
+        n := 10 * !n + dec (Bytes.get s i)
     done;
     if !n < 0 then
       raise Int_overflow
@@ -119,7 +119,7 @@
       if !n <= min10 then
         raise Int_overflow
       else
-        n := 10 * !n - dec s.[i]
+        n := 10 * !n - dec (Bytes.get s i)
     done;
     if !n > 0 then
       raise Int_overflow
@@ -147,11 +147,12 @@
 
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    Bi_outbuf.add_substring buf lexbuf.lex_buffer lexbuf.lex_start_pos len
+    let s = Bytes.to_string lexbuf.lex_buffer in
+    Bi_outbuf.add_substring buf s lexbuf.lex_start_pos len
 
   let map_lexeme f lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    f lexbuf.lex_buffer lexbuf.lex_start_pos len
+    f (Bytes.to_string lexbuf.lex_buffer) lexbuf.lex_start_pos len
 
   type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
   type tuple_kind = [ `Parenthesis | `Square_bracket ]
@@ -317,7 +318,7 @@ and finish_string v = parse
 
 and map_string v f = parse
     '"'           { let b = v.buf in
-                    f b.Bi_outbuf.o_s 0 b.Bi_outbuf.o_len }
+                    f (Bytes.to_string b.Bi_outbuf.o_s) 0 b.Bi_outbuf.o_len }
   | '\\'          { finish_escaped_char v lexbuf;
                     map_string v f lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
@@ -364,10 +365,10 @@ and finish_stringlit v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-           let s = String.create (len+1) in
-           s.[0] <- '"';
-           String.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
-           s
+           let s = Bytes.create (len+1) in
+           Bytes.set s 0 '"';
+           Bytes.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
+           Bytes.to_string s
          }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
