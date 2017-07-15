@@ -147,8 +147,7 @@
 
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    let s = Bytes.to_string lexbuf.lex_buffer in
-    Bi_outbuf.add_substring buf s lexbuf.lex_start_pos len
+    Bi_outbuf.add_subbytes buf lexbuf.lex_buffer lexbuf.lex_start_pos len
 
   let map_lexeme f lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in

@@ -17,5 +17,5 @@ depends: [
   "jbuilder" {build}
   "cppo" {build}
   "easy-format"
-  "biniou" {>= "1.0.6"}
+  "biniou" {>= "1.2.0"}
 ]
