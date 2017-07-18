@@ -46,5 +46,6 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
   (modules (yojson yojson_biniou))
   (wrapped false)
   (synopsis "JSON parsing and printing (successor of json-wheel)")
-  (libraries (easy-format biniou bytes))))
+  (flags (-safe-string))
+  (libraries (easy-format biniou))))
 |} version

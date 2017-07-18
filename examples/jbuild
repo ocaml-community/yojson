@@ -2,6 +2,7 @@
 
 (executables
  ((names (filtering))
+  (flags (-safe-string))
   (libraries (yojson))))
 
 (alias

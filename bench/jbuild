@@ -3,4 +3,5 @@
 
 (executable
  ((name bench)
+  (flags (-safe-string))
   (libraries (yojson))))
