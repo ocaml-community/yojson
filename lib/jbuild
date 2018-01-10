@@ -1,13 +1,3 @@
-(* -*- tuareg -*- *)
-#require "unix"
-
-let version =
-  let ic = open_in "../VERSION" in
-  let version = input_line ic in
-  close_in ic;
-  version
-
-let () = Printf.ksprintf Jbuild_plugin.V1.send {|
 (jbuild_version 1)
 
 (ocamllex (read))
@@ -25,7 +15,7 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
     common.ml
     util.ml
     type.ml))
-  (action (run cppo -D "VERSION %s" ${<} -o ${@}))))
+  (action (run cppo -D "VERSION ${version:yojson}" ${<} -o ${@}))))
 
 (rule
  ((targets (yojson.mli))
@@ -48,4 +38,3 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
   (synopsis "JSON parsing and printing (successor of json-wheel)")
   (flags (-safe-string))
   (libraries (easy-format biniou))))
-|} version
