@@ -6,6 +6,7 @@ bug-reports: "https://github.com/mjambon/yojson/issues"
 dev-repo: "https://github.com/mjambon/yojson.git"
 available: [ ocaml-version >= "4.02.3"]
 build: [
+  ["jbuilder" "subst" "-n" name] {pinned}
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
 

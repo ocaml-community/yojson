@@ -15,7 +15,7 @@
     common.ml
     util.ml
     type.ml))
-  (action (run cppo -D "VERSION ${version:yojson}" ${<} -o ${@}))))
+  (action (run cppo ${<} -o ${@}))))
 
 (rule
  ((targets (yojson.mli))

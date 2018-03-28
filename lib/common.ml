@@ -1,4 +1,4 @@
-let version = STRINGIFY(VERSION)
+let version = "%%VERSION%%"
 
 exception Json_error of string
 
