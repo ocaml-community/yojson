@@ -1,7 +1,7 @@
 Yojson: low-level JSON library for OCaml
 ========================================
 
-_This library is for manipulating the json AST directly. For typed interfaces to json APIs, we recommend [atdgen](https://github.com/mjambon/atd)._
+_This library is for manipulating the json AST directly. For mapping between OCaml types and json, we recommend [atdgen](https://github.com/mjambon/atd)._
 
 Library documentation
 ---------------------
