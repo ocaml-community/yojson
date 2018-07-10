@@ -9,7 +9,6 @@
     read.ml
     write.ml
     safe.ml
-    type.ml
     pretty.ml
     write2.ml
     common.ml
@@ -27,7 +26,8 @@
     pretty.mli
     write2.mli
     common.mli
-    util.mli))
+    util.mli
+    type.ml))
   (action (run cppo ${<} -o ${@}))))
 
 (library
