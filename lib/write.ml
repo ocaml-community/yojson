@@ -25,10 +25,10 @@ let write_control_char src start stop ob c =
 let finish_string src start ob =
   try
     Bi_outbuf.add_substring ob src !start (String.length src - !start)
-  with _ ->
+  with exc ->
     Printf.eprintf "src=%S start=%i len=%i\n%!"
       src !start (String.length src - !start);
-    failwith "oops"
+    raise exc
 
 let write_string_body ob s =
   let start = ref 0 in
