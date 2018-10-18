@@ -9,20 +9,16 @@
         start_column = lexpos.pos_cnum - lexpos.pos_bol;
       }
 
-    let element_function lexbuf jsonmainf =
-      let pos = make_position lexbuf in
-      let jsonmain = jsonmainf () in
-        (*
-           extraction of the position should be performed
-           before evaluating json
-        *)
-      (pos, jsonmain)
+    let element_function (pos : position) x : json =
+      (pos, x)
   #else
-    let element_function _ jsonmainf = jsonmainf ()
+    let make_position _ = ()
+
+    let element_function _ (jsonmain : json) : json = jsonmain
   #endif
 
   #undef element
-  #define element(jsonexpr) element_function lexbuf (fun () -> jsonexpr)
+  #define element(jsonmain) (let pos = make_position lexbuf in element_function pos (jsonmain))
 
   module Lexing =
     (*
