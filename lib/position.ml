@@ -7,6 +7,8 @@
         file_name = Some "(dummy)";
         start_line = 0;
         start_column = 0;
+        end_line = 0;
+        end_column = 0;
       }
     in
     (dummy, x)

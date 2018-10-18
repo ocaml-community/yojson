@@ -32,40 +32,47 @@
 
   let get_raw_position v lexbuf =
     let open Lexing in
+    let fname = v.fname in
     let offs = lexbuf.lex_abs_pos in
     let bol = v.bol in
     let pos1 = offs + lexbuf.lex_start_pos - bol in
     let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
-    (v.lnum, pos1, pos2)
+    (fname, v.lnum, pos1, pos2)
 
   #ifdef POSITION
-    let make_position v lexbuf =
+    let range rawpos_start rawpos_end x : json =
       let open Lexing in
-      let (lnum, pos1, _) = get_raw_position v lexbuf in
+      let (fname, lnum1, pos1, _) = rawpos_start in
+      let (_, lnum2, _, pos2) = rawpos_end in
       let pos =
         {
-          file_name = Some lexbuf.lex_start_p.pos_fname;
-          start_line = lnum;
+          file_name = fname;
+          start_line = lnum1;
           start_column = pos1;
+          end_line = lnum2;
+          end_column = pos2;
         }
       in
       Printf.printf "[line %i, column %i]\n" pos.start_line pos.start_column;  (* for debug *)
-      pos
+      (pos, x)
 
-    let element_function (pos : position) x : json =
+    let single v lexbuf x : json =
+      let (fname, lnum, pos1, pos2) = get_raw_position v lexbuf in
+      let pos =
+        {
+          file_name = fname;
+          start_line = lnum;
+          start_column = pos1;
+          end_line = lnum;
+          end_column = pos2;
+        }
+      in
       (pos, x)
   #else
-    let make_position _ _ = ()
+    let range _ _ (x : json) : json = x
 
-    let element_function _ (jsonmain : json) : json = jsonmain
+    let single _ _ (x : json) : json = x
   #endif
-
-  #undef element
-  #define element(jsonmain) \
-    begin \
-      let pos = make_position v lexbuf in \
-      element_function pos (jsonmain) \
-    end
 
   open Printf
   open Lexing
@@ -81,7 +88,7 @@
       | _ -> assert false
 
   let custom_error descr v lexbuf =
-    let (lnum, pos1, pos2) = get_raw_position v lexbuf in
+    let (fname, lnum, pos1, pos2) = get_raw_position v lexbuf in
     let file_line =
       match v.fname with
           None -> "Line"
@@ -135,11 +142,11 @@
 
   let make_positive_int v lexbuf =
     #ifdef INT
-      try element(`Int (extract_positive_int lexbuf))
+      try single v lexbuf (`Int (extract_positive_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        element(`Intlit (lexeme lexbuf))
+        single v lexbuf (`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -162,11 +169,11 @@
 
   let make_negative_int v lexbuf =
     #ifdef INT
-      try element(`Int (extract_negative_int lexbuf))
+      try single v lexbuf (`Int (extract_negative_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        element(`Intlit (lexeme lexbuf))
+        single v lexbuf (`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -219,50 +226,50 @@ let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
 let junk = optjunk32
 
 rule read_json v = parse
-  | "true"      { element(`Bool true) }
-  | "false"     { element(`Bool false) }
-  | "null"      { element(`Null) }
+  | "true"      { single v lexbuf (`Bool true) }
+  | "false"     { single v lexbuf (`Bool false) }
+  | "null"      { single v lexbuf (`Null) }
   | "NaN"       {
                   #ifdef FLOAT
-                    element(`Float nan)
+                    single v lexbuf (`Float nan)
                   #elif defined FLOATLIT
-                    element(`Floatlit "NaN")
+                    single v lexbuf (`Floatlit "NaN")
                   #endif
                 }
   | "Infinity"  {
                   #ifdef FLOAT
-                    element(`Float infinity)
+                    single v lexbuf (`Float infinity)
                   #elif defined FLOATLIT
-                    element(`Floatlit "Infinity")
+                    single v lexbuf (`Floatlit "Infinity")
                   #endif
                 }
   | "-Infinity" {
                   #ifdef FLOAT
-                    element(`Float neg_infinity)
+                    single v lexbuf (`Float neg_infinity)
                   #elif defined FLOATLIT
-                    element(`Floatlit "-Infinity")
+                    single v lexbuf (`Floatlit "-Infinity")
                   #endif
                 }
   | '"'         {
                   #ifdef STRING
                     Bi_outbuf.clear v.buf;
-                    element(`String (finish_string v lexbuf))
+                    single v lexbuf (`String (finish_string v lexbuf))
                   #elif defined STRINGLIT
-                    element(`Stringlit (finish_stringlit v lexbuf))
+                    single v lexbuf (`Stringlit (finish_stringlit v lexbuf))
                   #endif
                 }
   | positive_int         { make_positive_int v lexbuf }
   | '-' positive_int     { make_negative_int v lexbuf }
   | float       {
                   #ifdef FLOAT
-                    element(`Float (float_of_string (lexeme lexbuf)))
+                    single v lexbuf (`Float (float_of_string (lexeme lexbuf)))
                   #elif defined FLOATLIT
-                    element(`Floatlit (lexeme lexbuf))
+                    single v lexbuf (`Floatlit (lexeme lexbuf))
                   #endif
                  }
 
   | '{'          { let acc = ref [] in
-                   let pos = make_position v lexbuf in
+                   let pos_start = get_raw_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_object_end lexbuf;
@@ -283,11 +290,12 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_object ->
-                     element_function pos (`Assoc (List.rev !acc))
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`Assoc (List.rev !acc))
                  }
 
   | '['          { let acc = ref [] in
-                   let pos = make_position v lexbuf in
+                   let pos_start = get_raw_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_array_end lexbuf;
@@ -300,12 +308,14 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_array ->
-                     element_function pos (`List (List.rev !acc))
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`List (List.rev !acc))
                  }
 
   | '('          {
                    #ifdef TUPLE
                      let acc = ref [] in
+                     let pos_start = get_raw_position v lexbuf in
                      try
                        read_space v lexbuf;
                        read_tuple_end lexbuf;
@@ -318,7 +328,8 @@ rule read_json v = parse
                        done;
                        assert false
                      with End_of_tuple ->
-                       element(`Tuple (List.rev !acc))
+                       let pos_end = get_raw_position v lexbuf in
+                       range pos_start pos_end (`Tuple (List.rev !acc))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
@@ -326,10 +337,12 @@ rule read_json v = parse
 
   | '<'          {
                    #ifdef VARIANT
+                     let pos_start = get_raw_position v lexbuf in
                      read_space v lexbuf;
                      let cons = read_ident v lexbuf in
                      read_space v lexbuf;
-                     element(`Variant (cons, finish_variant v lexbuf))
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`Variant (cons, finish_variant v lexbuf))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
