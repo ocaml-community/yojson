@@ -1,33 +1,4 @@
 {
-  #ifdef POSITION
-    let make_position lexbuf =
-      let open Lexing in
-      let lexpos = lexbuf.lex_start_p in
-      let pos =
-        {
-          file_name = Some lexpos.pos_fname;
-          start_line = lexpos.pos_lnum;
-          start_column = lexpos.pos_cnum - lexpos.pos_bol;
-        }
-      in
-      Printf.printf "[line %i, column %i]\n" pos.start_line pos.start_column;  (* for debug *)
-      pos
-
-    let element_function (pos : position) x : json =
-      (pos, x)
-  #else
-    let make_position _ = ()
-
-    let element_function _ (jsonmain : json) : json = jsonmain
-  #endif
-
-  #undef element
-  #define element(jsonmain) \
-    begin \
-      let pos = make_position lexbuf in \
-      element_function pos (jsonmain) \
-    end
-
   module Lexing =
     (*
       We override Lexing.engine in order to avoid creating a new position
@@ -51,9 +22,6 @@
       result
   end
 
-  open Printf
-  open Lexing
-
   (* see description in common.mli *)
   type lexer_state = Lexer_state.t = {
     buf : Bi_outbuf.t;
@@ -61,6 +29,46 @@
     mutable bol : int;
     mutable fname : string option;
   }
+
+  let get_raw_position v lexbuf =
+    let open Lexing in
+    let offs = lexbuf.lex_abs_pos - 1 in
+    let bol = v.bol in
+    let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
+    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
+    (v.lnum, pos1, pos2)
+
+  #ifdef POSITION
+    let make_position v lexbuf =
+      let open Lexing in
+      let (lnum, pos1, _) = get_raw_position v lexbuf in
+      let pos =
+        {
+          file_name = Some lexbuf.lex_start_p.pos_fname;
+          start_line = lnum;
+          start_column = pos1 + 1;
+        }
+      in
+      Printf.printf "[line %i, column %i]\n" pos.start_line pos.start_column;  (* for debug *)
+      pos
+
+    let element_function (pos : position) x : json =
+      (pos, x)
+  #else
+    let make_position _ _ = ()
+
+    let element_function _ (jsonmain : json) : json = jsonmain
+  #endif
+
+  #undef element
+  #define element(jsonmain) \
+    begin \
+      let pos = make_position v lexbuf in \
+      element_function pos (jsonmain) \
+    end
+
+  open Printf
+  open Lexing
 
   let dec c =
     Char.code c - 48
@@ -73,10 +81,7 @@
       | _ -> assert false
 
   let custom_error descr v lexbuf =
-    let offs = lexbuf.lex_abs_pos - 1 in
-    let bol = v.bol in
-    let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
-    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
+    let (lnum, pos1, pos2) = get_raw_position v lexbuf in
     let file_line =
       match v.fname with
           None -> "Line"
@@ -89,7 +94,7 @@
       else
         sprintf "bytes %i-%i" (pos1+1) (pos2+1)
     in
-    let msg = sprintf "%s %i, %s:\n%s" file_line v.lnum bytes descr in
+    let msg = sprintf "%s %i, %s:\n%s" file_line lnum bytes descr in
     json_error msg
 
 
