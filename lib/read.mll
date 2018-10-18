@@ -3,11 +3,15 @@
     let make_position lexbuf =
       let open Lexing in
       let lexpos = lexbuf.lex_start_p in
-      {
-        file_name = Some lexpos.pos_fname;
-        start_line = lexpos.pos_lnum;
-        start_column = lexpos.pos_cnum - lexpos.pos_bol;
-      }
+      let pos =
+        {
+          file_name = Some lexpos.pos_fname;
+          start_line = lexpos.pos_lnum;
+          start_column = lexpos.pos_cnum - lexpos.pos_bol;
+        }
+      in
+      Printf.printf "[line %i, column %i]\n" pos.start_line pos.start_column;  (* for debug *)
+      pos
 
     let element_function (pos : position) x : json =
       (pos, x)
@@ -18,7 +22,11 @@
   #endif
 
   #undef element
-  #define element(jsonmain) (let pos = make_position lexbuf in element_function pos (jsonmain))
+  #define element(jsonmain) \
+    begin \
+      let pos = make_position lexbuf in \
+      element_function pos (jsonmain) \
+    end
 
   module Lexing =
     (*
