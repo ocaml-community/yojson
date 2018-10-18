@@ -53,7 +53,6 @@
           end_column = pos2;
         }
       in
-      Printf.printf "[line %d, column %d to line %d, column %d]\n" lnum1 pos1 lnum2 pos2;  (* for debug *)
       (pos, x)
 
     let single v lexbuf x : json =
@@ -67,7 +66,6 @@
           end_column = pos2;
         }
       in
-      Printf.printf "[line %d, column %d-%d]\n" lnum pos1 pos2;  (* for debug *)
       (pos, x)
   #else
     let range _ _ (x : json) : json = x
