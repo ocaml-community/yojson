@@ -32,9 +32,9 @@
 
   let get_raw_position v lexbuf =
     let open Lexing in
-    let offs = lexbuf.lex_abs_pos - 1 in
+    let offs = lexbuf.lex_abs_pos in
     let bol = v.bol in
-    let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
+    let pos1 = offs + lexbuf.lex_start_pos - bol in
     let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
     (v.lnum, pos1, pos2)
 
@@ -46,7 +46,7 @@
         {
           file_name = Some lexbuf.lex_start_p.pos_fname;
           start_line = lnum;
-          start_column = pos1 + 1;
+          start_column = pos1;
         }
       in
       Printf.printf "[line %i, column %i]\n" pos.start_line pos.start_column;  (* for debug *)
@@ -90,9 +90,9 @@
     in
     let bytes =
       if pos1 = pos2 then
-        sprintf "byte %i" (pos1+1)
+        sprintf "byte %i" pos1
       else
-        sprintf "bytes %i-%i" (pos1+1) (pos2+1)
+        sprintf "bytes %i-%i" pos1 pos2
     in
     let msg = sprintf "%s %i, %s:\n%s" file_line lnum bytes descr in
     json_error msg
