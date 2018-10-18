@@ -219,6 +219,15 @@ let filter_string l =
       | _ -> None
   ) l
 
+#ifdef POSITION
+let filter_string_with_pos l =
+  filter_map (fun (pos, v) ->
+    match v with
+        `String x -> Some (pos, x)
+      | _ -> None
+  ) l
+#endif
+
 let keys o =
   to_assoc o |> List.map (fun (key, _) -> key)
 

@@ -200,3 +200,7 @@ val filter_number : json list -> float list
 
 val filter_string : json list -> string list
   (** Expects JSON strings and unwraps them. *)
+
+#ifdef POSITION
+val filter_string_with_pos : json list -> (position * string) list
+#endif
