@@ -262,6 +262,7 @@ rule read_json v = parse
                  }
 
   | '{'          { let acc = ref [] in
+                   let pos = make_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_object_end lexbuf;
@@ -282,10 +283,11 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_object ->
-                     element(`Assoc (List.rev !acc))
+                     element_function pos (`Assoc (List.rev !acc))
                  }
 
   | '['          { let acc = ref [] in
+                   let pos = make_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_array_end lexbuf;
@@ -298,7 +300,7 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_array ->
-                     element(`List (List.rev !acc))
+                     element_function pos (`List (List.rev !acc))
                  }
 
   | '('          {
