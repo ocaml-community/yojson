@@ -294,6 +294,9 @@ let f_sep ob =
   Bi_outbuf.add_char ob ','
 
 let rec write_json ob (x : json) =
+#ifdef POSITION
+  let (_, x) = x in
+#endif
   match x with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
@@ -361,6 +364,9 @@ and write_variant ob s o =
 
 
 let rec write_std_json ob (x : json) =
+#ifdef POSITION
+  let (_, x) = x in
+#endif
   match x with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
@@ -424,7 +430,17 @@ and write_std_variant ob s o =
 #endif
 
 
-let to_outbuf ?(std = false) ob x =
+let is_object_or_array (x : json) =
+#ifdef POSITION
+  let (_, x) = x in
+#endif
+  match x with
+      `List _
+    | `Assoc _ -> true
+    | _ -> false
+
+
+let to_outbuf ?(std = false) ob (x : json) =
   if std then (
     if not (is_object_or_array x) then
       json_error "Root is not an object or array"

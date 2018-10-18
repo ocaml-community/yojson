@@ -1,4 +1,29 @@
 {
+  #ifdef POSITION
+    let make_position lexbuf =
+      let open Lexing in
+      let lexpos = lexbuf.lex_start_p in
+      {
+        file_name = Some lexpos.pos_fname;
+        start_line = lexpos.pos_lnum;
+        start_column = lexpos.pos_cnum - lexpos.pos_bol;
+      }
+
+    let element_function lexbuf jsonmainf =
+      let pos = make_position lexbuf in
+      let jsonmain = jsonmainf () in
+        (*
+           extraction of the position should be performed
+           before evaluating json
+        *)
+      (pos, jsonmain)
+  #else
+    let element_function _ jsonmainf = jsonmainf ()
+  #endif
+
+  #undef element
+  #define element(jsonexpr) element_function lexbuf (fun () -> jsonexpr)
+
   module Lexing =
     (*
       We override Lexing.engine in order to avoid creating a new position
@@ -101,11 +126,11 @@
 
   let make_positive_int v lexbuf =
     #ifdef INT
-      try `Int (extract_positive_int lexbuf)
+      try element(`Int (extract_positive_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        element(`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -128,11 +153,11 @@
 
   let make_negative_int v lexbuf =
     #ifdef INT
-      try `Int (extract_negative_int lexbuf)
+      try element(`Int (extract_negative_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        element(`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -185,45 +210,45 @@ let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
 let junk = optjunk32
 
 rule read_json v = parse
-  | "true"      { `Bool true }
-  | "false"     { `Bool false }
-  | "null"      { `Null }
+  | "true"      { element(`Bool true) }
+  | "false"     { element(`Bool false) }
+  | "null"      { element(`Null) }
   | "NaN"       {
                   #ifdef FLOAT
-                    `Float nan
+                    element(`Float nan)
                   #elif defined FLOATLIT
-                    `Floatlit "NaN"
+                    element(`Floatlit "NaN")
                   #endif
                 }
   | "Infinity"  {
                   #ifdef FLOAT
-                    `Float infinity
+                    element(`Float infinity)
                   #elif defined FLOATLIT
-                    `Floatlit "Infinity"
+                    element(`Floatlit "Infinity")
                   #endif
                 }
   | "-Infinity" {
                   #ifdef FLOAT
-                    `Float neg_infinity
+                    element(`Float neg_infinity)
                   #elif defined FLOATLIT
-                    `Floatlit "-Infinity"
+                    element(`Floatlit "-Infinity")
                   #endif
                 }
   | '"'         {
                   #ifdef STRING
                     Bi_outbuf.clear v.buf;
-                    `String (finish_string v lexbuf)
+                    element(`String (finish_string v lexbuf))
                   #elif defined STRINGLIT
-                    `Stringlit (finish_stringlit v lexbuf)
+                    element(`Stringlit (finish_stringlit v lexbuf))
                   #endif
                 }
   | positive_int         { make_positive_int v lexbuf }
   | '-' positive_int     { make_negative_int v lexbuf }
   | float       {
                   #ifdef FLOAT
-                    `Float (float_of_string (lexeme lexbuf))
+                    element(`Float (float_of_string (lexeme lexbuf)))
                   #elif defined FLOATLIT
-                    `Floatlit (lexeme lexbuf)
+                    element(`Floatlit (lexeme lexbuf))
                   #endif
                  }
 
@@ -248,7 +273,7 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_object ->
-                     `Assoc (List.rev !acc)
+                     element(`Assoc (List.rev !acc))
                  }
 
   | '['          { let acc = ref [] in
@@ -264,7 +289,7 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_array ->
-                     `List (List.rev !acc)
+                     element(`List (List.rev !acc))
                  }
 
   | '('          {
@@ -282,7 +307,7 @@ rule read_json v = parse
                        done;
                        assert false
                      with End_of_tuple ->
-                       `Tuple (List.rev !acc)
+                       element(`Tuple (List.rev !acc))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
@@ -293,7 +318,7 @@ rule read_json v = parse
                      read_space v lexbuf;
                      let cons = read_ident v lexbuf in
                      read_space v lexbuf;
-                     `Variant (cons, finish_variant v lexbuf)
+                     element(`Variant (cons, finish_variant v lexbuf))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif

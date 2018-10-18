@@ -85,3 +85,32 @@ struct
 #undef TUPLE
 #undef VARIANT
 end
+
+module SafePos =
+struct
+#define POSITION
+#define INT
+#define INTLIT
+#define FLOAT
+#define STRING
+#define TUPLE
+#define VARIANT
+#include "type.ml"
+#include "safe.ml"
+#include "write.ml"
+#include "write2.ml"
+#include "read.ml"
+(*
+module Util =
+struct
+  #include "util.ml"
+end
+*)
+#undef POSITION
+#undef INT
+#undef INTLIT
+#undef FLOAT
+#undef STRING
+#undef TUPLE
+#undef VARIANT
+end

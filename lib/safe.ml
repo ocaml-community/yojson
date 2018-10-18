@@ -1,5 +1,9 @@
-let rec to_basic : json -> Basic.json = function
-    `Null
+let rec to_basic (x : json) : Basic.json =
+#ifdef POSITION
+  let (_, x) = x in
+#endif
+  match x with
+  | `Null
   | `Bool _
   | `Int _
   | `Float _
