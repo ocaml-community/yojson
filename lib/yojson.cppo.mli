@@ -166,12 +166,10 @@ sig
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
-(*
 module Util :
 sig
   #include "util.mli"
 end
-*)
 #undef POSITION
 #undef INT
 #undef INTLIT

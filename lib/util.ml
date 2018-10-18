@@ -40,8 +40,15 @@ let index i js =
                  ^ " of non-array type ") js
 
 let map f js =
-  match project js with
-  | `List l -> `List (List.map f l)
+#ifdef POSITION
+  let (pos, x) = js in
+  let posf v = (pos, v) in
+#else
+  let x = js in
+  let posf v = v in
+#endif
+  match x with
+  | `List l -> posf (`List (List.map f l))
   | _ -> typerr "Can't map function over non-array type " js
 
 let to_assoc js =
@@ -136,8 +143,8 @@ let filter_map f l =
 let rec rev_flatten acc l =
   match l with
       [] -> acc
-    | x :: tl ->
-        match x with
+    | js :: tl ->
+        match project js with
             `List l2 -> rev_flatten (List.rev_append l2 acc) tl
           | _ -> rev_flatten acc tl
 
@@ -145,8 +152,8 @@ let flatten l =
   List.rev (rev_flatten [] l)
 
 let filter_index i l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `List l ->
           (try Some (List.nth l i)
            with _ -> None)
@@ -154,15 +161,15 @@ let filter_index i l =
   ) l
 
 let filter_list l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `List l -> Some l
       | _ -> None
   ) l
 
 let filter_member k l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Assoc l ->
           (try Some (List.assoc k l)
            with _ -> None)
@@ -170,44 +177,44 @@ let filter_member k l =
   ) l
 
 let filter_assoc l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Assoc l -> Some l
       | _ -> None
   ) l
 
 let filter_bool l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Bool x -> Some x
       | _ -> None
   ) l
 
 let filter_int l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Int x -> Some x
       | _ -> None
   ) l
 
 let filter_float l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Float x -> Some x
       | _ -> None
   ) l
 
 let filter_number l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `Int x -> Some (float x)
       | `Float x -> Some x
       | _ -> None
   ) l
 
 let filter_string l =
-  filter_map (
-    function
+  filter_map (fun js ->
+    match project js with
         `String x -> Some x
       | _ -> None
   ) l
