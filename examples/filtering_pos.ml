@@ -41,12 +41,17 @@ let main () =
     let open Yojson.SafePos in
     let fnamestr =
       match pos.file_name with
-      | None
-      | Some("") -> ""
+      | None -> ""
       | Some(x) -> " in '" ^ x ^ "'"
     in
-    Printf.printf "%s (starts from line %d, column %d%s)\n"
-      s pos.start_line pos.start_column fnamestr
+    let lnum1 = pos.start_line in
+    let lnum2 = pos.end_line in
+    if lnum1 = lnum2 then
+      Printf.printf "%s (line %d, column %d-%d%s)\n"
+        s lnum1 pos.start_column pos.end_column fnamestr
+    else
+      Printf.printf "%s (line %d column %d to line %d, column %d)\n"
+        s lnum1 pos.start_column lnum2 pos.end_column
   ) (extract_titles json)
 
 let () = main ()
