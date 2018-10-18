@@ -254,9 +254,13 @@ rule read_json v = parse
   | '"'         {
                   #ifdef STRING
                     Bi_outbuf.clear v.buf;
-                    single v lexbuf (`String (finish_string v lexbuf))
+                    let pos_start = get_raw_position v lexbuf in
+                    let (pos_end, s) = finish_string_with_position v lexbuf in
+                    range pos_start pos_end (`String (s))
                   #elif defined STRINGLIT
-                    single v lexbuf (`Stringlit (finish_stringlit v lexbuf))
+                    let pos_start = get_raw_position v lexbuf in
+                    let (pos_end, s) = finish_stringlit_with_position v lexbuf in
+                    range pos_start pos_end (`Stringlit (s))
                   #endif
                 }
   | positive_int         { make_positive_int v lexbuf }
@@ -357,12 +361,12 @@ rule read_json v = parse
   | _            { long_error "Invalid token" v lexbuf }
 
 
-and finish_string v = parse
-    '"'           { Bi_outbuf.contents v.buf }
+and finish_string_with_position v = parse
+    '"'           { let pos_end = get_raw_position v lexbuf in (pos_end, Bi_outbuf.contents v.buf) }
   | '\\'          { finish_escaped_char v lexbuf;
-                    finish_string v lexbuf }
+                    finish_string_with_position v lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
-                    finish_string v lexbuf }
+                    finish_string_with_position v lexbuf }
   | eof           { custom_error "Unexpected end of input" v lexbuf }
 
 and map_string v f = parse
@@ -410,14 +414,15 @@ and finish_surrogate_pair v x = parse
                        for code point beyond U+FFFF" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_stringlit v = parse
+and finish_stringlit_with_position v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
            let s = Bytes.create (len+1) in
+           let pos_end = get_raw_position v lexbuf in
            Bytes.set s 0 '"';
            Bytes.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
-           Bytes.to_string s
+           (pos_end, Bytes.to_string s)
          }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
@@ -505,7 +510,7 @@ and read_int v = parse
                              lexer_error "Int overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -526,7 +531,7 @@ and read_int32 v = parse
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -547,7 +552,7 @@ and read_int64 v = parse
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -568,7 +573,7 @@ and read_number v = parse
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
   | '"'         { Bi_outbuf.clear v.buf;
-                  let s = finish_string v lexbuf in
+                  let (_, s) = finish_string_with_position v lexbuf in
                   try
                     (* Any OCaml-compliant float will pass,
                        including hexadecimal and octal notations,
@@ -590,13 +595,15 @@ and read_number v = parse
 
 and read_string v = parse
     '"'      { Bi_outbuf.clear v.buf;
-               finish_string v lexbuf }
+               let (_, s) = finish_string_with_position v lexbuf in
+               s }
   | _        { long_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
     '"'      { Bi_outbuf.clear v.buf;
-               finish_string v lexbuf }
+               let (_, s) = finish_string_with_position v lexbuf in
+               s }
   | ident as s
              { s }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
@@ -1261,4 +1268,12 @@ and junk = parse
     to_string (from_string s)
 
   let validate_json _path _value = None
+
+  let finish_string v lexbuf =
+    let (_, s) = finish_string_with_position v lexbuf in
+    s
+
+  let finish_stringlit v lexbuf =
+    let (_, s) = finish_stringlit_with_position v lexbuf in
+    s
 }
