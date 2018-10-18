@@ -105,12 +105,10 @@ struct
 #include "write.ml"
 #include "write2.ml"
 #include "read.ml"
-(*
 module Util =
 struct
   #include "util.ml"
 end
-*)
 #undef POSITION
 #undef INT
 #undef INTLIT

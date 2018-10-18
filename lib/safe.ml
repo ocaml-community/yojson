@@ -1,8 +1,5 @@
 let rec to_basic (x : json) : Basic.json =
-#ifdef POSITION
-  let (_, x) = x in
-#endif
-  match x with
+  match project x with
   | `Null
   | `Bool _
   | `Int _

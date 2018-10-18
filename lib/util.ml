@@ -1,6 +1,7 @@
 exception Type_error of string * json
 
-let typeof = function
+let typeof js =
+  match project js with
   | `Assoc _ -> "object"
   | `Bool _ -> "bool"
   | `Float _ -> "float"
@@ -20,88 +21,105 @@ let ( |> ) = ( |> )
 
 let assoc name obj =
   try List.assoc name obj
-  with Not_found -> `Null
+  with Not_found -> inject `Null
 
-let member name = function
+let member name js =
+  match project js with
   | `Assoc obj -> assoc name obj
-  | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
+  | _ -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
 
-let index i = function
-  | `List l as js ->
+let index i js =
+  match project js with
+  | `List l ->
       let len = List.length l in
       let wrapped_index = if i < 0 then len + i else i in
       if wrapped_index < 0 || wrapped_index >= len then
         raise (Undefined ("Index " ^ string_of_int i ^ " out of bounds", js))
       else List.nth l wrapped_index
-  | js -> typerr ("Can't get index " ^ string_of_int i
+  | _ -> typerr ("Can't get index " ^ string_of_int i
                  ^ " of non-array type ") js
 
-let map f = function
+let map f js =
+  match project js with
   | `List l -> `List (List.map f l)
-  | js -> typerr "Can't map function over non-array type " js
+  | _ -> typerr "Can't map function over non-array type " js
 
-let to_assoc = function
+let to_assoc js =
+  match project js with
   | `Assoc obj -> obj
-  | js -> typerr "Expected object, got " js
+  | _ -> typerr "Expected object, got " js
 
-let to_option f = function
+let to_option f js =
+  match project js with
   | `Null -> None
-  | x -> Some (f x)
+  | _ -> Some (f js)
 
-let to_bool = function
+let to_bool js =
+  match project js with
   | `Bool b -> b
-  | js -> typerr "Expected bool, got " js
+  | _ -> typerr "Expected bool, got " js
 
-let to_bool_option = function
+let to_bool_option js =
+  match project js with
   | `Bool b -> Some b
   | `Null -> None
-  | js -> typerr "Expected bool or null, got " js
+  | _ -> typerr "Expected bool or null, got " js
 
-let to_number = function
+let to_number js =
+  match project js with
   | `Int i -> float i
   | `Float f -> f
-  | js -> typerr "Expected number, got " js
+  | _ -> typerr "Expected number, got " js
 
-let to_number_option = function
+let to_number_option js =
+  match project js with
   | `Int i -> Some (float i)
   | `Float f -> Some f
   | `Null -> None
-  | js -> typerr "Expected number or null, got " js
+  | _ -> typerr "Expected number or null, got " js
 
-let to_float = function
+let to_float js =
+  match project js with
   | `Float f -> f
-  | js -> typerr "Expected float, got " js
+  | _ -> typerr "Expected float, got " js
 
-let to_float_option = function
+let to_float_option js =
+  match project js with
   | `Float f -> Some f
   | `Null -> None
-  | js -> typerr "Expected float or null, got " js
+  | _ -> typerr "Expected float or null, got " js
 
-let to_int = function
+let to_int js =
+  match project js with
   | `Int i -> i
-  | js -> typerr "Expected int, got " js
+  | _ -> typerr "Expected int, got " js
 
-let to_int_option = function
+let to_int_option js =
+  match project js with
   | `Int i -> Some i
   | `Null -> None
-  | js -> typerr "Expected int or null, got " js
+  | _ -> typerr "Expected int or null, got " js
 
-let to_list = function
+let to_list js =
+  match project js with
   | `List l -> l
-  | js -> typerr "Expected array, got " js
+  | _ -> typerr "Expected array, got " js
 
-let to_string = function
+let to_string js =
+  match project js with
   | `String s -> s
-  | js -> typerr "Expected string, got " js
+  | _ -> typerr "Expected string, got " js
 
-let to_string_option = function
+let to_string_option js =
+  match project js with
   | `String s -> Some s
   | `Null -> None
-  | js -> typerr "Expected string or null, got " js
+  | _ -> typerr "Expected string or null, got " js
 
-let convert_each f = function
+let convert_each f js =
+  match project js with
   | `List l -> List.map f l
-  | js -> typerr "Can't convert each element of non-array type " js
+  | _ -> typerr "Can't convert each element of non-array type " js
 
 
 let rec rev_filter_map f acc l =
@@ -201,6 +219,15 @@ let values o =
   to_assoc o |> List.map (fun (_, value) -> value)
 
 let combine (first : json) (second : json) =
-  match (first, second) with
-  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  json)
-  | (a, b) -> raise (Invalid_argument "Expected two objects, check inputs")
+#ifdef POSITION
+  let (pos, x) = first in
+  let (_, y) = second in
+  let f v = (pos, v) in
+#else
+  let x = first in
+  let y = second in
+  let f v = v in
+#endif
+  match (x, y) with
+  | (`Assoc a, `Assoc b) -> (f (`Assoc (a @ b)) : json)
+  | (_, _) -> raise (Invalid_argument "Expected two objects, check inputs")

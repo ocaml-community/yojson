@@ -1,4 +1,16 @@
 #ifdef POSITION
+  let project (_, x) = x
+
+  let inject x =
+    let dummy =
+      {
+        file_name = Some "(dummy)";
+        start_line = 0;
+        start_column = 0;
+      }
+    in
+    (dummy, x)
+
   let rec forget_positions ((_, x) : json) =
     match x with
     | `Null -> `Null
@@ -34,4 +46,8 @@
           | Some(j) -> `Variant (s, Some(forget_positions j))
         end
   #endif
+#else
+  let project x = x
+
+  let inject x = x
 #endif
