@@ -50,4 +50,6 @@
   let project x = x
 
   let inject x = x
+
+  let forget_positions x = x
 #endif
