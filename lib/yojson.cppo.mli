@@ -6,7 +6,7 @@
    The design goals of Yojson are the following:
    - Reducing inter-package dependencies by the use of polymorphic
    variants for the JSON tree type.
-   - Allowing type-aware serializers/deserializers 
+   - Allowing type-aware serializers/deserializers
    to read and write directly without going through a generic JSON tree,
    for efficiency purposes.
    Readers and writers of all JSON syntaxic elements are provided
@@ -15,7 +15,7 @@
    - Providing optional extensions of the JSON syntax.
    These extensions include comments, arbitrary strings,
    optional quotes around field names, tuples and variants.
-   
+
    @author Martin Jambon
    @see <http://json.org> JSON specification
  *)
@@ -60,10 +60,10 @@ sig
 (**
    This module supports a specific syntax for variants and tuples
    in addition to the standard JSON nodes.
-   Arbitrary integers are supported and represented as a decimal string 
+   Arbitrary integers are supported and represented as a decimal string
    using [`Intlit] when they cannot be represented using OCaml's int type.
 
-   This module is recommended for intensive use 
+   This module is recommended for intensive use
    or OCaml-friendly use of JSON.
 *)
 
@@ -140,3 +140,43 @@ type json_max = json
 #undef TUPLE
 #undef VARIANT
 
+(** {1 Multipurpose JSON tree type} *)
+
+module SafePos :
+sig
+(**
+   This module supports a specific syntax for variants and tuples
+   in addition to the standard JSON nodes.
+   Arbitrary integers are supported and represented as a decimal string
+   using [`Intlit] when they cannot be represented using OCaml's int type.
+
+   This module is recommended for intensive use
+   or OCaml-friendly use of JSON.
+*)
+
+#define POSITION
+#define INT
+#define INTLIT
+#define FLOAT
+#define STRING
+#define TUPLE
+#define VARIANT
+#include "type.ml"
+#include "safe.mli"
+#include "write.mli"
+#include "write2.mli"
+#include "read.mli"
+(*
+module Util :
+sig
+  #include "util.mli"
+end
+*)
+#undef POSITION
+#undef INT
+#undef INTLIT
+#undef FLOAT
+#undef STRING
+#undef TUPLE
+#undef VARIANT
+end

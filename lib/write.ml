@@ -526,21 +526,28 @@ let stream_to_file ?len ?std file st =
     raise e
 
 
-let rec sort = function
+let rec sort (x : json) : json =
+#ifdef POSITION
+  let (pos, x) = x in
+  let return v = (pos, v) in
+#else
+  let return x = x in
+#endif
+  match x with
   | `Assoc l ->
       let l = List.rev (List.rev_map (fun (k, v) -> (k, sort v)) l) in
-      `Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l)
+      return (`Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l))
   | `List l ->
-      `List (List.rev (List.rev_map sort l))
+      return (`List (List.rev (List.rev_map sort l)))
 #ifdef TUPLE
   | `Tuple l ->
-      `Tuple (List.rev (List.rev_map sort l))
+      return (`Tuple (List.rev (List.rev_map sort l)))
 #endif
 #ifdef VARIANT
   | `Variant (k, Some v) as x ->
       let v' = sort v in
-      if v == v' then x
+      if v == v' then return x
       else
-        `Variant (k, Some v')
+        return (`Variant (k, Some v'))
 #endif
-  | x -> x
+  | x -> return x

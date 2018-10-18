@@ -13,7 +13,8 @@
     write2.ml
     common.ml
     util.ml
-    type.ml))
+    type.ml
+    position.ml))
   (action (run cppo ${<} -o ${@}))))
 
 (rule

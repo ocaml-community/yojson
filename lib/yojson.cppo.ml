@@ -9,6 +9,7 @@
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "position.ml"
 type json_max = json
 #include "write.ml"
 module Pretty =
@@ -31,6 +32,7 @@ struct
 #define FLOAT
 #define STRING
 #include "type.ml"
+#include "position.ml"
 #include "write.ml"
 #include "write2.ml"
 #include "read.ml"
@@ -52,6 +54,7 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "position.ml"
 #include "safe.ml"
 #include "write.ml"
 #include "write2.ml"
@@ -76,6 +79,7 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "position.ml"
 #include "write.ml"
 #include "write2.ml"
 #include "read.ml"
@@ -96,6 +100,7 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "position.ml"
 #include "safe.ml"
 #include "write.ml"
 #include "write2.ml"
