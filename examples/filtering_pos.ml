@@ -27,8 +27,9 @@ EOF
 *)
 
 open Yojson.SafePos.Util
+open Format
 
-let show ?print:prfopt (pos, a) =
+let pp_position ppf pos =
   let open Yojson in
   let fnamestr =
     match pos.file_name with
@@ -37,17 +38,17 @@ let show ?print:prfopt (pos, a) =
   in
   let lnum1 = pos.start_line in
   let lnum2 = pos.end_line in
-  let () =
-    match prfopt with
-    | None -> Printf.printf "*"
-    | Some(prf) -> Printf.printf "%a" prf a
-  in
   if lnum1 = lnum2 then
-    Printf.printf " (line %d, column %d-%d%s)\n"
+    fprintf ppf "line %d, column %d-%d%s"
       lnum1 pos.start_column pos.end_column fnamestr
   else
-    Printf.printf " (line %d column %d to line %d, column %d)\n"
+    fprintf ppf "line %d column %d to line %d, column %d"
       lnum1 pos.start_column lnum2 pos.end_column
+
+let print_with_pos ?pp:ppopt ((pos, _) as a) =
+  match ppopt with
+  | None -> printf "<json> (%a)@," pp_position pos
+  | Some(pp) -> printf "%a (%a)@," pp a pp_position pos
 
 let extract_titles json =
   let objs =
@@ -55,16 +56,23 @@ let extract_titles json =
       |> filter_member "pages"
       |> flatten
   in
-  List.iter show objs;
+  List.iter print_with_pos objs;
   objs
     |> filter_member "title"
-    |> filter_string_with_pos
-
-let print_string chan =
-  Printf.fprintf chan "%s"
+    |> List.map to_string
 
 let main () =
-  let json = Yojson.SafePos.from_channel stdin in
-  List.iter (show ~print:print_string) (extract_titles json)
+  printf "@[<v0>";
+  begin
+    try
+      let json = Yojson.SafePos.from_channel stdin in
+      List.iter (printf "%s@,") (extract_titles json);
+    with
+    | Yojson.SafePos.Util.Type_error(msg, json) ->
+        printf "! [ERROR] %s:@," msg;
+        printf "! ";
+        print_with_pos ~pp:Yojson.SafePos.pretty_print json
+  end;
+  printf "@]"
 
 let () = main ()
