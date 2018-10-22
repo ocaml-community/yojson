@@ -293,11 +293,8 @@ let iter2 f_elt f_sep x = function
 let f_sep ob =
   Bi_outbuf.add_char ob ','
 
-let rec write_json ob (x : json) =
-#ifdef POSITION
-  let (_, x) = x in
-#endif
-  match x with
+let rec write_json ob (js : json) =
+  match project js with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
 #ifdef INT
@@ -363,11 +360,8 @@ and write_variant ob s o =
 #endif
 
 
-let rec write_std_json ob (x : json) =
-#ifdef POSITION
-  let (_, x) = x in
-#endif
-  match x with
+let rec write_std_json ob (js : json) =
+  match project js with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
 #ifdef INT
@@ -430,11 +424,8 @@ and write_std_variant ob s o =
 #endif
 
 
-let is_object_or_array (x : json) =
-#ifdef POSITION
-  let (_, x) = x in
-#endif
-  match x with
+let is_object_or_array (js : json) =
+  match project js with
       `List _
     | `Assoc _ -> true
     | _ -> false
@@ -531,7 +522,7 @@ let rec sort (x : json) : json =
   let (pos, x) = x in
   let return v = (pos, v) in
 #else
-  let return x = x in
+  let return v = v in
 #endif
   match x with
   | `Assoc l ->
