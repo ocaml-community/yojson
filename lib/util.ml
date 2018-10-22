@@ -220,6 +220,35 @@ let filter_string l =
   ) l
 
 #ifdef POSITION
+let filter_bool_with_pos l =
+  filter_map (fun (pos, v) ->
+    match v with
+        `Bool x -> Some (pos, x)
+      | _ -> None
+  ) l
+
+let filter_int_with_pos l =
+  filter_map (fun (pos, v) ->
+    match v with
+        `Int x -> Some (pos, x)
+      | _ -> None
+  ) l
+
+let filter_float_with_pos l =
+  filter_map (fun (pos, v) ->
+    match v with
+        `Float x -> Some (pos, x)
+      | _ -> None
+  ) l
+
+let filter_number_with_pos l =
+  filter_map (fun (pos, v) ->
+    match v with
+        `Int x -> Some (pos, float x)
+      | `Float x -> Some (pos, x)
+      | _ -> None
+  ) l
+
 let filter_string_with_pos l =
   filter_map (fun (pos, v) ->
     match v with
