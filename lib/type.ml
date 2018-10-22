@@ -1,15 +1,5 @@
 (** {3 Type of the JSON tree} *)
 
-#ifdef POSITION
-type position = {
-  file_name : string option;
-  start_line : int;
-  start_column : int;
-  end_line : int;
-  end_column : int;
-}
-#endif
-
 type json =
 #ifdef POSITION
   position *
