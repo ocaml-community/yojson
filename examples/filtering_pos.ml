@@ -29,7 +29,7 @@ EOF
 open Yojson.SafePos.Util
 
 let show ?print:prfopt (pos, a) =
-  let open Yojson.SafePos in
+  let open Yojson in
   let fnamestr =
     match pos.file_name with
     | None -> ""
