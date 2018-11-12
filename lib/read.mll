@@ -1139,6 +1139,8 @@ and junk = parse
       close_in_noerr ic;
       raise e
 
+  exception Finally of exn * exn
+
   let stream_from_lexbuf v ?(fin = fun () -> ()) lexbuf =
     let stream = Some true in
     let f i =
@@ -1148,7 +1150,7 @@ and junk = parse
             fin ();
             None
         | e ->
-            (try fin () with _ -> ());
+            (try fin () with fin_e -> raise (Finally (e, fin_e)));
             raise e
     in
     Stream.from f

@@ -6,8 +6,10 @@ val compact : ?std:bool -> string -> string
   (** Combined parser and printer.
       See [to_string] for the role of the optional [std] argument. *)
 
-
 (** {2 JSON readers} *)
+
+exception Finally of exn * exn
+(** Exception describing a failure in both finalizer and parsing. *)
 
 val from_string :
   ?buf:Bi_outbuf.t ->
@@ -89,6 +91,8 @@ val stream_from_channel :
       @param fin finalization function executed once when the end of the
       stream is reached either because there is no more input or because
       the input could not be parsed, raising an exception.
+      @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
+      is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
       See [from_string] for the meaning of the other optional arguments. *)
 
@@ -109,6 +113,8 @@ val stream_from_lexbuf :
   (** Input a sequence of JSON values from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       Whitespace between JSON values is fine but not required.
+      @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
+      is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
       See [stream_from_channel] for the meaning of the optional [fin]
       argument. *)
