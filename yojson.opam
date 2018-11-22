@@ -1,7 +1,7 @@
 opam-version: "1.2"
 maintainer: "martin@mjambon.com"
 authors: ["Martin Jambon"]
-homepage: "http://mjambon.com/yojson.html"
+homepage: "https://mjambon.github.io/mjambon2016/yojson-doc/Yojson.html"
 bug-reports: "https://github.com/mjambon/yojson/issues"
 dev-repo: "https://github.com/mjambon/yojson.git"
 available: [ ocaml-version >= "4.02.3"]
