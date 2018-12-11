@@ -1,21 +1,26 @@
+.PHONY: all
 all:
-	@jbuilder build @install @DEFAULT
+	@dune build @install @DEFAULT
 
+.PHONY: test
 test:
-	@jbuilder runtest
+	@dune runtest --force
 
+.PHONY: check
 check: test
 
+.PHONY: install
 install:
-	@jbuilder install
+	@dune install
 
+.PHONY: uninstall
 uninstall:
-	@jbuilder uninstall
+	@dune uninstall
 
+.PHONY: bench
 bench:
-	@jbuilder build bench/bench.exe
+	@dune build bench/bench.exe
 
-.PHONY: clean all bench test check install uninstall
-
+.PHONY: clean
 clean:
-	jbuilder clean
+	@dune clean

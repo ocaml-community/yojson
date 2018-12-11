@@ -1,0 +1,8 @@
+(executables
+ (names filtering)
+ (flags (-safe-string))
+ (libraries yojson))
+
+(alias
+ (name DEFAULT)
+ (deps filtering.exe))

@@ -1,7 +1,0 @@
-;; doesn't actually build b/c json_io doesn't exist
-(jbuild_version 1)
-
-(executable
- ((name bench)
-  (flags (-safe-string))
-  (libraries (yojson))))
