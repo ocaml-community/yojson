@@ -1,6 +1,9 @@
 (** {3 Type of the JSON tree} *)
 
 type json =
+#ifdef POSITION
+  position *
+#endif
     [
     | `Null
     | `Bool of bool

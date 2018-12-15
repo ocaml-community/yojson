@@ -10,7 +10,7 @@
     { "id": 2, "deleted": true },
     {
       "id": 3,
-      "title": "Artichoke Salad",
+        "title": { "foo": "an example of broken value" },
       "url": "http://example.com/398eb027/3"
     },
     {

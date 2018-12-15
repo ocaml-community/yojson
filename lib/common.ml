@@ -72,13 +72,6 @@ let code_of_surrogate_pair i j =
 let utf8_of_surrogate_pair buf i j =
   utf8_of_code buf (code_of_surrogate_pair i j)
 
-let is_object_or_array x =
-  match x with
-      `List _
-    | `Assoc _ -> true
-    | _ -> false
-
-
 type lexer_state = {
   buf : Bi_outbuf.t;
     (* Buffer used to accumulate substrings *)
@@ -116,3 +109,11 @@ let init_lexer ?buf ?fname ?(lnum = 1) () =
     bol = 0;
     fname = fname
   }
+
+type position = {
+  file_name : string option;
+  start_line : int;
+  start_column : int;
+  end_line : int;
+  end_column : int;
+}

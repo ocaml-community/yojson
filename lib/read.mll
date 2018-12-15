@@ -22,9 +22,6 @@
       result
   end
 
-  open Printf
-  open Lexing
-
   (* see description in common.mli *)
   type lexer_state = Lexer_state.t = {
     buf : Bi_outbuf.t;
@@ -32,6 +29,52 @@
     mutable bol : int;
     mutable fname : string option;
   }
+
+  let get_raw_position v lexbuf =
+    let open Lexing in
+    let fname = v.fname in
+    let offs = lexbuf.lex_abs_pos in
+    let bol = v.bol in
+    let pos1 = offs + lexbuf.lex_start_pos - bol in
+    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
+    (fname, v.lnum, pos1, pos2)
+
+  #ifdef POSITION
+    let range rawpos_start rawpos_end x : json =
+      let open Lexing in
+      let (fname, lnum1, pos1, _) = rawpos_start in
+      let (_, lnum2, _, pos2) = rawpos_end in
+      let pos =
+        {
+          file_name = fname;
+          start_line = lnum1;
+          start_column = pos1;
+          end_line = lnum2;
+          end_column = pos2;
+        }
+      in
+      (pos, x)
+
+    let single v lexbuf x : json =
+      let (fname, lnum, pos1, pos2) = get_raw_position v lexbuf in
+      let pos =
+        {
+          file_name = fname;
+          start_line = lnum;
+          start_column = pos1;
+          end_line = lnum;
+          end_column = pos2;
+        }
+      in
+      (pos, x)
+  #else
+    let range _ _ (x : json) : json = x
+
+    let single _ _ (x : json) : json = x
+  #endif
+
+  open Printf
+  open Lexing
 
   let dec c =
     Char.code c - 48
@@ -44,10 +87,7 @@
       | _ -> assert false
 
   let custom_error descr v lexbuf =
-    let offs = lexbuf.lex_abs_pos - 1 in
-    let bol = v.bol in
-    let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
-    let pos2 = max pos1 (offs + lexbuf.lex_curr_pos - bol) in
+    let (fname, lnum, pos1, pos2) = get_raw_position v lexbuf in
     let file_line =
       match v.fname with
           None -> "Line"
@@ -56,11 +96,11 @@
     in
     let bytes =
       if pos1 = pos2 then
-        sprintf "byte %i" (pos1+1)
+        sprintf "byte %i" pos1
       else
-        sprintf "bytes %i-%i" (pos1+1) (pos2+1)
+        sprintf "bytes %i-%i" pos1 pos2
     in
-    let msg = sprintf "%s %i, %s:\n%s" file_line v.lnum bytes descr in
+    let msg = sprintf "%s %i, %s:\n%s" file_line lnum bytes descr in
     json_error msg
 
 
@@ -101,11 +141,11 @@
 
   let make_positive_int v lexbuf =
     #ifdef INT
-      try `Int (extract_positive_int lexbuf)
+      try single v lexbuf (`Int (extract_positive_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        single v lexbuf (`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -128,11 +168,11 @@
 
   let make_negative_int v lexbuf =
     #ifdef INT
-      try `Int (extract_negative_int lexbuf)
+      try single v lexbuf (`Int (extract_negative_int lexbuf))
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        single v lexbuf (`Intlit (lexeme lexbuf))
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
@@ -185,49 +225,54 @@ let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
 let junk = optjunk32
 
 rule read_json v = parse
-  | "true"      { `Bool true }
-  | "false"     { `Bool false }
-  | "null"      { `Null }
+  | "true"      { single v lexbuf (`Bool true) }
+  | "false"     { single v lexbuf (`Bool false) }
+  | "null"      { single v lexbuf (`Null) }
   | "NaN"       {
                   #ifdef FLOAT
-                    `Float nan
+                    single v lexbuf (`Float nan)
                   #elif defined FLOATLIT
-                    `Floatlit "NaN"
+                    single v lexbuf (`Floatlit "NaN")
                   #endif
                 }
   | "Infinity"  {
                   #ifdef FLOAT
-                    `Float infinity
+                    single v lexbuf (`Float infinity)
                   #elif defined FLOATLIT
-                    `Floatlit "Infinity"
+                    single v lexbuf (`Floatlit "Infinity")
                   #endif
                 }
   | "-Infinity" {
                   #ifdef FLOAT
-                    `Float neg_infinity
+                    single v lexbuf (`Float neg_infinity)
                   #elif defined FLOATLIT
-                    `Floatlit "-Infinity"
+                    single v lexbuf (`Floatlit "-Infinity")
                   #endif
                 }
   | '"'         {
                   #ifdef STRING
                     Bi_outbuf.clear v.buf;
-                    `String (finish_string v lexbuf)
+                    let pos_start = get_raw_position v lexbuf in
+                    let (pos_end, s) = finish_string_with_position v lexbuf in
+                    range pos_start pos_end (`String (s))
                   #elif defined STRINGLIT
-                    `Stringlit (finish_stringlit v lexbuf)
+                    let pos_start = get_raw_position v lexbuf in
+                    let (pos_end, s) = finish_stringlit_with_position v lexbuf in
+                    range pos_start pos_end (`Stringlit (s))
                   #endif
                 }
   | positive_int         { make_positive_int v lexbuf }
   | '-' positive_int     { make_negative_int v lexbuf }
   | float       {
                   #ifdef FLOAT
-                    `Float (float_of_string (lexeme lexbuf))
+                    single v lexbuf (`Float (float_of_string (lexeme lexbuf)))
                   #elif defined FLOATLIT
-                    `Floatlit (lexeme lexbuf)
+                    single v lexbuf (`Floatlit (lexeme lexbuf))
                   #endif
                  }
 
   | '{'          { let acc = ref [] in
+                   let pos_start = get_raw_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_object_end lexbuf;
@@ -248,10 +293,12 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_object ->
-                     `Assoc (List.rev !acc)
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`Assoc (List.rev !acc))
                  }
 
   | '['          { let acc = ref [] in
+                   let pos_start = get_raw_position v lexbuf in
                    try
                      read_space v lexbuf;
                      read_array_end lexbuf;
@@ -264,12 +311,14 @@ rule read_json v = parse
                      done;
                      assert false
                    with End_of_array ->
-                     `List (List.rev !acc)
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`List (List.rev !acc))
                  }
 
   | '('          {
                    #ifdef TUPLE
                      let acc = ref [] in
+                     let pos_start = get_raw_position v lexbuf in
                      try
                        read_space v lexbuf;
                        read_tuple_end lexbuf;
@@ -282,7 +331,8 @@ rule read_json v = parse
                        done;
                        assert false
                      with End_of_tuple ->
-                       `Tuple (List.rev !acc)
+                       let pos_end = get_raw_position v lexbuf in
+                       range pos_start pos_end (`Tuple (List.rev !acc))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
@@ -290,10 +340,12 @@ rule read_json v = parse
 
   | '<'          {
                    #ifdef VARIANT
+                     let pos_start = get_raw_position v lexbuf in
                      read_space v lexbuf;
                      let cons = read_ident v lexbuf in
                      read_space v lexbuf;
-                     `Variant (cons, finish_variant v lexbuf)
+                     let pos_end = get_raw_position v lexbuf in
+                     range pos_start pos_end (`Variant (cons, finish_variant v lexbuf))
                    #else
                      long_error "Invalid token" v lexbuf
                    #endif
@@ -307,12 +359,12 @@ rule read_json v = parse
   | _            { long_error "Invalid token" v lexbuf }
 
 
-and finish_string v = parse
-    '"'           { Bi_outbuf.contents v.buf }
+and finish_string_with_position v = parse
+    '"'           { let pos_end = get_raw_position v lexbuf in (pos_end, Bi_outbuf.contents v.buf) }
   | '\\'          { finish_escaped_char v lexbuf;
-                    finish_string v lexbuf }
+                    finish_string_with_position v lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
-                    finish_string v lexbuf }
+                    finish_string_with_position v lexbuf }
   | eof           { custom_error "Unexpected end of input" v lexbuf }
 
 and map_string v f = parse
@@ -360,14 +412,15 @@ and finish_surrogate_pair v x = parse
                        for code point beyond U+FFFF" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_stringlit v = parse
+and finish_stringlit_with_position v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
            let s = Bytes.create (len+1) in
+           let pos_end = get_raw_position v lexbuf in
            Bytes.set s 0 '"';
            Bytes.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
-           Bytes.to_string s
+           (pos_end, Bytes.to_string s)
          }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
@@ -455,7 +508,7 @@ and read_int v = parse
                              lexer_error "Int overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -476,7 +529,7 @@ and read_int32 v = parse
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -497,7 +550,7 @@ and read_int64 v = parse
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
                            Bi_outbuf.clear v.buf;
-                           let s = finish_string v lexbuf in
+                           let (_, s) = finish_string_with_position v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
                                 including hexadecimal and octal notations,
@@ -518,7 +571,7 @@ and read_number v = parse
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
   | '"'         { Bi_outbuf.clear v.buf;
-                  let s = finish_string v lexbuf in
+                  let (_, s) = finish_string_with_position v lexbuf in
                   try
                     (* Any OCaml-compliant float will pass,
                        including hexadecimal and octal notations,
@@ -540,13 +593,15 @@ and read_number v = parse
 
 and read_string v = parse
     '"'      { Bi_outbuf.clear v.buf;
-               finish_string v lexbuf }
+               let (_, s) = finish_string_with_position v lexbuf in
+               s }
   | _        { long_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
     '"'      { Bi_outbuf.clear v.buf;
-               finish_string v lexbuf }
+               let (_, s) = finish_string_with_position v lexbuf in
+               s }
   | ident as s
              { s }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
@@ -1213,4 +1268,12 @@ and junk = parse
     to_string (from_string s)
 
   let validate_json _path _value = None
+
+  let finish_string v lexbuf =
+    let (_, s) = finish_string_with_position v lexbuf in
+    s
+
+  let finish_stringlit v lexbuf =
+    let (_, s) = finish_stringlit_with_position v lexbuf in
+    s
 }

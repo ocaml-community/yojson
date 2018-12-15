@@ -293,8 +293,8 @@ let iter2 f_elt f_sep x = function
 let f_sep ob =
   Bi_outbuf.add_char ob ','
 
-let rec write_json ob (x : json) =
-  match x with
+let rec write_json ob (js : json) =
+  match project js with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
 #ifdef INT
@@ -360,8 +360,8 @@ and write_variant ob s o =
 #endif
 
 
-let rec write_std_json ob (x : json) =
-  match x with
+let rec write_std_json ob (js : json) =
+  match project js with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
 #ifdef INT
@@ -424,7 +424,14 @@ and write_std_variant ob s o =
 #endif
 
 
-let to_outbuf ?(std = false) ob x =
+let is_object_or_array (js : json) =
+  match project js with
+      `List _
+    | `Assoc _ -> true
+    | _ -> false
+
+
+let to_outbuf ?(std = false) ob (x : json) =
   if std then (
     if not (is_object_or_array x) then
       json_error "Root is not an object or array"
@@ -510,21 +517,28 @@ let stream_to_file ?len ?std file st =
     raise e
 
 
-let rec sort = function
+let rec sort (x : json) : json =
+#ifdef POSITION
+  let (pos, x) = x in
+  let return v = (pos, v) in
+#else
+  let return v = v in
+#endif
+  match x with
   | `Assoc l ->
       let l = List.rev (List.rev_map (fun (k, v) -> (k, sort v)) l) in
-      `Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l)
+      return (`Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l))
   | `List l ->
-      `List (List.rev (List.rev_map sort l))
+      return (`List (List.rev (List.rev_map sort l)))
 #ifdef TUPLE
   | `Tuple l ->
-      `Tuple (List.rev (List.rev_map sort l))
+      return (`Tuple (List.rev (List.rev_map sort l)))
 #endif
 #ifdef VARIANT
   | `Variant (k, Some v) as x ->
       let v' = sort v in
-      if v == v' then x
+      if v == v' then return x
       else
-        `Variant (k, Some v')
+        return (`Variant (k, Some v'))
 #endif
-  | x -> x
+  | x -> return x

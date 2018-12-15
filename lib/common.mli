@@ -36,6 +36,14 @@ val init_lexer :
   unit -> lexer_state
   (** Create a fresh lexer_state record. *)
 
+type position = {
+  file_name : string option;
+  start_line : int;
+  start_column : int;
+  end_line : int;
+  end_column : int;
+}
+  (** The type for code positions. *)
 
 (**/**)
 (* begin undocumented section *)

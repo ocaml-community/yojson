@@ -200,3 +200,20 @@ val filter_number : json list -> float list
 
 val filter_string : json list -> string list
   (** Expects JSON strings and unwraps them. *)
+
+#ifdef POSITION
+val filter_bool_with_pos : json list -> (position * bool) list
+  (** Same as [filter_bool], but preserves the code position of the values. *)
+
+val filter_int_with_pos : json list -> (position * int) list
+  (** Same as [filter_int], but preserves the code position of the values. *)
+
+val filter_float_with_pos : json list -> (position * float) list
+  (** Same as [filter_float], but preserves the code position of the values. *)
+
+val filter_number_with_pos : json list -> (position * float) list
+  (** Same as [filter_number], but preserves the code position of the values. *)
+
+val filter_string_with_pos : json list -> (position * string) list
+  (** Same as [filter_string], but preserves the code position of the values. *)
+#endif
