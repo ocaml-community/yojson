@@ -1,6 +1,5 @@
 (*
-  ocamlfind ocamlopt -o filtering filtering.ml -package yojson -linkpkg
-  ./filtering <<EOF
+  dune exec examples/filtering.exe <<EOF
 {
   "id": "398eb027",
   "name": "John Doe",

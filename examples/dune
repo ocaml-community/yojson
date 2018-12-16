@@ -4,5 +4,5 @@
  (libraries yojson))
 
 (alias
- (name DEFAULT)
+ (name examples)
  (deps filtering.exe))

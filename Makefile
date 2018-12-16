@@ -1,6 +1,10 @@
 .PHONY: all
 all:
-	@dune build @install @DEFAULT
+	@dune build @install @examples
+
+.PHONY: run-examples
+run-examples:
+	dune exec examples/filtering.exe < examples/filtering.json
 
 .PHONY: test
 test:
