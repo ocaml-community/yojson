@@ -1,5 +1,5 @@
-(executables
- (names filtering)
+(executable
+ (name filtering)
  (flags (-safe-string))
  (libraries yojson))
 
