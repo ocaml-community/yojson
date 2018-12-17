@@ -6,9 +6,6 @@ all:
 run-examples:
 	dune exec examples/filtering.exe < examples/filtering.json
 
-.PHONY: check
-check: test
-
 .PHONY: install
 install:
 	@dune install
