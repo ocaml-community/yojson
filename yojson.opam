@@ -9,7 +9,6 @@ build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
-run-test: ["dune" "runtest" "-p" name]
 depends: [
   "ocaml" {>= "4.02.3"}
   "dune" {build}

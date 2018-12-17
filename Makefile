@@ -6,10 +6,6 @@ all:
 run-examples:
 	dune exec examples/filtering.exe < examples/filtering.json
 
-.PHONY: test
-test:
-	@dune runtest --force
-
 .PHONY: check
 check: test
 
