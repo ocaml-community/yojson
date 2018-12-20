@@ -4,6 +4,7 @@
  (targets yojson.ml)
  (deps
    (:out yojson.cppo.ml)
+   equal.ml
    read.ml
    write.ml
    safe.ml
@@ -35,4 +36,5 @@
  (wrapped false)
  (synopsis "JSON parsing and printing (successor of json-wheel)")
  (flags (-safe-string))
+ (preprocess (pps ppx_deriving.show))
  (libraries easy-format biniou))

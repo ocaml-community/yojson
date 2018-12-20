@@ -30,7 +30,7 @@ type t =
 #ifdef VARIANT
     | `Variant of (string * t option)
 #endif
-    ]
+    ] [@@deriving show]
 (**
 All possible cases defined in Yojson:
 - `Null: JSON null

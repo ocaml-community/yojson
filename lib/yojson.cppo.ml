@@ -8,6 +8,7 @@
 #define STRINGLIT
 #define TUPLE
 #define VARIANT
+#include "equal.ml"
 #include "type.ml"
 type json_max = json
 #include "write.ml"
@@ -30,6 +31,7 @@ struct
 #define INT
 #define FLOAT
 #define STRING
+#include "equal.ml"
 #include "type.ml"
 #include "write.ml"
 #include "write2.ml"
@@ -51,6 +53,7 @@ struct
 #define STRING
 #define TUPLE
 #define VARIANT
+#include "equal.ml"
 #include "type.ml"
 #include "safe.ml"
 #include "write.ml"
@@ -75,6 +78,7 @@ struct
 #define STRINGLIT
 #define TUPLE
 #define VARIANT
+#include "equal.ml"
 #include "type.ml"
 #include "write.ml"
 #include "write2.ml"
