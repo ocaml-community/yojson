@@ -15,7 +15,6 @@ depends: [
   "cppo" {build}
   "easy-format"
   "biniou" {>= "1.2.0"}
-  "ppx_deriving"
 ]
 synopsis:
   "Yojson is an optimized parsing and printing library for the JSON format"

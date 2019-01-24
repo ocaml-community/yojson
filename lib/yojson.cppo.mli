@@ -41,6 +41,7 @@ sig
 #define FLOAT
 #define STRING
 #include "type.ml"
+#include "monomorphic.mli"
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
@@ -74,6 +75,7 @@ sig
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "monomorphic.mli"
 #include "safe.mli"
 #include "write.mli"
 #include "write2.mli"
@@ -107,6 +109,7 @@ sig
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "monomorphic.mli"
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
@@ -128,6 +131,7 @@ end
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "monomorphic.mli"
 type json_max = json
 #include "write.mli"
 #include "write2.mli"
