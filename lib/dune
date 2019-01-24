@@ -4,7 +4,7 @@
  (targets yojson.ml)
  (deps
    (:out yojson.cppo.ml)
-   equal.ml
+   monomorphic.ml
    read.ml
    write.ml
    safe.ml
@@ -19,6 +19,7 @@
  (targets yojson.mli)
  (deps
    (:out yojson.cppo.mli)
+   monomorphic.mli
    write.mli
    read.mli
    safe.mli
