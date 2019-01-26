@@ -1,5 +1,5 @@
 opam-version: "2.0"
-maintainer: "martin@mjambon.com"
+maintainer: "nathan@cryptosense.com"
 authors: ["Martin Jambon"]
 homepage: "https://github.com/ocaml-community/yojson"
 bug-reports: "https://github.com/ocaml-community/yojson/issues"
@@ -14,7 +14,6 @@ depends: [
   "ocaml" {>= "4.02.3"}
   "dune"
   "cppo" {build}
-  "biniou" {>= "1.2.0"}
   "alcotest" {with-test & >= "0.8.5"}
 ]
 synopsis:

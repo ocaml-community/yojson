@@ -19,7 +19,7 @@ let create_in_param ?(len = 256) () = {
 
 
 let utf8_of_code buf x =
-  let add = Bi_outbuf.add_char in
+  let add = Buffer.add_char in
 
   (* Straight <= doesn't work with signed 31-bit ints *)
   let maxbits n x = x lsr n = 0 in
@@ -80,7 +80,7 @@ let is_object_or_array x =
 
 
 type lexer_state = {
-  buf : Bi_outbuf.t;
+  buf : Buffer.t;
     (* Buffer used to accumulate substrings *)
 
   mutable lnum : int;
@@ -97,7 +97,7 @@ type lexer_state = {
 module Lexer_state =
 struct
   type t = lexer_state = {
-    buf : Bi_outbuf.t;
+    buf : Buffer.t;
     mutable lnum : int;
     mutable bol : int;
     mutable fname : string option;
@@ -107,7 +107,7 @@ end
 let init_lexer ?buf ?fname ?(lnum = 1) () =
   let buf =
     match buf with
-	None -> Bi_outbuf.create 256
+	None -> Buffer.create 256
       | Some buf -> buf
   in
   {

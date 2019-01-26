@@ -1,0 +1,23 @@
+opam-version: "2.0"
+maintainer: "nathan@cryptosense.com"
+authors: ["Martin Jambon"]
+homepage: "https://github.com/ocaml-community/yojson"
+bug-reports: "https://github.com/ocaml-community/yojson/issues"
+dev-repo: "git+https://github.com/ocaml-community/yojson.git"
+doc: "https://ocaml-community.github.io/yojson/"
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+depends: [
+  "ocaml" {>= "4.02.3"}
+  "dune" {build}
+  "yojson" {= version}
+  "biniou" {>= "1.2.0"}
+]
+synopsis:
+  "Yojson-biniou provides Biniou support for Yojson"
+description: """
+Yojson-biniou provides Biniou support for Yojson.
+
+It used to be part of the main Yojson package but was spun off."""
