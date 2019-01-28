@@ -4,7 +4,7 @@ val to_string :
   ?buf:Bi_outbuf.t ->
   ?len:int ->
   ?std:bool ->
-  json -> string
+  t -> string
   (** Write a compact JSON value to a string.
       @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create]. The buffer is cleared of all contents
@@ -21,7 +21,7 @@ val to_channel :
   ?buf:Bi_outbuf.t ->
   ?len:int ->
   ?std:bool ->
-  out_channel -> json -> unit
+  out_channel -> t -> unit
   (** Write a compact JSON value to a channel.
       @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create_channel_writer] on the same channel.
@@ -35,7 +35,7 @@ val to_output :
   ?buf:Bi_outbuf.t ->
   ?len:int ->
   ?std:bool ->
-  < output : string -> int -> int -> int; .. > -> json -> unit
+  < output : string -> int -> int -> int; .. > -> t -> unit
   (** Write a compact JSON value to an OO channel.
       @param buf allows to reuse an existing buffer created with
       [Bi_outbuf.create_output_writer] on the same channel.
@@ -48,13 +48,13 @@ val to_output :
 val to_file :
   ?len:int ->
   ?std:bool ->
-  string -> json -> unit
+  string -> t -> unit
   (** Write a compact JSON value to a file.
       See [to_string] for the role of the optional arguments. *)
 
 val to_outbuf :
   ?std:bool ->
-  Bi_outbuf.t -> json -> unit
+  Bi_outbuf.t -> t -> unit
   (** Write a compact JSON value to an existing buffer.
       See [to_string] for the role of the optional argument. *)
 
@@ -62,7 +62,7 @@ val stream_to_string :
   ?buf:Bi_outbuf.t ->
   ?len:int ->
   ?std:bool ->
-  json Stream.t -> string
+  t Stream.t -> string
   (** Write a newline-separated sequence of compact one-line JSON values to
       a string.
       See [to_string] for the role of the optional arguments. *)
@@ -71,7 +71,7 @@ val stream_to_channel :
   ?buf:Bi_outbuf.t ->
   ?len:int ->
   ?std:bool ->
-  out_channel -> json Stream.t -> unit
+  out_channel -> t Stream.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       a channel.
       See [to_channel] for the role of the optional arguments. *)
@@ -79,7 +79,7 @@ val stream_to_channel :
 val stream_to_file :
   ?len:int ->
   ?std:bool ->
-  string -> json Stream.t -> unit
+  string -> t Stream.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       a file.
       See [to_string] for the role of the optional arguments. *)
@@ -87,14 +87,14 @@ val stream_to_file :
 val stream_to_outbuf :
   ?std:bool ->
   Bi_outbuf.t ->
-  json Stream.t -> unit
+  t Stream.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       an existing buffer.
       See [to_string] for the role of the optional arguments. *)
 
 (** {2 Miscellaneous} *)
 
-val sort : json -> json
+val sort : t -> t
   (** Sort object fields (stable sort, comparing field names
       and treating them as byte sequences) *)
 
@@ -130,20 +130,20 @@ val write_floatlit : Bi_outbuf.t -> string -> unit
 val write_stringlit : Bi_outbuf.t -> string -> unit
 #endif
 
-val write_assoc : Bi_outbuf.t -> (string * json) list -> unit
-val write_list : Bi_outbuf.t -> json list -> unit
+val write_assoc : Bi_outbuf.t -> (string * t) list -> unit
+val write_list : Bi_outbuf.t -> t list -> unit
 #ifdef TUPLE
-val write_tuple : Bi_outbuf.t -> json list -> unit
-val write_std_tuple : Bi_outbuf.t -> json list -> unit
+val write_tuple : Bi_outbuf.t -> t list -> unit
+val write_std_tuple : Bi_outbuf.t -> t list -> unit
 #endif
 #ifdef VARIANT
-val write_variant : Bi_outbuf.t -> string -> json option -> unit
-val write_std_variant : Bi_outbuf.t -> string -> json option -> unit
+val write_variant : Bi_outbuf.t -> string -> t option -> unit
+val write_std_variant : Bi_outbuf.t -> string -> t option -> unit
 #endif
 
 
-val write_json : Bi_outbuf.t -> json -> unit
-val write_std_json : Bi_outbuf.t -> json -> unit
+val write_json : Bi_outbuf.t -> t -> unit
+val write_std_json : Bi_outbuf.t -> t -> unit
 
 (* end undocumented section *)
 (**/**)

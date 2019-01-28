@@ -9,7 +9,7 @@
 #define TUPLE
 #define VARIANT
 #include "type.ml"
-type json_max = json
+type json_max = t
 #include "write.ml"
 #include "monomorphic.ml"
 module Pretty =
