@@ -137,13 +137,11 @@ let rec equal a b =
     | `Tuple xs, `Tuple ys
 #endif
     | `List xs, `List ys ->
-      (match List.length xs = List.length ys with
-      | false -> false
-      | true ->
-        List.fold_left2 (fun acc x y ->
-          match acc with
-          | false -> false
-          | true -> equal x y) true xs ys)
+      (match List.for_all2 equal xs ys with
+      | result -> result
+      | exception Invalid_argument _ ->
+        (* the lists were of different lengths, thus unequal *)
+        false)
 #ifdef VARIANT
     | `Variant (name, value), `Variant (name', value') ->
       (match name = name' with
