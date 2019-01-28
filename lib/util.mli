@@ -49,7 +49,7 @@ v}
 {v
 open Yojson.Basic.Util
 
-let extract_titles (json : Yojson.Basic.json) : string list =
+let extract_titles (json : Yojson.Basic.t) : string list =
   [json]
     |> filter_member "pages"
     |> flatten
@@ -58,12 +58,12 @@ let extract_titles (json : Yojson.Basic.json) : string list =
 v}
 *)
 
-exception Type_error of string * json
+exception Type_error of string * t
   (** Raised when the JSON value is not of the correct type to support an
       operation, e.g. [member] on an [`Int]. The string message explains the
       mismatch. *)
 
-exception Undefined of string * json
+exception Undefined of string * t
   (** Raised when the equivalent JavaScript operation on the JSON value would
       return undefined. Currently this only happens when an array index is out
       of bounds. *)
@@ -72,82 +72,82 @@ val ( |> ) : 'a -> ('a -> 'b) -> 'b
 (** @deprecated Forward pipe operator; useful for composing JSON
     access functions without too many parentheses *)
 
-val keys : json -> string list
+val keys : t -> string list
   (** Returns all the key names in the given JSON object *)
 
-val values : json -> json list
+val values : t -> t list
   (** Return all the value in the given JSON object *)
 
-val combine : json -> json -> json
+val combine : t -> t -> t
   (** Combine two JSON Objects together *)
 
-val member : string -> json -> json
+val member : string -> t -> t
   (** [member k obj] returns the value associated with the key [k] in the JSON
       object [obj], or [`Null] if [k] is not present in [obj]. *)
 
-val index : int -> json -> json
+val index : int -> t -> t
   (** [index i arr] returns the value at index [i] in the JSON array [arr].
       Negative indices count from the end of the list (so -1 is the last
       element). *)
 
-val map : (json -> json) -> json -> json
+val map : (t -> t) -> t -> t
   (** [map f arr] calls the function [f] on each element of the JSON array
       [arr], and returns a JSON array containing the results. *)
 
-val to_assoc : json -> (string * json) list
+val to_assoc : t -> (string * t) list
   (** Extract the items of a JSON object or raise [Type_error]. *)
 
-val to_option : (json -> 'a) -> json -> 'a option
+val to_option : (t -> 'a) -> t -> 'a option
   (** Return [None] if the JSON value is null or map the JSON value
       to [Some] value using the provided function. *)
 
-val to_bool : json -> bool
+val to_bool : t -> bool
   (** Extract a boolean value or raise [Type_error]. *)
 
-val to_bool_option : json -> bool option
+val to_bool_option : t -> bool option
   (** Extract [Some] boolean value,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
-val to_number : json -> float
+val to_number : t -> float
   (** Extract a number or raise [Type_error]. *)
 
-val to_number_option : json -> float option
+val to_number_option : t -> float option
   (** Extract [Some] number,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
-val to_float : json -> float
+val to_float : t -> float
   (** Extract a float value or raise [Type_error].
       [to_number] is generally preferred as it also works with int literals. *)
 
-val to_float_option : json -> float option
+val to_float_option : t -> float option
   (** Extract [Some] float value,
       return [None] if the value is null,
       or raise [Type_error] otherwise.
       [to_number_option] is generally preferred as it also works
       with int literals. *)
 
-val to_int : json -> int
+val to_int : t -> int
   (** Extract an int from a JSON int or raise [Type_error]. *)
 
-val to_int_option : json -> int option
+val to_int_option : t -> int option
   (** Extract [Some] int from a JSON int,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
-val to_list : json -> json list
+val to_list : t -> t list
   (** Extract a list from JSON array or raise [Type_error]. *)
 
-val to_string : json -> string
+val to_string : t -> string
   (** Extract a string from a JSON string or raise [Type_error]. *)
 
-val to_string_option : json -> string option
+val to_string_option : t -> string option
   (** Extract [Some] string from a JSON string,
       return [None] if the value is null,
       or raise [Type_error] otherwise. *)
 
-val convert_each : (json -> 'a) -> json -> 'a list
+val convert_each : (t -> 'a) -> t -> 'a list
   (** The conversion functions above cannot be used with [map], because they do
       not return JSON values. This convenience function [convert_each to_f arr]
       is equivalent to [List.map to_f (to_list arr)]. *)
@@ -167,36 +167,36 @@ val filter_map : ('a -> 'b option) -> 'a list -> 'b list
   (** [filter_map f l] maps each element of the list [l] to an optional value
       using function [f] and unwraps the resulting values. *)
 
-val flatten : json list -> json list
+val flatten : t list -> t list
   (** Expects JSON arrays and returns all their elements as a single
       list. [flatten l] is equivalent to [List.flatten (filter_list l)]. *)
 
-val filter_index : int -> json list -> json list
+val filter_index : int -> t list -> t list
   (** Expects JSON arrays and returns all their elements existing at the given
       position. *)
 
-val filter_list : json list -> json list list
+val filter_list : t list -> t list list
   (** Expects JSON arrays and unwraps them. *)
 
-val filter_member : string -> json list -> json list
+val filter_member : string -> t list -> t list
   (** Expects JSON objects and returns all the fields of the given name
       (at most one field per object). *)
 
-val filter_assoc : json list -> (string * json) list list
+val filter_assoc : t list -> (string * t) list list
   (** Expects JSON objects and unwraps them. *)
 
-val filter_bool : json list -> bool list
+val filter_bool : t list -> bool list
   (** Expects JSON booleans and unwraps them. *)
 
-val filter_int : json list -> int list
+val filter_int : t list -> int list
   (** Expects JSON integers ([`Int] nodes) and unwraps them. *)
 
-val filter_float : json list -> float list
+val filter_float : t list -> float list
   (** Expects JSON floats ([`Float] nodes) and unwraps them. *)
 
-val filter_number : json list -> float list
+val filter_number : t list -> float list
   (** Expects JSON numbers ([`Int] or [`Float]) and unwraps them.
       Ints are converted to floats. *)
 
-val filter_string : json list -> string list
+val filter_string : t list -> string list
   (** Expects JSON strings and unwraps them. *)

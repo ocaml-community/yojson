@@ -1,6 +1,6 @@
 (** {3 Type of the JSON tree} *)
 
-type json =
+type t =
     [
     | `Null
     | `Bool of bool
@@ -22,13 +22,13 @@ type json =
 #ifdef STRINGLIT
     | `Stringlit of string
 #endif
-    | `Assoc of (string * json) list
-    | `List of json list
+    | `Assoc of (string * t) list
+    | `List of t list
 #ifdef TUPLE
-    | `Tuple of json list
+    | `Tuple of t list
 #endif
 #ifdef VARIANT
-    | `Variant of (string * json option)
+    | `Variant of (string * t option)
 #endif
     ]
 (**
@@ -52,6 +52,12 @@ All possible cases defined in Yojson:
 - `Variant of (string * json option): Variant (non-standard extension of JSON).
 	    Syntax: [<"Foo">] or [<"Bar":123>].
 *)
+
+type json = t [@@deprecated "json types are being renamed and will be removed in the next Yojson major version. Use type t instead"]
+(**
+ * Compatibility type alias for type `t`
+ *)
+
 (*
   Note to adventurers: ocamldoc does not support inline comments
   on each polymorphic variant, and cppo doesn't allow to concatenate

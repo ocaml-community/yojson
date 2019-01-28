@@ -1,4 +1,4 @@
-let rec to_basic : json -> Basic.json = function
+let rec to_basic : t -> Basic.t = function
     `Null
   | `Bool _
   | `Int _

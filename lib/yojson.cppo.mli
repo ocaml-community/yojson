@@ -42,6 +42,7 @@ sig
 #define STRING
 #include "type.ml"
 #include "write.mli"
+#include "monomorphic.mli"
 #include "write2.mli"
 #include "read.mli"
 module Util :
@@ -74,6 +75,7 @@ sig
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "monomorphic.mli"
 #include "safe.mli"
 #include "write.mli"
 #include "write2.mli"
@@ -107,6 +109,7 @@ sig
 #define TUPLE
 #define VARIANT
 #include "type.ml"
+#include "monomorphic.mli"
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
@@ -128,7 +131,8 @@ end
 #define TUPLE
 #define VARIANT
 #include "type.ml"
-type json_max = json
+#include "monomorphic.mli"
+type json_max = t
 #include "write.mli"
 #include "write2.mli"
 #undef INT

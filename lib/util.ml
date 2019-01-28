@@ -1,4 +1,4 @@
-exception Type_error of string * json
+exception Type_error of string * t
 
 let typeof = function
   | `Assoc _ -> "object"
@@ -14,7 +14,7 @@ let typeof = function
 
 let typerr msg js = raise (Type_error (msg ^ typeof js, js))
 
-exception Undefined of string * json
+exception Undefined of string * t
 
 let ( |> ) = ( |> )
 
@@ -200,7 +200,7 @@ let keys o =
 let values o =
   to_assoc o |> List.map (fun (_, value) -> value)
 
-let combine (first : json) (second : json) =
+let combine (first : t) (second : t) =
   match (first, second) with
-  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  json)
+  | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  t)
   | (a, b) -> raise (Invalid_argument "Expected two objects, check inputs")

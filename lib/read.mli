@@ -15,7 +15,7 @@ val from_string :
   ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json
+  string -> t
   (** Read a JSON value from a string.
       @param buf use this buffer at will during parsing instead of creating
       a new one.
@@ -28,7 +28,7 @@ val from_channel :
   ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> json
+  in_channel -> t
   (** Read a JSON value from a channel.
       See [from_string] for the meaning of the optional arguments. *)
 
@@ -36,7 +36,7 @@ val from_file :
   ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json
+  string -> t
   (** Read a JSON value from a file.
       See [from_string] for the meaning of the optional arguments. *)
 
@@ -62,7 +62,7 @@ val init_lexer :
 val from_lexbuf :
   lexer_state ->
   ?stream:bool ->
-  Lexing.lexbuf -> json
+  Lexing.lexbuf -> t
   (** Read a JSON value from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       See [from_string] for the meaning of the optional arguments.
@@ -75,7 +75,7 @@ val stream_from_string :
   ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json Stream.t
+  string -> t Stream.t
   (** Input a sequence of JSON values from a string.
       Whitespace between JSON values is fine but not required.
       See [from_string] for the meaning of the optional arguments. *)
@@ -85,7 +85,7 @@ val stream_from_channel :
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> json Stream.t
+  in_channel -> t Stream.t
   (** Input a sequence of JSON values from a channel.
       Whitespace between JSON values is fine but not required.
       @param fin finalization function executed once when the end of the
@@ -100,7 +100,7 @@ val stream_from_file :
   ?buf:Bi_outbuf.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json Stream.t
+  string -> t Stream.t
   (** Input a sequence of JSON values from a file.
       Whitespace between JSON values is fine but not required.
 
@@ -109,7 +109,7 @@ val stream_from_file :
 val stream_from_lexbuf :
   lexer_state ->
   ?fin:(unit -> unit) ->
-  Lexing.lexbuf -> json Stream.t
+  Lexing.lexbuf -> t Stream.t
   (** Input a sequence of JSON values from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       Whitespace between JSON values is fine but not required.
@@ -120,7 +120,7 @@ val stream_from_lexbuf :
       argument. *)
 
 
-type json_line = [ `Json of json | `Exn of exn ]
+type json_line = [ `Json of t | `Exn of exn ]
     (** The type of values resulting from a parsing attempt of a JSON value. *)
 
 val linestream_from_channel :
@@ -170,7 +170,7 @@ val map_ident :
 
 type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
 val start_any_variant : lexer_state -> Lexing.lexbuf -> variant_kind
-val finish_variant : lexer_state -> Lexing.lexbuf -> json option
+val finish_variant : lexer_state -> Lexing.lexbuf -> t option
 val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
 val read_lt : lexer_state -> Lexing.lexbuf -> unit
 val read_gt : lexer_state -> Lexing.lexbuf -> unit
@@ -252,15 +252,15 @@ val read_object_end : Lexing.lexbuf -> unit
 val read_object_sep : lexer_state -> Lexing.lexbuf -> unit
 val read_colon : lexer_state -> Lexing.lexbuf -> unit
 
-val read_json : lexer_state -> Lexing.lexbuf -> json
+val read_json : lexer_state -> Lexing.lexbuf -> t
 val skip_json : lexer_state -> Lexing.lexbuf -> unit
 val buffer_json : lexer_state -> Lexing.lexbuf -> unit
 
-val validate_json : 'path -> json -> 'error option
+val validate_json : 'path -> t -> 'error option
   (* always returns [None].
      Provided so that atdgen users can write:
 
-       type json <ocaml module="Yojson.Safe"> = abstract
+       type t <ocaml module="Yojson.Safe"> = abstract
   *)
 
 (* end undocumented section *)

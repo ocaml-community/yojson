@@ -1,7 +1,5 @@
 (* included: type.ml *)
 
-open Bi_outbuf
-
 let hex n =
   Char.chr (
     if n < 10 then n + 48
@@ -293,7 +291,7 @@ let iter2 f_elt f_sep x = function
 let f_sep ob =
   Bi_outbuf.add_char ob ','
 
-let rec write_json ob (x : json) =
+let rec write_json ob (x : t) =
   match x with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
@@ -360,7 +358,7 @@ and write_variant ob s o =
 #endif
 
 
-let rec write_std_json ob (x : json) =
+let rec write_std_json ob (x : t) =
   match x with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
