@@ -122,10 +122,9 @@ let rec equal a b =
     | `Stringlit a, `Stringlit b -> a = b
 #endif
     | `Assoc xs, `Assoc ys ->
-      let xs, ys = match sort (`Assoc xs), sort (`Assoc ys) with
-        | `Assoc xs, `Assoc ys -> xs, ys
-        | _ -> raise (Failure "Sorting Assoc returned non-Assoc")
-      in
+      let compare_keys = fun (key, _) (key', _) -> String.compare key key' in
+      let xs = List.stable_sort compare_keys xs in
+      let ys = List.stable_sort compare_keys ys in
       (match List.for_all2 (fun (key, value) (key', value') ->
         match key = key' with
         | false -> false
