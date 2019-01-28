@@ -126,13 +126,10 @@ let rec equal a b =
         | `Assoc xs, `Assoc ys -> xs, ys
         | _ -> raise (Failure "Sorting Assoc returned non-Assoc")
       in
-      (match List.fold_left2 (fun acc (key, value) (key', value') ->
-        match acc with
+      (match List.for_all2 (fun (key, value) (key', value') ->
+        match key = key' with
         | false -> false
-        | true ->
-          (match key = key' with
-          | false -> false
-          | true -> equal value value')) true xs ys with
+        | true -> equal value value') xs ys with
       | result -> result
       | exception Invalid_argument _ ->
         (* the lists were of different lengths, thus unequal *)
