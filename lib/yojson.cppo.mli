@@ -41,8 +41,8 @@ sig
 #define FLOAT
 #define STRING
 #include "type.ml"
-#include "monomorphic.mli"
 #include "write.mli"
+#include "monomorphic.mli"
 #include "write2.mli"
 #include "read.mli"
 module Util :

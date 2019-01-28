@@ -122,25 +122,21 @@ let rec equal a b =
     | `Stringlit a, `Stringlit b -> a = b
 #endif
     | `Assoc xs, `Assoc ys ->
-      (* determine whether a k exists in assoc that has value v *)
-      let rec mem_value k v = function
-        | [] -> false
-        | (k', v')::xs ->
-            match k = k' with
-            | false -> mem_value k v xs
-            | true ->
-              match equal v v' with
-              | true -> true
-              | false -> mem_value k v xs
+      let xs, ys = match sort (`Assoc xs), sort (`Assoc ys) with
+        | `Assoc xs, `Assoc ys -> xs, ys
+        | _ -> raise (Failure "Sorting Assoc returned non-Assoc")
       in
-
-      (match List.length xs = List.length ys with
-      | false -> false
-      | true ->
-        List.fold_left (fun acc (k, v) ->
-          match acc with
+      (match List.fold_left2 (fun acc (key, value) (key', value') ->
+        match acc with
+        | false -> false
+        | true ->
+          (match key = key' with
           | false -> false
-          | true -> mem_value k v ys) true xs)
+          | true -> equal value value')) true xs ys with
+      | result -> result
+      | exception Invalid_argument _ ->
+        (* the lists were of different lengths, thus unequal *)
+        false)
 #ifdef TUPLE
     | `Tuple xs, `Tuple ys
 #endif

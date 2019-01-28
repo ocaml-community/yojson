@@ -8,10 +8,10 @@
 #define STRINGLIT
 #define TUPLE
 #define VARIANT
-#include "monomorphic.ml"
 #include "type.ml"
 type json_max = json
 #include "write.ml"
+#include "monomorphic.ml"
 module Pretty =
 struct
 #include "pretty.ml"
@@ -31,9 +31,9 @@ struct
 #define INT
 #define FLOAT
 #define STRING
-#include "monomorphic.ml"
 #include "type.ml"
 #include "write.ml"
+#include "monomorphic.ml"
 #include "write2.ml"
 #include "read.ml"
 module Util =
@@ -54,9 +54,9 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
-#include "monomorphic.ml"
 #include "safe.ml"
 #include "write.ml"
+#include "monomorphic.ml"
 #include "write2.ml"
 #include "read.ml"
 module Util =
@@ -78,9 +78,9 @@ struct
 #define STRINGLIT
 #define TUPLE
 #define VARIANT
-#include "monomorphic.ml"
 #include "type.ml"
 #include "write.ml"
+#include "monomorphic.ml"
 #include "write2.ml"
 #include "read.ml"
 #undef INTLIT
