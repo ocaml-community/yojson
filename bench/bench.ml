@@ -1,33 +1,18 @@
+open Core
+open Core_bench
+
 let data =
-  let l = ref [] in
-  try
-    while true do
-      l := input_line stdin :: !l
-    done;
-    assert false
-  with End_of_file -> String.concat "\n" (List.rev !l)
+  In_channel.read_all "bench.json"
 
 let yojson_data = Yojson.Safe.from_string data
 
-let n = 10_000
-
-let yojson_rd_loop () =
-  for i = 1 to n do
-    ignore (Yojson.Safe.from_string data)
-  done
-
-let yojson_wr_loop () =
-  for i = 1 to n do
-    ignore (Yojson.Safe.to_string yojson_data)
-  done
-
-let time msg f =
-  let t1 = Unix.gettimeofday () in
-  f ();
-  let t2 = Unix.gettimeofday () in
-  Printf.printf "%s: %.3f\n%!" msg (t2 -. t1)
+let main () =
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name:"JSON reading" (fun () ->
+      ignore (Yojson.Safe.from_string data));
+    Bench.Test.create ~name:"JSON writing" (fun () ->
+      ignore (Yojson.Safe.to_string yojson_data));
+  ])
 
 let () =
-  time "rd yojson" yojson_rd_loop;
-
-  time "wr yojson" yojson_wr_loop;
+  main ()
