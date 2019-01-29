@@ -16,7 +16,7 @@ uninstall:
 
 .PHONY: bench
 bench:
-	@dune build bench/bench.exe
+	@dune build @bench --force
 
 .PHONY: clean
 clean:
@@ -25,3 +25,4 @@ clean:
 .PHONY: test
 test:
 	@dune runtest --force
+
