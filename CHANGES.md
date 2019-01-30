@@ -1,4 +1,6 @@
-## unreleased
+## 1.6.0
+
+*2019-01-30*
 
 ### Deprecate
 
