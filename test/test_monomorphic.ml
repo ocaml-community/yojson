@@ -1,5 +1,3 @@
-let yojson = Alcotest.testable Yojson.Safe.pp Yojson.Safe.equal
-
 let null = `Null
 let bool = `Bool true
 let other_bool = `Bool false
@@ -11,6 +9,7 @@ let string = `String "kameloso"
 let other_string = `String "syggelekokle"
 
 let scalar_equal () =
+  let open Testable in
   Alcotest.(check yojson) "Equal Null" null null;
   Alcotest.(check (neg yojson)) "Unequal Null" null int;
   Alcotest.(check yojson) "Equal bool" bool bool;
@@ -26,6 +25,7 @@ let scalar_equal () =
   Alcotest.(check (neg yojson)) "Unequal strings" string float
 
 let list_equal () =
+  let open Testable in
   let list = `List [int; int; float] in
   let other_list = `List [int; other_int; float] in
   let empty_list = `List [] in
@@ -34,6 +34,7 @@ let list_equal () =
   Alcotest.(check (neg yojson)) "Empty lists" list empty_list
 
 let assoc_equal () =
+  let open Testable in
   let assoc = `Assoc [("a", int); ("b", float)] in
   let other_assoc = `Assoc [("a", int); ("c", string)] in
   let empty_assoc = `Assoc [] in
@@ -45,8 +46,14 @@ let assoc_equal () =
   let different_values_duplicate = `Assoc [("a", int); ("a", float)] in
   let flipped_values_duplicate = `Assoc [("a", float); ("a", int)] in
   Alcotest.(check (neg yojson)) "Duplicate keys don't unify" simple_key duplicate_key;
-  Alcotest.(check yojson) "Duplicate keys should still be equal" different_values_duplicate different_values_duplicate;
-  Alcotest.(check (neg yojson)) "Duplicate keys not equal when different order" different_values_duplicate flipped_values_duplicate
+  Alcotest.(check yojson)
+    "Duplicate keys should still be equal"
+    different_values_duplicate
+    different_values_duplicate;
+  Alcotest.(check (neg yojson))
+    "Duplicate keys not equal when different order"
+    different_values_duplicate
+    flipped_values_duplicate
 
 let equality = [
   "Scalar equality", `Quick, scalar_equal;
