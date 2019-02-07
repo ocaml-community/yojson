@@ -1,8 +1,5 @@
 let to_string () =
-  Alcotest.(check string)
-    "simple value"
-    Fixtures.json_string
-    (Yojson.Safe.to_string Fixtures.json_value)
+  Alcotest.(check string) __LOC__ Fixtures.json_string (Yojson.Safe.to_string Fixtures.json_value)
 
 let to_file () =
   let output_file = Filename.temp_file "test_yojson_to_file" ".json" in
@@ -14,7 +11,7 @@ let to_file () =
     close_in ic;
     s
   in
-  Alcotest.(check string) "simple value" Fixtures.json_string file_content;
+  Alcotest.(check string) __LOC__ Fixtures.json_string file_content;
   Sys.remove output_file
 
 let single_json = [
