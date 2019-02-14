@@ -1055,6 +1055,8 @@ and junk = parse
 {
   let _ = (read_json : lexer_state -> Lexing.lexbuf -> t)
 
+  let read_t = read_json
+
   let () =
     read_junk := junk
 
