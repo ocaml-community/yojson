@@ -1,3 +1,10 @@
+## unreleased
+
+### Add
+
+- Add documented `write_t` and `read_t` to modules defining a JSON ast type for compatibility
+  with atdgen
+
 ## 1.6.0
 
 *2019-01-30*

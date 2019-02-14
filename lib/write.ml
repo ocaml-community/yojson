@@ -357,6 +357,7 @@ and write_variant ob s o =
   Bi_outbuf.add_char ob '>'
 #endif
 
+let write_t = write_json
 
 let rec write_std_json ob (x : t) =
   match x with

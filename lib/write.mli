@@ -92,12 +92,16 @@ val stream_to_outbuf :
       an existing buffer.
       See [to_string] for the role of the optional arguments. *)
 
+val write_t : Bi_outbuf.t -> t -> unit
+(** Write the given JSON value to the given buffer.
+    Provided as a writer function for atdgen.
+*)
+
 (** {2 Miscellaneous} *)
 
 val sort : t -> t
   (** Sort object fields (stable sort, comparing field names
       and treating them as byte sequences) *)
-
 
 
 (**/**)
@@ -140,7 +144,6 @@ val write_std_tuple : Bi_outbuf.t -> t list -> unit
 val write_variant : Bi_outbuf.t -> string -> t option -> unit
 val write_std_variant : Bi_outbuf.t -> string -> t option -> unit
 #endif
-
 
 val write_json : Bi_outbuf.t -> t -> unit
 val write_std_json : Bi_outbuf.t -> t -> unit

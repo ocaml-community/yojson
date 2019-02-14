@@ -150,6 +150,11 @@ val linestream_from_file :
       argument.
       See [from_string] for the meaning of the other optional arguments. *)
 
+val read_t : lexer_state -> Lexing.lexbuf -> t
+(** Read a JSON value from the given lexer_state and lexing buffer and return it.
+    Provided as a reader function for atdgen.
+*)
+
 
 (**/**)
 (* begin undocumented section *)
