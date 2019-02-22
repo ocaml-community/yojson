@@ -1,7 +1,3 @@
-(executable
+(test
   (name test)
   (libraries yojson alcotest))
-
-(alias
-  (name runtest)
-  (action (run ./test.exe)))
