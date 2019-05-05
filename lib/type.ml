@@ -53,7 +53,7 @@ All possible cases defined in Yojson:
 	    Syntax: [<"Foo">] or [<"Bar":123>].
 *)
 
-type json = t [@@deprecated "json types are being renamed and will be removed in the next Yojson major version. Use type t instead"]
+type json = t 
 (**
  * Compatibility type alias for type `t`
  *)

@@ -1,3 +1,9 @@
+## unreleased
+
+### Fix
+
+- Revert the deprecation warning on `json` type aliases
+
 ## 1.7.0
 
 *2019-02-14*
