@@ -317,7 +317,7 @@ and finish_string v = parse
 
 and map_string v f = parse
     '"'           { let b = v.buf in
-                    f (Bytes.to_string b.Bi_outbuf.o_s) 0 b.Bi_outbuf.o_len }
+                    f (Bytes.sub_string b.Bi_outbuf.o_s 0 b.Bi_outbuf.o_len) 0 b.Bi_outbuf.o_len }
   | '\\'          { finish_escaped_char v lexbuf;
                     map_string v f lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
