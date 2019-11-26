@@ -1,12 +1,5 @@
 (** {2 JSON pretty-printing} *)
 
-val pretty_format : ?std:bool -> t -> Easy_format.t
-  (** Convert into a pretty-printable tree.
-      See [to_string] for the role of the optional [std] argument.
-
-      @see <http://martin.jambon.free.fr/easy-format.html> Easy-format
-  *)
-
 val pretty_print : ?std:bool -> Format.formatter -> t -> unit
   (** Pretty-print into a {!Format.formatter}.
       See [to_string] for the role of the optional [std] argument.
