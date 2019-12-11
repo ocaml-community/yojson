@@ -28,7 +28,6 @@ let json_output =
 let main () =
   let oc = stdout in
   Yojson.Basic.pretty_to_channel oc json_output;
-  output_string oc "\n";
-  close_out oc
+  output_string oc "\n"
 
 let () = main ()
