@@ -447,7 +447,8 @@ let to_channel ?buf ?(len=4096) ?std oc x =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  to_outbuf ?std ob x
+  to_outbuf ?std ob x;
+  Buffer.output_buffer oc ob
 
 let to_output ?buf ?(len=4096) ?std out x =
   let ob =
@@ -455,7 +456,9 @@ let to_output ?buf ?(len=4096) ?std out x =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  to_outbuf ?std ob x
+  to_outbuf ?std ob x;
+  out#output (Buffer.contents ob) 0 (Buffer.length ob);
+  ()
 
 let to_file ?len ?std file x =
   let oc = open_out file in
