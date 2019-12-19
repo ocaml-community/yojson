@@ -92,7 +92,7 @@ val stream_to_outbuf :
       an existing buffer.
       See [to_string] for the role of the optional arguments. *)
 
-val write_t : Bi_outbuf.t -> t -> unit
+val write_t : Buffer.t -> t -> unit
 (** Write the given JSON value to the given buffer.
     Provided as a writer function for atdgen.
 *)
