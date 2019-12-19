@@ -2,6 +2,9 @@ language: c
 sudo: required
 install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
 script: bash -ex .travis-opam.sh
+cache:
+    directories:
+    - $HOME/.opam
 env:
   global:
   - PACKAGE=yojson
