@@ -37,6 +37,15 @@ let main () =
       ignore (Yojson.Safe.to_string large_int_list));
     Bench.Test.create ~name:"JSON writing string list" (fun () ->
       ignore (Yojson.Safe.to_string large_string_list));
+    Bench.Test.create ~name:"JSON writing int list to channel" (fun () ->
+      Out_channel.with_file "/dev/null" ~f:(fun oc ->
+      ignore (Yojson.Safe.to_channel oc large_int_list)));
+    Bench.Test.create ~name:"JSON writing string list to channel" (fun () ->
+      Out_channel.with_file "/dev/null" ~f:(fun oc ->
+      ignore (Yojson.Safe.to_channel oc large_string_list)));
+    Bench.Test.create ~name:"JSON writing assoc to channel" (fun () ->
+      Out_channel.with_file "/dev/null" ~f:(fun oc ->
+      ignore (Yojson.Safe.to_channel oc large_int_assoc)));
   ])
 
 let () =
