@@ -1,69 +1,63 @@
-open Printf
 
-let array = Easy_format.list
-let record = Easy_format.list
-let tuple = { Easy_format.list with
-                space_after_opening = false;
-                space_before_closing = false;
-                align_closing = false }
-let variant = { Easy_format.list with
-                  space_before_closing = false; }
+let pp_list sep ppx out l =
+  let pp_sep out () = Format.fprintf out "%s@ " sep in
+  Format.pp_print_list ~pp_sep ppx out l
 
-let rec format std (x : t) =
+let rec format std (out:Format.formatter) (x : t) : unit =
   match x with
-      `Null -> Easy_format.Atom ("null", Easy_format.atom)
-    | `Bool x -> Easy_format.Atom ((if x then "true" else "false"), Easy_format.atom)
-    | `Int x -> Easy_format.Atom (json_string_of_int x, Easy_format.atom)
+    | `Null -> Format.pp_print_string out "null"
+    | `Bool x -> Format.pp_print_bool out x
+    | `Int x -> Format.pp_print_string out (json_string_of_int x)
     | `Float x ->
         let s =
           if std then std_json_string_of_float x
           else json_string_of_float x
         in
-        Easy_format.Atom (s, Easy_format.atom)
-    | `String s -> Easy_format.Atom (json_string_of_string s, Easy_format.atom)
+        Format.pp_print_string out s
+    | `String s -> Format.pp_print_string out (json_string_of_string s)
     | `Intlit s
     | `Floatlit s
-    | `Stringlit s -> Easy_format.Atom (s, Easy_format.atom)
-    | `List [] -> Easy_format.Atom ("[]", Easy_format.atom)
-    | `List l -> Easy_format.List (("[", ",", "]", array), List.map (format std) l)
-    | `Assoc [] -> Easy_format.Atom ("{}", Easy_format.atom)
-    | `Assoc l -> Easy_format.List (("{", ",", "}", record), List.map (format_field std) l)
+    | `Stringlit s -> Format.pp_print_string out s
+    | `List [] -> Format.pp_print_string out "[]"
+    | `List l -> Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format std)) l
+    | `Assoc [] -> Format.pp_print_string out "{}"
+    | `Assoc l ->
+      Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l
     | `Tuple l ->
         if std then
-          format std (`List l)
+          format std out (`List l)
         else
           if l = [] then
-            Easy_format.Atom ("()", Easy_format.atom)
+            Format.pp_print_string out "()"
           else
-            Easy_format.List (("(", ",", ")", tuple), List.map (format std) l)
+            Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format std)) l
 
     | `Variant (s, None) ->
         if std then
-          format std (`String s)
+          format std out (`String s)
         else
-          Easy_format.Atom ("<" ^ json_string_of_string s ^ ">", Easy_format.atom)
+          Format.fprintf out "<%s>" (json_string_of_string s)
 
     | `Variant (s, Some x) ->
         if std then
-          format std (`List [ `String s; x ])
+          format std out (`List [ `String s; x ])
         else
-          let op = "<" ^ json_string_of_string s ^ ":" in
-          Easy_format.List ((op, "", ">", variant), [format std x])
+          let op = json_string_of_string s in
+          Format.fprintf out "<@[<hv2>%s: %a@]>" op (format std) x
 
-and format_field std (name, x) =
-  let s = sprintf "%s:" (json_string_of_string name) in
-  Easy_format.Label ((Easy_format.Atom (s, Easy_format.atom), Easy_format.label), format std x)
+and format_field std out (name, x) =
+  Format.fprintf out "@[<hv2>%s: %a@]" (json_string_of_string name) (format std) x
 
-
-let format ?(std = false) x =
+let pp ?(std = false) out x =
   if std && not (is_object_or_array x) then
     json_error
       "Root is not an object or array as requested by the JSON standard"
   else
-    format std (x :> t)
+    Format.fprintf out "@[<hv2>%a@]" (format std) (x :> t)
 
 let to_string ?std x =
-  Easy_format.Pretty.to_string (format ?std x)
+  Format.asprintf "%a" (pp ?std) x
 
 let to_channel ?std oc x =
-  Easy_format.Pretty.to_channel oc (format ?std x)
+  let fmt = Format.formatter_of_out_channel oc in
+  Format.fprintf fmt "%a@?" (pp ?std) x
