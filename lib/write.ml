@@ -13,7 +13,7 @@ let write_special src start stop ob str =
 
 let write_control_char src start stop ob c =
   Buffer.add_substring ob src !start (stop - !start);
-  Buffer.add_string ob "\\00";
+  Buffer.add_string ob "\\u00";
   Buffer.add_char ob (hex (Char.code c lsr 4));
   Buffer.add_char ob (hex (Char.code c land 0xf));
   start := stop + 1
