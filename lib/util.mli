@@ -2,7 +2,7 @@
    This module provides combinators for extracting fields from JSON
    values. This approach is recommended for reading a few fields
    from data returned by public APIs. However for more complex applications
-   we recommend {{:https://github.com/MyLifeLabs/atdgen}Atdgen}.
+   we recommend {{:https://github.com/ahrefs/atd}Atdgen}.
 
    Here is some sample JSON data:
 {v
