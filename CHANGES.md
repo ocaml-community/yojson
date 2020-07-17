@@ -1,5 +1,10 @@
 ## unreleased
 
+### Removed
+
+- Removed dependency on easy-format and removed `pretty_format` from
+  `Yojson`, `Yojson.Basic`, `Yojson.Safe` and `Yojson.Raw`. (@c-cube, #90)
+
 ### Fix
 
 - Revert the deprecation warning on `json` type aliases
