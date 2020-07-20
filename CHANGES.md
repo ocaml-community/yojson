@@ -4,6 +4,11 @@
 
 - Removed dependency on easy-format and removed `pretty_format` from
   `Yojson`, `Yojson.Basic`, `Yojson.Safe` and `Yojson.Raw`. (@c-cube, #90)
+- Removed dependency on `biniou`, simplifying the chain of dependencies. This
+  changes some APIs:
+  * `Bi_outbuf.t` in signatures is replaced with `Buffer.t`
+  * `to_outbuf` becomes `to_buffer` and `stream_to_outbuf` becomes
+    `stream_to_buffer`
 
 ### Fix
 
