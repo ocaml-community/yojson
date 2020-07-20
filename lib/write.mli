@@ -52,7 +52,7 @@ val to_file :
   (** Write a compact JSON value to a file.
       See [to_string] for the role of the optional arguments. *)
 
-val to_outbuf :
+val to_buffer :
   ?std:bool ->
   Buffer.t -> t -> unit
   (** Write a compact JSON value to an existing buffer.
@@ -84,7 +84,7 @@ val stream_to_file :
       a file.
       See [to_string] for the role of the optional arguments. *)
 
-val stream_to_outbuf :
+val stream_to_buffer :
   ?std:bool ->
   Buffer.t ->
   t Stream.t -> unit

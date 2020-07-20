@@ -417,7 +417,7 @@ and write_std_variant ob s o =
 #endif
 
 
-let to_outbuf ?(std = false) ob x =
+let to_buffer ?(std = false) ob x =
   if std then (
     if not (is_object_or_array x) then
       json_error "Root is not an object or array"
@@ -436,7 +436,7 @@ let to_string ?buf ?(len = 256) ?std x =
           Buffer.clear ob;
           ob
   in
-  to_outbuf ?std ob x;
+  to_buffer ?std ob x;
   let s = Buffer.contents ob in
   Buffer.clear ob;
   s
@@ -447,7 +447,7 @@ let to_channel ?buf ?(len=4096) ?std oc x =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  to_outbuf ?std ob x;
+  to_buffer ?std ob x;
   Buffer.output_buffer oc ob
 
 let to_output ?buf ?(len=4096) ?std out x =
@@ -456,7 +456,7 @@ let to_output ?buf ?(len=4096) ?std out x =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  to_outbuf ?std ob x;
+  to_buffer ?std ob x;
   out#output (Buffer.contents ob) 0 (Buffer.length ob);
   ()
 
@@ -469,8 +469,8 @@ let to_file ?len ?std file x =
     close_out_noerr oc;
     raise e
 
-let stream_to_outbuf ?std ob st =
-  Stream.iter (to_outbuf ?std ob) st
+let stream_to_buffer ?std ob st =
+  Stream.iter (to_buffer ?std ob) st
 
 let stream_to_string ?buf ?(len = 256) ?std st =
   let ob =
@@ -480,7 +480,7 @@ let stream_to_string ?buf ?(len = 256) ?std st =
           Buffer.clear ob;
           ob
   in
-  stream_to_outbuf ?std ob st;
+  stream_to_buffer ?std ob st;
   let s = Buffer.contents ob in
   Buffer.clear ob;
   s
@@ -491,7 +491,7 @@ let stream_to_channel ?buf ?(len=2096) ?std oc st =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  stream_to_outbuf ?std ob st
+  stream_to_buffer ?std ob st
 
 let stream_to_file ?len ?std file st =
   let oc = open_out file in
