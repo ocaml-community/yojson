@@ -75,3 +75,10 @@ Check out in particular
 [good first time issues](https://github.com/ocaml-community/yojson/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+time+issue%22)
 and other issues with which
 [we could use some help](https://github.com/ocaml-community/yojson/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22).
+
+
+License
+-------
+
+`Yojson` is licensed under the 3-clause BSD license, see `LICENSE.md` for
+details.

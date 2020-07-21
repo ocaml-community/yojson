@@ -5,6 +5,7 @@ homepage: "https://github.com/ocaml-community/yojson"
 bug-reports: "https://github.com/ocaml-community/yojson/issues"
 dev-repo: "git+https://github.com/ocaml-community/yojson.git"
 doc: "https://ocaml-community.github.io/yojson/"
+license: "BSD-3-Clause"
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
