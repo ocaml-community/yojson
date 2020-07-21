@@ -9,6 +9,7 @@
   * `Bi_outbuf.t` in signatures is replaced with `Buffer.t`
   * `to_outbuf` becomes `to_buffer` and `stream_to_outbuf` becomes
     `stream_to_buffer`
+- Removed `yojson-biniou` library
 
 ### Fix
 

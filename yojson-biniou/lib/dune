@@ -1,6 +1,0 @@
-(library
- (name yojson_biniou)
- (public_name yojson-biniou)
- (synopsis "Biniou support for Yojson")
- (flags (-safe-string))
- (libraries yojson biniou))
