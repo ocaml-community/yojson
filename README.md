@@ -17,15 +17,17 @@ Currently at https://ocaml-community.github.io/yojson/
 Examples
 --------
 
-A simple example on how to parse JSON that is in a string.
+A simple example on how to parse JSON from a string literal.
 
 ```ocaml
-let to_parse = {|
+let json_string = {|
   {"number" : 42,
    "string" : "yes",
    "list": ["for", "sure", 42]}|}
+(* val json_string : string *)
 
-let json = Yojson.Safe.from_string to_parse
+let json = Yojson.Safe.from_string json_string
+(* val json : Yojson.Safe.t *)
 
 Format.printf "Parsed to %a" Yojson.Safe.pp json
 ```
