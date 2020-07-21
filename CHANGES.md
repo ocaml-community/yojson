@@ -10,6 +10,8 @@
   * `to_outbuf` becomes `to_buffer` and `stream_to_outbuf` becomes
     `stream_to_buffer`
 - Removed `yojson-biniou` library
+- Removed deprecated `json` type aliasing type `t` which has been available
+  since 1.6.0 (@Leonidas-from-XIV, #100).
 
 ### Fix
 
