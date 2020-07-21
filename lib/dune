@@ -33,8 +33,6 @@
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson yojson_biniou)
- (wrapped false)
- (synopsis "JSON parsing and printing (successor of json-wheel)")
- (flags (-safe-string))
- (libraries biniou))
+ (modules yojson)
+ (synopsis "JSON parsing and printing")
+ (flags (-safe-string)))
