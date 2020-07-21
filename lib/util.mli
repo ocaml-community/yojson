@@ -68,10 +68,6 @@ exception Undefined of string * t
       return undefined. Currently this only happens when an array index is out
       of bounds. *)
 
-val ( |> ) : 'a -> ('a -> 'b) -> 'b
-(** @deprecated Forward pipe operator; useful for composing JSON
-    access functions without too many parentheses *)
-
 val keys : t -> string list
   (** Returns all the key names in the given JSON object *)
 
