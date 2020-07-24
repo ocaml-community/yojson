@@ -23,7 +23,6 @@
    write.mli
    read.mli
    safe.mli
-   pretty.mli
    write2.mli
    common.mli
    util.mli
