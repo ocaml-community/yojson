@@ -53,11 +53,6 @@ All possible cases defined in Yojson:
 	    Syntax: [<"Foo">] or [<"Bar":123>].
 *)
 
-type json = t 
-(**
- * Compatibility type alias for type `t`
- *)
-
 (*
   Note to adventurers: ocamldoc does not support inline comments
   on each polymorphic variant, and cppo doesn't allow to concatenate
