@@ -3,9 +3,7 @@ Yojson: JSON library for OCaml
 
 [![Build Status](https://travis-ci.org/ocaml-community/yojson.svg?branch=master)](https://travis-ci.org/ocaml-community/yojson)
 
-This library parses complete JSON files into a nested OCaml data structure,
-similarly to DOM parsers for XML. For stream processing in a SAX-like fashion
-check out [jsonm](https://erratique.ch/software/jsonm).
+This library parses JSON data into a nested OCaml tree data structure.
 
 
 Library documentation
@@ -47,7 +45,9 @@ base for a number of tools and libraries that are built on top of it.
   decisions
 * [`atd`](https://github.com/ahrefs/atd), generates mapping code from `.atd`
   specification files and can be used in multiple languages
-
+* [`jsonm`](https://erratique.ch/software/jsonm) is an alternate JSON parser
+  that parses JSON into a stream of items, so the complete data structure does
+  not have to be in memory.
 
 Help wanted
 -----------
