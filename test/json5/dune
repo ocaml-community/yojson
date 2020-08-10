@@ -1,0 +1,4 @@
+(executable
+ (name json5_test)
+ (libraries yojson_json5)
+ (preprocess (pps ppx_deriving.show)))
