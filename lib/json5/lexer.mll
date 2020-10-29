@@ -13,15 +13,23 @@ let exponent_indicator = ( 'e' | 'E' )
 let signed_integer = ( decimal_digits | '+' decimal_digits | '-' decimal_digits )
 let exponent_part = exponent_indicator signed_integer
 let decimal_integer_literal = ( '0' | non_zero_digit decimal_digits? )
-let decimal_literal = (
-    decimal_integer_literal '.' decimal_digits? exponent_part?
-    | '.' decimal_digits exponent_part?
-    | decimal_integer_literal exponent_part?
-)
 let hex_integer_literal = ( "0x" hex_digit+ | "0X" hex_digit+ )
-let numeric_literal = ( decimal_literal | hex_integer_literal )
-let json5_numeric_literal = ( numeric_literal | "Infinity" | "NaN" )
-let json5_number = (json5_numeric_literal | '+' json5_numeric_literal | '-' json5_numeric_literal )
+(* float *)
+let float_literal = ( decimal_integer_literal '.' decimal_digits? exponent_part?  | '.' decimal_digits exponent_part? )
+let json5_float = ( float_literal | '+' float_literal | '-' float_literal )
+(* int_or_float *)
+let int_or_float_literal = decimal_integer_literal exponent_part?
+let json5_int_or_float = ( int_or_float_literal | '+' int_or_float_literal | '-' int_or_float_literal )
+(* int/hex *)
+let json5_int = ( hex_integer_literal | '+' hex_integer_literal | '-' hex_integer_literal )
+
+(* IDENTIFIER_NAME (keys in objects) *)
+let unicode_escape_squence = 'u' hex_digit hex_digit hex_digit hex_digit
+let unicode_letter = [ 'a'-'z' 'A'-'F' ]
+let identifier_start = ( unicode_letter | '$' | '_' | '\\' unicode_escape_squence )
+let identifier_part = ( identifier_start | decimal_digits ) (* unicode_combining_mark, unicode_connector_punctuation, ZWNJ and NWJ missing *)
+let identifier_name = identifier_start identifier_part+?
+
 
 (* STRINGS, 7.8.4 *)
 
@@ -35,7 +43,20 @@ rule read_token = parse
     | "true" { TRUE }
     | "false" { FALSE }
     | "null" { NULL }
-    | json5_number {
+    | " " { SPACE }
+    | json5_float {
+        let s = float_of_string @@ Lexing.lexeme lexbuf in 
+        FLOAT s
+    }
+    | json5_int_or_float {
         let s = Lexing.lexeme lexbuf in 
-        NUMBER s
+        INT_OR_FLOAT s
+    }
+    | json5_int {
+        let s = int_of_string @@ Lexing.lexeme lexbuf in 
+        INT s
+    }
+    | identifier_name {
+        let s = Lexing.lexeme lexbuf in 
+        IDENTIFIER_NAME s
     }
