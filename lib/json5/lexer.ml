@@ -38,40 +38,48 @@ let identifier_start = [%sedlex.regexp? unicode_letter | '$' | '_' | '\\', unico
 let identifier_part = [%sedlex.regexp? identifier_start | unicode_combining_mark | unicode_digit | unicode_connector_punctuation | zwnj | zwj]
 let identifier_name = [%sedlex.regexp? identifier_start, Star identifier_part]
 
-let lex_next buf =
+(* COMMENTS 7.4 *)
+let line_terminator = [%sedlex.regexp? 0x000A | 0x000D | 0x2028 | 0x2029]
+let source_character = [%sedlex.regexp? any]
+let single_line_comment_char = [%sedlex.regexp? Sub (source_character, line_terminator)]
+let single_line_comment = [%sedlex.regexp? "//", Star single_line_comment_char]
+let multi_line_not_forward_slash_or_asterisk_char = [%sedlex.regexp? Sub (source_character, (Chars "*/"))]
+let multi_line_not_asterisk_char = [%sedlex.regexp? Sub (source_character, '*')]
+let post_asterisk_comment_char = [%sedlex.regexp? Opt '*', multi_line_not_forward_slash_or_asterisk_char]
+let multi_line_comment_char = [%sedlex.regexp? multi_line_not_asterisk_char | '*', Star post_asterisk_comment_char]
+let multi_line_comment = [%sedlex.regexp? "/*", Star multi_line_comment_char, "*/"]
+let comment = [%sedlex.regexp? multi_line_comment | single_line_comment]
+
+let white_space = [%sedlex.regexp? 0x0009 | 0x000B | 0x000C | 0x0020 | 0x00A0 | 0xFEFF | zs]
+
+let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
   match%sedlex buf with
-  | '{' -> OPEN_BRACE
-  | '}' -> CLOSE_BRACE
-  | '[' -> OPEN_BRACKET
-  | ']' -> CLOSE_BRACKET
-  | ':' -> COLON
-  | ',' -> COMMA
-  | ' ' -> SPACE
-  | "true" -> TRUE
-  | "false" -> FALSE
-  | "null" -> NULL
+  | '{' -> lex (OPEN_BRACE::tokens) buf
+  | '}' -> lex (CLOSE_BRACE::tokens) buf
+  | '[' -> lex (OPEN_BRACKET::tokens) buf
+  | ']' -> lex (CLOSE_BRACKET::tokens) buf
+  | ':' -> lex (COLON::tokens) buf
+  | ',' -> lex (COMMA::tokens) buf
+  | comment
+  | white_space
+  | line_terminator -> lex tokens buf
+  | "true" -> lex (TRUE::tokens) buf
+  | "false" -> lex (FALSE::tokens) buf
+  | "null" -> lex (NULL::tokens) buf
   | json5_float ->
     let s = float_of_string @@ lexeme buf in
-    FLOAT s
+    lex (FLOAT s::tokens) buf
   | json5_int_or_float ->
-      let s = lexeme buf in 
-      INT_OR_FLOAT s
+    let s = lexeme buf in 
+    lex (INT_OR_FLOAT s::tokens) buf
   | json5_int ->
-      let s = int_of_string @@ lexeme buf in 
-      INT s
+    let s = int_of_string @@ lexeme buf in 
+    lex (INT s::tokens) buf
   | identifier_name ->
-      let s = lexeme buf in 
-      IDENTIFIER_NAME s
-  | eof -> EOF
+    let s = lexeme buf in 
+    lex (IDENTIFIER_NAME s::tokens) buf
+  | eof -> List.rev tokens
   | _ ->
-      let s = lexeme buf in 
-      failwith @@ "Unexpected character: '" ^ s ^ "'"
-
-let lex buf =
-  let rec loop xs buf =
-    match lex_next buf with
-    | EOF -> xs
-    | token -> loop (token::xs) buf
-  in
-  List.rev @@ loop [] buf
+    let s = lexeme buf in 
+    failwith @@ "Unexpected character: '" ^ s ^ "'"

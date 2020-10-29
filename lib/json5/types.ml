@@ -8,11 +8,9 @@ type token =
     | TRUE
     | FALSE
     | NULL
-    | SPACE
     | FLOAT of float
     | INT_OR_FLOAT of string
     | INT of int
     | IDENTIFIER_NAME of string
-    | EOF
     [@@deriving show, eq]
 
