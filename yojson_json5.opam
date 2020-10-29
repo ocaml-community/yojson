@@ -13,6 +13,7 @@ run-test: [["dune" "runtest" "-p" name "-j" jobs]]
 depends: [
   "ocaml" {>= "4.02.3"}
   "dune"
+  "sedlex"
   "alcotest" {with-test & >= "0.8.5"}
 ]
 synopsis:

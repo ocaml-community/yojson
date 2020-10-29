@@ -13,5 +13,6 @@ type token =
     | INT_OR_FLOAT of string
     | INT of int
     | IDENTIFIER_NAME of string
-    [@@deriving show]
+    | EOF
+    [@@deriving show, eq]
 

@@ -1,6 +1,8 @@
-(ocamllex lexer)
-
 (library
  (name yojson_json5)
  (public_name yojson_json5)
- (preprocess (pps ppx_deriving.show)))
+ (libraries sedlex)
+ (preprocess
+  (pps ppx_deriving.show sedlex.ppx ppx_deriving.eq)
+ )
+)

@@ -1,25 +1,18 @@
 module Lexer = Yojson_json5.Lexer
 open Yojson_json5.Types
 
-type token_list = token list [@@deriving show]
-
+type token_list = token list [@@deriving show, eq]
 
 let () =
     let check_json (name, json_string, expected) =
-        let lex_buffer = Lexing.from_string json_string in
+        let buf = Sedlexing.Utf8.from_string json_string in
+        let result = Lexer.lex buf in
 
-        let rec loop lex_buf token_list =
-            match Lexer.read_token lex_buf with
-            | exception Failure _ -> token_list
-            | token -> loop lex_buf (token::token_list)
-        in
-        let result = loop lex_buffer []
-            |> List.rev
-            |> show_token_list
-        in
-        let expected = show_token_list expected in
-        if result <> expected then
-            print_string @@ name ^ " failed:\n\nInput:\n" ^ result ^ "\n\nExpected:\n" ^ expected
+        match equal_token_list result expected with
+        | true -> ()
+        | false ->
+          let s = Format.asprintf "%s failed:\n\nInput:\n%a\n\nExpected:\n%a\n" name pp_token_list result pp_token_list expected in
+          print_string s
     in
 
     let lexer_tests = [
