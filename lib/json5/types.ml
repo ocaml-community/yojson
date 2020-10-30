@@ -11,6 +11,7 @@ type token =
     | FLOAT of float
     | INT_OR_FLOAT of string
     | INT of int
+    | STRING of string
     | IDENTIFIER_NAME of string
     [@@deriving show, eq]
 

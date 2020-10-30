@@ -6,6 +6,9 @@ open Types
 let digit = [%sedlex.regexp? '0'..'9']
 let number = [%sedlex.regexp? Plus digit]
 *)
+let source_character = [%sedlex.regexp? any]
+let line_terminator = [%sedlex.regexp? 0x000A | 0x000D | 0x2028 | 0x2029]
+let line_terminator_sequence = [%sedlex.regexp? 0x000A | 0x000D, Opt 0x000A | 0x2028 | 0x2029]
 
 (* NUMBERS, 7.8.3 *)
 let non_zero_digit = [%sedlex.regexp? '1'..'9']
@@ -26,8 +29,21 @@ let json5_int_or_float = [%sedlex.regexp? int_or_float_literal | '+', int_or_flo
 (* int/hex *)
 let json5_int = [%sedlex.regexp? hex_integer_literal | '+', hex_integer_literal | '-', hex_integer_literal]
 
-(* IDENTIFIER_NAME (keys in objects) *)
+(* STRING LITERALS, 7.8.4 *)
 let unicode_escape_sequence = [%sedlex.regexp? 'u', hex_digit, hex_digit, hex_digit, hex_digit]
+let single_escape_character = [%sedlex.regexp? Chars {|'"\\bfnrtv|}]
+let escape_character = [%sedlex.regexp? single_escape_character | decimal_digit | 'x' | 'u' ]
+let non_escape_character = [%sedlex.regexp? Sub (source_character, ( escape_character | line_terminator ) ) ]
+let character_escape_sequence = [%sedlex.regexp? single_escape_character | non_escape_character ]
+let line_continuation = [%sedlex.regexp? '\\', line_terminator_sequence ]
+let escape_sequence = [%sedlex.regexp? unicode_escape_sequence | character_escape_sequence ]
+let single_string_character = [%sedlex.regexp? Sub (source_character, ('\'' | '\\' | line_terminator)) | '\\', escape_sequence | line_continuation ]
+let double_string_character = [%sedlex.regexp? Sub (source_character, ('"'  | '\\' | line_terminator)) | '\\', escape_sequence | line_continuation ]
+let string_literal = [%sedlex.regexp? '"', Star double_string_character, '"' | '\'', Star single_string_character, '\'' ]
+
+
+
+(* IDENTIFIER_NAME (keys in objects) *)
 let unicode_combining_mark =[%sedlex.regexp? mn | mc]
 let unicode_digit = [%sedlex.regexp? nd]
 let unicode_connector_punctuation = [%sedlex.regexp? pc]
@@ -39,8 +55,6 @@ let identifier_part = [%sedlex.regexp? identifier_start | unicode_combining_mark
 let identifier_name = [%sedlex.regexp? identifier_start, Star identifier_part]
 
 (* COMMENTS 7.4 *)
-let line_terminator = [%sedlex.regexp? 0x000A | 0x000D | 0x2028 | 0x2029]
-let source_character = [%sedlex.regexp? any]
 let single_line_comment_char = [%sedlex.regexp? Sub (source_character, line_terminator)]
 let single_line_comment = [%sedlex.regexp? "//", Star single_line_comment_char]
 let multi_line_not_asterisk_char = [%sedlex.regexp? Sub (source_character, '*')]
@@ -66,6 +80,8 @@ let rec lex tokens buf =
   | "true" -> lex (TRUE::tokens) buf
   | "false" -> lex (FALSE::tokens) buf
   | "null" -> lex (NULL::tokens) buf
+  | string_literal -> let s = lexeme buf in
+    lex (STRING s::tokens) buf
   | json5_float ->
     let s = float_of_string @@ lexeme buf in
     lex (FLOAT s::tokens) buf
