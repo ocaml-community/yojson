@@ -54,6 +54,33 @@ let test_single_line_comments () =
     Alcotest.(check (list token)) "Simple case" [] (tokenize_json5 "//foo\n");
     Alcotest.(check (list token)) "Between numbers" [INT_OR_FLOAT "1"; INT_OR_FLOAT "1"] (tokenize_json5 "1//foo\n1")
 
+(**
+ * PARSING
+ *)
+
+let yojson = Alcotest.testable Yojson.Safe.pp Yojson.Safe.equal
+
+let parse tokens =
+    let (json, _) = Yojson_json5.Parser.parse tokens in
+    json
+
+let test_parser_simple () =
+    Alcotest.(check yojson) "Simple null" `Null (parse [NULL]);
+    Alcotest.(check yojson) "Simple true" (`Bool true) (parse [TRUE]);
+    Alcotest.(check yojson) "Simple false" (`Bool false) (parse [FALSE]);
+    ()
+
+let test_parser_list () =
+    Alcotest.(check yojson) "Empty list" (`List []) (parse [OPEN_BRACKET; CLOSE_BRACKET]);
+    Alcotest.(check yojson) "List with bools" (`List [`Bool false; `Bool true]) (parse [OPEN_BRACKET; FALSE; COMMA; TRUE; CLOSE_BRACKET]);
+    Alcotest.(check yojson) "List of lists" (`List [ `List []; `Null ]) (parse [OPEN_BRACKET; OPEN_BRACKET; CLOSE_BRACKET; COMMA; NULL; CLOSE_BRACKET]);
+    ()
+
+
+(**
+ * RUN
+ *)
+
 let () =
     let open Alcotest in
     run "JSON5" [
@@ -71,5 +98,9 @@ let () =
             "Comments", [
                 test_case "Multi-line comments" `Quick test_multi_line_comments;
                 test_case "Single-line comments" `Quick test_single_line_comments;
+            ];
+            "Parse", [
+                test_case "Simple parsing" `Quick test_parser_simple;
+                test_case "Simple list parsing" `Quick test_parser_list;
             ];
         ]
