@@ -15,3 +15,4 @@ type token =
     | IDENTIFIER_NAME of string
     [@@deriving show, eq]
 
+type t = Yojson.Safe.t

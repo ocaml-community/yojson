@@ -21,8 +21,9 @@ let test_int () =
 let test_string () =
     Alcotest.(check (list token)) "Doublequoted simple" [STRING "\"hello\""] (tokenize_json5 "\"hello\"");
     Alcotest.(check (list token)) "Doublequoted single-character escape sequence" [STRING {|"\'\"\\\b\f\n\r\t\v"|}] (tokenize_json5 {|"\'\"\\\b\f\n\r\t\v"|});
-    Alcotest.(check (list token)) "Doublequoted non-escape-character escape sequence" [STRING {|"\z"|}] (tokenize_json5 {|"\z"|});
+    Alcotest.(check (list token)) "Doublequoted non-escape-character escape sequence" [STRING {|"foo\z"|}] (tokenize_json5 {|"foo\z"|});
     Alcotest.(check (list token)) "Doublequoted zero escape sequence" [STRING {|"\0"|}] (tokenize_json5 {|"\0"|});
+    (* Alcotest.check_raises "Doublequoted zero then one escape sequence" (Failure "Unexpected character: ''") (fun () -> ignore @@ tokenize_json5 {|"\01"|}); *)
     Alcotest.(check (list token)) "Doublequoted unicode escape" [STRING "\"\\uD83D\\uDC2A\""] (tokenize_json5 "\"\\uD83D\\uDC2A\"");
     Alcotest.(check (list token)) "Doublequoted line continuation" [STRING "\"hel\\\nlo\""] (tokenize_json5 "\"hel\\\nlo\"");
     Alcotest.(check (list token)) "Singlequoted simple" [STRING "'hello'"] (tokenize_json5 "'hello'");
@@ -31,6 +32,7 @@ let test_string () =
     Alcotest.(check (list token)) "Singlequoted zero escape sequence" [STRING {|'\0'|}] (tokenize_json5 {|'\0'|});
     Alcotest.(check (list token)) "Singlequoted unicode escape" [STRING "'\\uD83D\\uDC2A'"] (tokenize_json5 "'\\uD83D\\uDC2A'");
     Alcotest.(check (list token)) "Singlequoted line continuation" [STRING "'hel\\\nlo'"] (tokenize_json5 "'hel\\\nlo'");
+    (* Alcotest.(check (list token)) "Singlequoted one escape sequence" [STRING {|'\1'|}] (tokenize_json5 {|'\1'|}); *)
     ()
 
 let test_identifier () =

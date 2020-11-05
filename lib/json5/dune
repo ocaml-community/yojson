@@ -1,7 +1,7 @@
 (library
  (name yojson_json5)
  (public_name yojson_json5)
- (libraries sedlex)
+ (libraries yojson sedlex)
  (preprocess
   (pps ppx_deriving.show sedlex.ppx ppx_deriving.eq)
  )
