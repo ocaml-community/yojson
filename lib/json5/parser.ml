@@ -17,25 +17,25 @@ let rec parse_list acc = function
             let s = Format.asprintf "Unexpected list token: %a" pp_token x in
             failwith s)
         
-(*
 and parse_assoc acc = function
     | [] -> failwith "Assoc never ends"
     | CLOSE_BRACE::xs
     | COMMA::CLOSE_BRACE::xs -> (acc, xs)
-    | (STRING k)::COLON::v::COMMA::xs
-    | (IDENTIFIER_NAME k)::COLON::v::COMMA::xs ->
-        let (v, xs) = parse [v] in
+    | (STRING k)::COLON::xs
+    | (IDENTIFIER_NAME k)::COLON::xs -> (
+        let (v, xs) = parse xs in
         let item = (k, v) in
-        parse_assoc (item::acc) xs
-    | (STRING k)::COLON::v::CLOSE_BRACE::xs
-    | (IDENTIFIER_NAME k)::COLON::v::CLOSE_BRACE::xs ->
-            let (v, _) = parse [x]
-            let acc = (k, parse [v])::acc in
-            (acc, xs)
+        match xs with
+        | [] -> failwith "Object was not closed"
+        | CLOSE_BRACE::xs
+        | COMMA::CLOSE_BRACE::xs -> (item::acc, xs)
+        | COMMA::xs -> parse_assoc (item::acc) xs
+        | x::_ ->
+            let s = Format.asprintf "Unexpected assoc list token: %a" pp_token x in
+            failwith s)
     | x::_ ->
         let s = Format.asprintf "Unexpected assoc list token: %a" pp_token x in
         failwith s
-*)
 
 and parse : token list -> (t * token list) = function
     | [] -> failwith "empty list of tokens"
@@ -51,11 +51,9 @@ and parse : token list -> (t * token list) = function
         | OPEN_BRACKET -> 
             let (l, xs) = parse_list [] xs in
             (`List (List.rev l), xs)
-            (*
         | OPEN_BRACE ->
             let (a, xs) = parse_assoc [] xs in
             (`Assoc (List.rev a), xs)
-            *)
         | x ->
             let s = Format.asprintf "Unexpected token: %a" pp_token x in
             failwith s

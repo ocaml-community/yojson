@@ -54,6 +54,7 @@ let test_single_line_comments () =
     Alcotest.(check (list token)) "Simple case" [] (tokenize_json5 "//foo\n");
     Alcotest.(check (list token)) "Between numbers" [INT_OR_FLOAT "1"; INT_OR_FLOAT "1"] (tokenize_json5 "1//foo\n1")
 
+
 (**
  * PARSING
  *)
@@ -68,12 +69,30 @@ let test_parser_simple () =
     Alcotest.(check yojson) "Simple null" `Null (parse [NULL]);
     Alcotest.(check yojson) "Simple true" (`Bool true) (parse [TRUE]);
     Alcotest.(check yojson) "Simple false" (`Bool false) (parse [FALSE]);
+    Alcotest.(check yojson) "Simple int" (`Int 3) (parse [INT 3]);
+    Alcotest.(check yojson) "Simple float" (`Float 3.4) (parse [FLOAT 3.4]);
+    ()
+
+let test_parser_string () =
+    Alcotest.(check yojson) "Simple string" (`String "hello") (parse [STRING "hello"]);
+    Alcotest.(check yojson) "Escape sequences" (`String "a\'\"\\\b\n\r\ta") (parse [STRING "a\'\"\\\b\n\r\ta"]);
     ()
 
 let test_parser_list () =
     Alcotest.(check yojson) "Empty list" (`List []) (parse [OPEN_BRACKET; CLOSE_BRACKET]);
     Alcotest.(check yojson) "List with bools" (`List [`Bool false; `Bool true]) (parse [OPEN_BRACKET; FALSE; COMMA; TRUE; CLOSE_BRACKET]);
     Alcotest.(check yojson) "List of lists" (`List [ `List []; `Null ]) (parse [OPEN_BRACKET; OPEN_BRACKET; CLOSE_BRACKET; COMMA; NULL; CLOSE_BRACKET]);
+    Alcotest.(check yojson) "List with trailing comma" (`List [ `Null ]) (parse [OPEN_BRACKET; NULL; COMMA; CLOSE_BRACKET]);
+    Alcotest.(check yojson) "List of list with content" (`List [ `List [ `Bool true ] ]) (parse [OPEN_BRACKET; OPEN_BRACKET; TRUE; CLOSE_BRACKET; CLOSE_BRACKET]);
+    ()
+
+let test_parser_object () =
+    Alcotest.(check yojson) "Empty object" (`Assoc []) (parse [OPEN_BRACE; CLOSE_BRACE]);
+    Alcotest.(check yojson) "String key" (`Assoc [ ("foo", `Null) ]) (parse [OPEN_BRACE; STRING "foo"; COLON; NULL; CLOSE_BRACE]);
+    Alcotest.(check yojson) "Identifer key" (`Assoc [ ("foo", `Null) ]) (parse [OPEN_BRACE; IDENTIFIER_NAME "foo"; COLON; NULL; CLOSE_BRACE]);
+    Alcotest.(check yojson) "Trailing comma" (`Assoc [ ("foo", `Null) ]) (parse [OPEN_BRACE; STRING "foo"; COLON; NULL; COMMA; CLOSE_BRACE]);
+    Alcotest.(check yojson) "Nested object" (`Assoc [ ("foo", `Assoc [ ("bar", `Null) ]) ]) (parse [OPEN_BRACE; STRING "foo"; COLON; OPEN_BRACE; STRING "bar"; COLON; NULL; CLOSE_BRACE; COMMA; CLOSE_BRACE]);
+    Alcotest.(check yojson) "Mixed keys and values" (`Assoc [ ("foo", `Bool true); ("bar", `Null); ("baz", `Bool false) ]) (parse [OPEN_BRACE; STRING "foo"; COLON; TRUE; COMMA; IDENTIFIER_NAME "bar"; COLON; NULL; COMMA; IDENTIFIER_NAME "baz"; COLON; FALSE; CLOSE_BRACE]);
     ()
 
 
@@ -101,6 +120,8 @@ let () =
             ];
             "Parse", [
                 test_case "Simple parsing" `Quick test_parser_simple;
+                test_case "Strings" `Quick test_parser_string;
                 test_case "Simple list parsing" `Quick test_parser_list;
+                test_case "Simple object parsing" `Quick test_parser_object;
             ];
         ]
