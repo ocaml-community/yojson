@@ -9,7 +9,7 @@ This library parses JSON data into a nested OCaml tree data structure.
 Library documentation
 ---------------------
 
-Currently at https://ocaml-community.github.io/yojson/
+Currently at [ocaml-community.github.io/yojson](https://ocaml-community.github.io/yojson/).
 
 
 Examples
