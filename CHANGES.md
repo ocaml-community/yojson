@@ -23,6 +23,11 @@
 - The function `to_file` now adds a newline at the end of the generated file. An
   optional argument allows to return to the original behaviour (#124, @panglesd)
 
+### Fix
+
+- Avoid copying unnecessarily large amounts of strings when parsing (#85, #108,
+  @Leonidas-from-XIV)
+
 ## 1.7.0
 
 *2019-02-14*
