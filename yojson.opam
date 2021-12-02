@@ -17,8 +17,6 @@ depends: [
   "dune"
   "cppo" {build}
   "alcotest" {with-test & >= "0.8.5"}
-  "core_bench" {with-test}
-  "core" {with-test}
   "odoc" {with-doc}
 ]
 synopsis:
