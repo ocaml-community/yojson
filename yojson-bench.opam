@@ -1,5 +1,5 @@
 opam-version: "2.0"
-maintainer: ["nathan@cryptosense.com" "marek@xivilization.net"]
+maintainer: ["paul-elliot@tarides.com" "nathan@tarides.com" "marek@tarides.com"]
 authors: ["Martin Jambon"]
 homepage: "https://github.com/ocaml-community/yojson"
 bug-reports: "https://github.com/ocaml-community/yojson/issues"
@@ -12,7 +12,6 @@ depends: [
   "dune"
   "core_bench" {>= "v0.11.0"}
   "core" {>= "v0.11.0"}
-  "alcotest" {>= "0.8.5"}
 ]
 build: [
   ["dune" "subst"] {pinned}
