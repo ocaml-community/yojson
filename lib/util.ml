@@ -4,11 +4,17 @@ let typeof = function
   | `Assoc _ -> "object"
   | `Bool _ -> "bool"
   | `Float _ -> "float"
+#ifdef INT
   | `Int _ -> "int"
+#endif
   | `List _ -> "array"
   | `Null -> "null"
   | `String _ -> "string"
   | `Intlit _ -> "intlit"
+  | `Floatlit _ -> "floatlit"
+#ifdef STRINGLIT
+  | `Stringlit _ -> "stringlit"
+#endif
   | `Tuple _ -> "tuple"
   | `Variant _ -> "variant"
 
@@ -49,38 +55,62 @@ let to_bool_option = function
   | js -> typerr "Expected bool or null, got " js
 
 let to_number = function
+#ifdef INT
   | `Int i -> float i
+#endif
+#ifdef FLOAT
   | `Float f -> f
+#endif
   | js -> typerr "Expected number, got " js
 
 let to_number_option = function
+#ifdef INT
   | `Int i -> Some (float i)
+#endif
+#ifdef FLOAT
   | `Float f -> Some f
+#endif
   | `Null -> None
   | js -> typerr "Expected number or null, got " js
 
-let to_float = function `Float f -> f | js -> typerr "Expected float, got " js
+let to_float = function
+#ifdef FLOAT
+  | `Float f -> f
+#endif
+  | js -> typerr "Expected float, got " js
 
 let to_float_option = function
+#ifdef FLOAT
   | `Float f -> Some f
+#endif
   | `Null -> None
   | js -> typerr "Expected float or null, got " js
 
-let to_int = function `Int i -> i | js -> typerr "Expected int, got " js
+let to_int = function
+#ifdef INT
+  | `Int i -> i
+#endif
+  | js -> typerr "Expected int, got " js
 
 let to_int_option = function
+#ifdef INT
   | `Int i -> Some i
+#endif
   | `Null -> None
   | js -> typerr "Expected int or null, got " js
 
 let to_list = function `List l -> l | js -> typerr "Expected array, got " js
 
 let to_string = function
+#ifdef STRING
   | `String s -> s
+#endif
   | js -> typerr "Expected string, got " js
 
 let to_string_option = function
+#ifdef STRING
   | `String s -> Some s
+#endif
   | `Null -> None
   | js -> typerr "Expected string or null, got " js
 
@@ -124,17 +154,50 @@ let filter_member k l =
 
 let filter_assoc l = filter_map (function `Assoc l -> Some l | _ -> None) l
 let filter_bool l = filter_map (function `Bool x -> Some x | _ -> None) l
-let filter_int l = filter_map (function `Int x -> Some x | _ -> None) l
-let filter_float l = filter_map (function `Float x -> Some x | _ -> None) l
+let filter_int l =
+  filter_map (
+      function
+        #ifdef INT
+      |  `Int x -> Some x
+                     #endif
+      | _ -> None
+    ) l
+
+let filter_float l =
+  filter_map (
+    function
+#ifdef FLOAT
+      `Float x -> Some x
+#endif
+      | _ -> None
+  ) l
 
 let filter_number l =
-  filter_map
-    (function `Int x -> Some (float x) | `Float x -> Some x | _ -> None)
-    l
+  filter_map (
+    function
+#ifdef INT
+        `Int x -> Some (float x)
+#endif
+#ifdef FLOAT
+      | `Float x -> Some x
+#endif
+      | _ -> None
+  ) l
 
-let filter_string l = filter_map (function `String x -> Some x | _ -> None) l
-let keys o = to_assoc o |> List.map (fun (key, _) -> key)
-let values o = to_assoc o |> List.map (fun (_, value) -> value)
+let filter_string l =
+  filter_map (
+    function
+#ifdef STRING
+        `String x -> Some x
+#endif
+      | _ -> None
+  ) l
+
+let keys o =
+  to_assoc o |> List.map (fun (key, _) -> key)
+
+let values o =
+  to_assoc o |> List.map (fun (_, value) -> value)
 
 let combine (first : t) (second : t) =
   match (first, second) with
