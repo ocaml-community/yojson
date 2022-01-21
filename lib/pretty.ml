@@ -49,11 +49,7 @@ and format_field std out (name, x) =
   Format.fprintf out "@[<hv2>%s: %a@]" (json_string_of_string name) (format std) x
 
 let pp ?(std = false) out x =
-  if std && not (is_object_or_array x) then
-    json_error
-      "Root is not an object or array as requested by the JSON standard"
-  else
-    Format.fprintf out "@[<hv2>%a@]" (format std) (x :> t)
+  Format.fprintf out "@[<hv2>%a@]" (format std) (x :> t)
 
 let to_string ?std x =
   Format.asprintf "%a" (pp ?std) x
