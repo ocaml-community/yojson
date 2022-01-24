@@ -10,17 +10,17 @@ let yojson_data = Yojson.Safe.from_string data
 let large = 10_000
 
 let large_int_assoc = 
-  let ints = List.init large (fun n ->
+  let ints = List.init large ~f:(fun n ->
    (string_of_int n, `Int n))
   in
   `Assoc ints
 
 let large_int_list = 
-  let ints = List.init large (fun n -> `Int n) in
+  let ints = List.init large ~f:(fun n -> `Int n) in
   `List ints
 
 let large_string_list =
-  let strings = List.init large (fun n ->
+  let strings = List.init large ~f:(fun n ->
     `String (string_of_int n))
   in
   `List strings

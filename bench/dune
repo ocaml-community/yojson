@@ -1,5 +1,7 @@
 (executable
  (name bench)
+ (package yojson-bench)
+ (public_name yojson-bench)
  (flags (-safe-string))
  (libraries yojson core_bench core))
 
