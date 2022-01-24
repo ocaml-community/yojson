@@ -460,10 +460,12 @@ let to_output ?buf ?(len=4096) ?std out x =
   out#output (Buffer.contents ob) 0 (Buffer.length ob);
   ()
 
-let to_file ?len ?std file x =
+let to_file ?len ?std ?(newline = true) file x =
   let oc = open_out file in
   try
     to_channel ?len ?std oc x;
+    if newline then
+      output_string oc "\n";
     close_out oc
   with e ->
     close_out_noerr oc;

@@ -11,7 +11,7 @@ let to_file () =
     close_in ic;
     s
   in
-  Alcotest.(check string) __LOC__ Fixtures.json_string file_content;
+  Alcotest.(check string) __LOC__ (Fixtures.json_string ^ "\n") file_content;
   Sys.remove output_file
 
 let single_json = [
