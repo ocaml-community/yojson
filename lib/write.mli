@@ -48,9 +48,12 @@ val to_output :
 val to_file :
   ?len:int ->
   ?std:bool ->
+  ?newline:bool ->
   string -> t -> unit
   (** Write a compact JSON value to a file.
-      See [to_string] for the role of the optional arguments. *)
+      See [to_string] for the role of the optional arguments.
+      @param newline whether to end the content of the file with a new line.
+      Optional parameter with value [true] by default. *)
 
 val to_buffer :
   ?std:bool ->
