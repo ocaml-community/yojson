@@ -18,10 +18,6 @@
 - Add an opam package `yojson-bench` to deal with benchmarks dependency
   (@tmcgilchrist, #117)
 
-### Fix
-
-- Revert the deprecation warning on `json` type aliases
-
 ## 1.7.0
 
 *2019-02-14*
