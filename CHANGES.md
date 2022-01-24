@@ -18,6 +18,11 @@
 - Add an opam package `yojson-bench` to deal with benchmarks dependency
   (@tmcgilchrist, #117)
 
+### Change
+
+- The function `to_file` now adds a newline at the end of the generated file. An
+  optional argument allows to return to the original behaviour (#124, @panglesd)
+
 ## 1.7.0
 
 *2019-02-14*
