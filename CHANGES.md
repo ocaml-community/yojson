@@ -13,6 +13,11 @@
 - Removed deprecated `json` type aliasing type `t` which has been available
   since 1.6.0 (@Leonidas-from-XIV, #100).
 
+### Add
+
+- Add an opam package `yojson-bench` to deal with benchmarks dependency
+  (@tmcgilchrist, #117)
+
 ### Fix
 
 - Revert the deprecation warning on `json` type aliases
