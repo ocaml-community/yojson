@@ -12,6 +12,8 @@
 - Removed `yojson-biniou` library
 - Removed deprecated `json` type aliasing type `t` which has been available
   since 1.6.0 (@Leonidas-from-XIV, #100).
+- Removed constraint that the "root" value being rendered (via either
+  `pretty_print` or `to_string`) must be an object or array. (@cemerick, #121)
 
 ### Add
 

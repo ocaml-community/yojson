@@ -72,13 +72,6 @@ let code_of_surrogate_pair i j =
 let utf8_of_surrogate_pair buf i j =
   utf8_of_code buf (code_of_surrogate_pair i j)
 
-let is_object_or_array x =
-  match x with
-      `List _
-    | `Assoc _ -> true
-    | _ -> false
-
-
 type lexer_state = {
   buf : Buffer.t;
     (* Buffer used to accumulate substrings *)

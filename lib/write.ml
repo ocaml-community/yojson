@@ -418,12 +418,8 @@ and write_std_variant ob s o =
 
 
 let to_buffer ?(std = false) ob x =
-  if std then (
-    if not (is_object_or_array x) then
-      json_error "Root is not an object or array"
-    else
-      write_std_json ob x
-  )
+  if std then
+    write_std_json ob x
   else
     write_json ob x
 
