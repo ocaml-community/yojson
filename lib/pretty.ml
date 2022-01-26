@@ -50,7 +50,7 @@ let rec format std (out:Format.formatter) (x:t) : unit =
         if std then
 #ifdef STRING
           let representation = `String s in
-#else
+#elif defined STRINGLIT
           let representation = `Stringlit s in
 #endif
           format std out representation
@@ -61,7 +61,7 @@ let rec format std (out:Format.formatter) (x:t) : unit =
         if std then
 #ifdef STRING
           let representation = `String s in
-#else
+#elif defined STRINGLIT
           let representation = `Stringlit s in
 #endif
           format std out (`List [ representation; x ])
