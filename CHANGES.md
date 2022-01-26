@@ -20,6 +20,8 @@
 
 - Add an opam package `yojson-bench` to deal with benchmarks dependency
   (@tmcgilchrist, #117)
+- Added utilitaries function `assoc_map`, `assoc_map_filter`, `add`, `update`
+  and `remove` to the `Utils` module (@panglesd, #127)
 
 ### Change
 
