@@ -202,3 +202,49 @@ let combine (first : t) (second : t) =
   match (first, second) with
   | (`Assoc a, `Assoc b) -> (`Assoc (a @ b) :  t)
   | (a, b) -> raise (Invalid_argument "Expected two objects, check inputs")
+
+let assoc_map f json = match json with
+  | `Assoc l -> 
+    let rec map res l = match l with
+        [] -> res
+      | (k,v) :: q -> map ( (k,f (k,v)) :: res) q in
+    `Assoc (List.rev @@ map [] l)
+  | js -> typerr "Can't assoc_map over non-object type " js
+
+let assoc_map_filter f json = match json with
+  | `Assoc l -> 
+    let rec map res l = match l with
+        [] -> res
+      | (k,v) :: q ->
+        match f (k,v) with
+          None -> map (res) q
+        | Some v -> map ( (k,v) :: res) q in
+    `Assoc (List.rev @@ map [] l)
+  | js -> typerr "Can't assoc_map_filter over non-object type " js
+
+let add json pair = match json with
+  | `Assoc l -> `Assoc (pair :: l)
+  | js -> typerr "Can't assoc_map_filter over non-object type " js
+
+let update json (key, value) = match json with
+  | `Assoc l ->
+    let rec map res l = match l with
+        [] -> List.rev res
+      | (k,v) :: q when k = key ->
+        List.rev_append res ((k, value) :: q)
+      | a :: q ->
+        map (a::res) q in
+    `Assoc (map [] l)
+  | js -> typerr "Can't update field of non-object type " js
+
+let remove json key = match json with
+  | `Assoc l ->
+    let rec map res l = match l with
+        [] -> List.rev res
+      | (k,v) :: q when k = key ->
+        List.rev_append res q
+      | a :: q ->
+        map (a::res) q in
+    `Assoc (map [] l)
+  | js -> typerr "Can't remove field on non-object type " js
+

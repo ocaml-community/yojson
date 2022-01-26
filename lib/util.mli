@@ -74,6 +74,17 @@ val keys : t -> string list
 val values : t -> t list
   (** Return all the value in the given JSON object *)
 
+val add : t -> (string * t) -> t
+  (** Add an entry to a JSON object *)
+
+val update : t -> (string * t) -> t
+  (** [update json (key, value)] updates the first field with key [key] of the
+      JSON object [json] to [value] *)
+
+val remove : t -> string -> t
+  (** [remove json key] remove the first field with key [key] of the
+      JSON object [json] *)
+
 val combine : t -> t -> t
   (** Combine two JSON Objects together *)
 
@@ -89,6 +100,15 @@ val index : int -> t -> t
 val map : (t -> t) -> t -> t
   (** [map f arr] calls the function [f] on each element of the JSON array
       [arr], and returns a JSON array containing the results. *)
+
+val assoc_map : (string  * t -> t) -> t -> t
+  (** [assoc_map f json] calls the function [f] on each [(key, value)] pair of
+      the JSON object [json], and returns a JSON object containing the updated
+      [(key, f (key, value))]. *)
+
+val assoc_map_filter : (string  * t -> t option) -> t -> t
+  (** Same as [assoc_map] but filters the output of [f].
+  *)
 
 val to_assoc : t -> (string * t) list
   (** Extract the items of a JSON object or raise [Type_error]. *)
