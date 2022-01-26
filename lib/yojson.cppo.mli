@@ -45,6 +45,7 @@ sig
 #include "monomorphic.mli"
 #include "write2.mli"
 #include "read.mli"
+(** This module provides combinators for extracting fields from JSON values. *)
 module Util :
 sig
   #include "util.mli"
@@ -62,7 +63,8 @@ sig
    This module supports a specific syntax for variants and tuples
    in addition to the standard JSON nodes.
    Arbitrary integers are supported and represented as a decimal string 
-   using [`Intlit] when they cannot be represented using OCaml's int type.
+   using [`Intlit] when they cannot be represented using OCaml's int type
+   (31 or 63 bits depending on the platform).
 
    This module is recommended for intensive use 
    or OCaml-friendly use of JSON.
@@ -80,6 +82,7 @@ sig
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
+(** This module provides combinators for extracting fields from JSON values. *)
 module Util :
 sig
   #include "util.mli"
@@ -143,4 +146,3 @@ type json_max = t
 #undef STRINGLIT
 #undef TUPLE
 #undef VARIANT
-
