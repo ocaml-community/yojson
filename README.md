@@ -1,7 +1,7 @@
 Yojson: JSON library for OCaml
 ==============================
 
-[![Build Status](https://travis-ci.org/ocaml-community/yojson.svg?branch=master)](https://travis-ci.org/ocaml-community/yojson)
+[![Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Focaml-community%2Fyojson%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/ocaml-community/yojson)
 
 This library parses JSON data into a nested OCaml tree data structure.
 
