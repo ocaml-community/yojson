@@ -135,7 +135,6 @@ end
 #define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
-type json_max = t
 #include "write.mli"
 #include "write2.mli"
 #undef INT
