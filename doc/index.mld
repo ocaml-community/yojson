@@ -1,23 +1,18 @@
 {0 The [yojson] library}
 
 The Yojson library provides runtime functions for reading and writing JSON
-data from OCaml. It addresses a few shortcomings of its predecessor
-json-wheel and is about twice as fast (2.7x reading, 1.3x writing; results
-may vary).
+data from OCaml.
 The design goals of Yojson are the following:
-- Reducing inter-package dependencies by the use of polymorphic
-variants for the JSON tree type.
 - Allowing type-aware serializers/deserializers
 to read and write directly without going through a generic JSON tree,
 for efficiency purposes.
-Readers and writers of all JSON syntaxic elements are provided
-but are undocumented and meant to be used by generated OCaml code.
 - Distinguishing between ints and floats.
 - Providing optional extensions of the JSON syntax.
 These extensions include comments, arbitrary strings,
 optional quotes around field names, tuples and variants.
+- Eventually supporting the {{:https://json5.org}JSON5} standard
 
-See {{:<http://json.org> JSON specification}json specification}.
+See {{:http://json.org}JSON specification}.
 
 Author: Martin Jambon
 

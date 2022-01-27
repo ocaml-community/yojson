@@ -3,7 +3,7 @@
 
    - The {{!basic}Basic} JSON type,
    - The {{!safe}Safe} JSON type, a superset of JSON with safer support for integers,
-   - The {{!raw}Raw} JSON type, a superset of JSON, safer but less integrated with ocaml types.
+   - The {{!raw}Raw} JSON type, a superset of JSON, safer but less integrated with OCaml types.
 
 Each of these different types have their own module.
 
