@@ -1,30 +1,19 @@
 (**
-   The Yojson library provides runtime functions for reading and writing JSON
-   data from OCaml. It addresses a few shortcomings of its predecessor
-   json-wheel and is about twice as fast (2.7x reading, 1.3x writing; results
-   may vary).
-   The design goals of Yojson are the following:
-   - Reducing inter-package dependencies by the use of polymorphic
-   variants for the JSON tree type.
-   - Allowing type-aware serializers/deserializers 
-   to read and write directly without going through a generic JSON tree,
-   for efficiency purposes.
-   Readers and writers of all JSON syntaxic elements are provided
-   but are undocumented and meant to be used by generated OCaml code.
-   - Distinguishing between ints and floats.
-   - Providing optional extensions of the JSON syntax.
-   These extensions include comments, arbitrary strings,
-   optional quotes around field names, tuples and variants.
-   
-   @author Martin Jambon
-   @see <http://json.org> JSON specification
- *)
+   The Yojson library provides several types for representing JSON values, with different use cases.
+
+   - The {{!basic}Basic} JSON type,
+   - The {{!safe}Safe} JSON type, a superset of JSON with safer support for integers,
+   - The {{!raw}Raw} JSON type, a superset of JSON, safer but less integrated with OCaml types.
+
+Each of these different types have their own module.
+
+*)
 
 (** {1 Shared types and functions} *)
 
 #include "common.mli"
 
-(** {1 Basic JSON tree type} *)
+(** {1:basic Basic JSON tree type} *)
 
 module Basic :
 sig
@@ -55,7 +44,7 @@ end
 #undef STRING
 end
 
-(** {1 Multipurpose JSON tree type} *)
+(** {{1:safe} Multipurpose JSON tree type} *)
 
 module Safe :
 sig
@@ -123,7 +112,7 @@ sig
 #undef VARIANT
 end
 
-(** {1 Supertype of all JSON tree types} *)
+(** {1:raw Supertype of all JSON tree types} *)
 
 #define INT
 #define INTLIT
