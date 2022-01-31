@@ -10,7 +10,6 @@ for efficiency purposes.
 - Providing optional extensions of the JSON syntax.
 These extensions include comments, arbitrary strings,
 optional quotes around field names, tuples and variants.
-- Eventually supporting the {{:https://json5.org}JSON5} standard
 
 See {{:http://json.org}JSON specification}.
 
