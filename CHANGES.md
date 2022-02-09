@@ -31,7 +31,7 @@
 - Avoid copying unnecessarily large amounts of strings when parsing (#85, #108,
   @Leonidas-from-XIV)
 - Avoid deprecation warning when building with OCaml 4.14+ by switching to the
-  camlp-streams package until the Streams API is replaced (#129, #<PR_NUMBER>,
+  camlp-streams package until the Streams API is replaced (#129, #130,
   @Leonidas-from-XIV)
 
 ## 1.7.0
