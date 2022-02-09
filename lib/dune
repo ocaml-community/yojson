@@ -34,4 +34,5 @@
  (public_name yojson)
  (modules yojson)
  (synopsis "JSON parsing and printing")
+ (libraries camlp-streams)
  (flags (-safe-string)))

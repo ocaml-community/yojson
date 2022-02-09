@@ -15,6 +15,7 @@ build: [
 depends: [
   "ocaml" {>= "4.02.3"}
   "dune"
+  "camlp-streams"
   "cppo" {build}
   "alcotest" {with-test & >= "0.8.5"}
   "odoc" {with-doc}
