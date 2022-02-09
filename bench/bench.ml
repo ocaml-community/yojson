@@ -55,9 +55,9 @@ let main () =
       ignore (Yojson.Safe.to_channel oc large_int_assoc)));
     begin
       let buf = Buffer.create 1000 in
-      Bench.Test.create ~name:"JSON stream roundtrip" (fun () ->
-        let stream = Yojson.Safe.stream_from_string ~buf streamable_string in
-        ignore (Yojson.Safe.stream_to_string ~buf stream)
+      Bench.Test.create ~name:"JSON seq roundtrip" (fun () ->
+        let stream = Yojson.Safe.seq_from_string ~buf streamable_string in
+        ignore (Yojson.Safe.seq_to_string ~buf stream)
       )
     end;
   ])

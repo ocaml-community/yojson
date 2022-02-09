@@ -1143,30 +1143,30 @@ and junk = parse
 
   exception Finally of exn * exn
 
-  let stream_from_lexbuf v ?(fin = fun () -> ()) lexbuf =
+  let seq_from_lexbuf v ?(fin = fun () -> ()) lexbuf =
     let stream = Some true in
-    let f i =
-      try Some (from_lexbuf v ?stream lexbuf)
+    let rec f () =
+      try Seq.Cons (from_lexbuf v ?stream lexbuf, f)
       with
           End_of_input ->
             fin ();
-            None
+            Seq.Nil
         | e ->
             (try fin () with fin_e -> raise (Finally (e, fin_e)));
             raise e
     in
-    Stream.from f
+    f
 
-  let stream_from_string ?buf ?fname ?lnum s =
+  let seq_from_string ?buf ?fname ?lnum s =
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v (Lexing.from_string s)
+    seq_from_lexbuf v (Lexing.from_string s)
 
-  let stream_from_channel ?buf ?fin ?fname ?lnum ic =
+  let seq_from_channel ?buf ?fin ?fname ?lnum ic =
     let lexbuf = Lexing.from_channel ic in
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v ?fin lexbuf
+    seq_from_lexbuf v ?fin lexbuf
 
-  let stream_from_file ?buf ?fname ?lnum file =
+  let seq_from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     let fin () = close_in ic in
     let fname =
@@ -1176,29 +1176,28 @@ and junk = parse
     in
     let lexbuf = Lexing.from_channel ic in
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v ~fin lexbuf
+    seq_from_lexbuf v ~fin lexbuf
 
   type json_line = [ `Json of t | `Exn of exn ]
 
-  let linestream_from_channel
+  let lineseq_from_channel
       ?buf ?(fin = fun () -> ()) ?fname ?lnum:(lnum0 = 1) ic =
     let buf =
       match buf with
           None -> Some (Buffer.create 256)
         | Some _ -> buf
     in
-    let f i =
+    let rec f lnum = fun () ->
       try
         let line = input_line ic in
-        let lnum = lnum0 + i in
-        Some (`Json (from_string ?buf ?fname ~lnum line))
+        Seq.Cons (`Json (from_string ?buf ?fname ~lnum line), f (lnum + 1))
       with
-          End_of_file -> fin (); None
-        | e -> Some (`Exn e)
+          End_of_file -> fin (); Seq.Nil
+        | e -> Seq.Cons (`Exn e, f (lnum + 1))
     in
-    Stream.from f
+    f lnum0
 
-  let linestream_from_file ?buf ?fname ?lnum file =
+  let lineseq_from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     let fin () = close_in ic in
     let fname =
@@ -1206,7 +1205,7 @@ and junk = parse
           None -> Some file
         | x -> x
     in
-    linestream_from_channel ?buf ~fin ?fname ?lnum ic
+    lineseq_from_channel ?buf ~fin ?fname ?lnum ic
 
   let prettify ?std s =
     pretty_to_string ?std (from_string s)

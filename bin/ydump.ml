@@ -46,7 +46,7 @@ let polycat write_one streaming in_file out_file =
   in
   try
     if streaming then
-      Stream.iter (write_one oc) (Yojson.Safe.stream_from_channel ~fname ic)
+      Seq.iter (write_one oc) (Yojson.Safe.seq_from_channel ~fname ic)
     else
       write_one oc (Yojson.Safe.from_channel ~fname ic);
     finally ();

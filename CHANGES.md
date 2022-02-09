@@ -25,6 +25,8 @@
 
 - The function `to_file` now adds a newline at the end of the generated file. An
   optional argument allows to return to the original behaviour (#124, @panglesd)
+- The `stream_from_*` and `stream_to_*` functions now use a `Seq.t` instead of a
+  `Stream.t`, and they are renamed into `seq_from_*` and `seq_to_*` (@gasche, #131).
 
 ### Fix
 

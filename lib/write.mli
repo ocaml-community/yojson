@@ -61,36 +61,36 @@ val to_buffer :
   (** Write a compact JSON value to an existing buffer.
       See [to_string] for the role of the optional argument. *)
 
-val stream_to_string :
+val seq_to_string :
   ?buf:Buffer.t ->
   ?len:int ->
   ?std:bool ->
-  t Stream.t -> string
+  t Seq.t -> string
   (** Write a newline-separated sequence of compact one-line JSON values to
       a string.
       See [to_string] for the role of the optional arguments. *)
 
-val stream_to_channel :
+val seq_to_channel :
   ?buf:Buffer.t ->
   ?len:int ->
   ?std:bool ->
-  out_channel -> t Stream.t -> unit
+  out_channel -> t Seq.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       a channel.
       See [to_channel] for the role of the optional arguments. *)
 
-val stream_to_file :
+val seq_to_file :
   ?len:int ->
   ?std:bool ->
-  string -> t Stream.t -> unit
+  string -> t Seq.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       a file.
       See [to_string] for the role of the optional arguments. *)
 
-val stream_to_buffer :
+val seq_to_buffer :
   ?std:bool ->
   Buffer.t ->
-  t Stream.t -> unit
+  t Seq.t -> unit
   (** Write a newline-separated sequence of compact one-line JSON values to
       an existing buffer.
       See [to_string] for the role of the optional arguments. *)

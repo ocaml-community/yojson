@@ -71,82 +71,82 @@ val from_lexbuf :
       is false and indicates that only JSON whitespace can be found between
       the end of the JSON value and the end of the input. *)
 
-val stream_from_string :
+val seq_from_string :
   ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> t Stream.t
+  string -> t Seq.t
   (** Input a sequence of JSON values from a string.
       Whitespace between JSON values is fine but not required.
       See [from_string] for the meaning of the optional arguments. *)
 
-val stream_from_channel :
+val seq_from_channel :
   ?buf:Buffer.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> t Stream.t
+  in_channel -> t Seq.t
   (** Input a sequence of JSON values from a channel.
       Whitespace between JSON values is fine but not required.
       @param fin finalization function executed once when the end of the
-      stream is reached either because there is no more input or because
+      sequence is reached either because there is no more input or because
       the input could not be parsed, raising an exception.
       @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
       See [from_string] for the meaning of the other optional arguments. *)
 
-val stream_from_file :
+val seq_from_file :
   ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> t Stream.t
+  string -> t Seq.t
   (** Input a sequence of JSON values from a file.
       Whitespace between JSON values is fine but not required.
 
       See [from_string] for the meaning of the optional arguments. *)
 
-val stream_from_lexbuf :
+val seq_from_lexbuf :
   lexer_state ->
   ?fin:(unit -> unit) ->
-  Lexing.lexbuf -> t Stream.t
+  Lexing.lexbuf -> t Seq.t
   (** Input a sequence of JSON values from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       Whitespace between JSON values is fine but not required.
       @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
-      See [stream_from_channel] for the meaning of the optional [fin]
+      See [seq_from_channel] for the meaning of the optional [fin]
       argument. *)
 
 
 type json_line = [ `Json of t | `Exn of exn ]
     (** The type of values resulting from a parsing attempt of a JSON value. *)
 
-val linestream_from_channel :
+val lineseq_from_channel :
   ?buf:Buffer.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> json_line Stream.t
+  in_channel -> json_line Seq.t
   (** Input a sequence of JSON values, one per line, from a channel.
       Exceptions raised when reading malformed lines are caught
       and represented using [`Exn].
 
-      See [stream_from_channel] for the meaning of the optional [fin]
+      See [seq_from_channel] for the meaning of the optional [fin]
       argument.
       See [from_string] for the meaning of the other optional arguments. *)
 
-val linestream_from_file :
+val lineseq_from_file :
   ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json_line Stream.t
+  string -> json_line Seq.t
   (** Input a sequence of JSON values, one per line, from a file.
       Exceptions raised when reading malformed lines are caught
       and represented using [`Exn].
 
-      See [stream_from_channel] for the meaning of the optional [fin]
+      See [seq_from_channel] for the meaning of the optional [fin]
       argument.
       See [from_string] for the meaning of the other optional arguments. *)
 

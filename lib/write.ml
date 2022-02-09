@@ -467,10 +467,10 @@ let to_file ?len ?std ?(newline = true) file x =
     close_out_noerr oc;
     raise e
 
-let stream_to_buffer ?std ob st =
-  Stream.iter (to_buffer ?std ob) st
+let seq_to_buffer ?std ob st =
+  Seq.iter (to_buffer ?std ob) st
 
-let stream_to_string ?buf ?(len = 256) ?std st =
+let seq_to_string ?buf ?(len = 256) ?std st =
   let ob =
     match buf with
         None -> Buffer.create len
@@ -478,27 +478,27 @@ let stream_to_string ?buf ?(len = 256) ?std st =
           Buffer.clear ob;
           ob
   in
-  stream_to_buffer ?std ob st;
+  seq_to_buffer ?std ob st;
   let s = Buffer.contents ob in
   Buffer.clear ob;
   s
 
-let stream_to_channel ?buf ?(len=2096) ?std oc st =
+let seq_to_channel ?buf ?(len=2096) ?std oc seq =
   let ob =
     match buf with
         None -> Buffer.create len
       | Some ob -> ob
   in
-  Stream.iter (fun json ->
+  Seq.iter (fun json ->
     to_buffer ?std ob json;
     Buffer.output_buffer oc ob;
     Buffer.clear ob;
-  ) st
+  ) seq
 
-let stream_to_file ?len ?std file st =
+let seq_to_file ?len ?std file st =
   let oc = open_out file in
   try
-    stream_to_channel ?len ?std oc st;
+    seq_to_channel ?len ?std oc st;
     close_out oc
   with e ->
     close_out_noerr oc;
