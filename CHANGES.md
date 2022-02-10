@@ -30,6 +30,7 @@
 
 - Avoid copying unnecessarily large amounts of strings when parsing (#85, #108,
   @Leonidas-from-XIV)
+- Fix `stream_to_file` (#133, @tcoopman and @gasche)
 
 ## 1.7.0
 
