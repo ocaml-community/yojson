@@ -489,8 +489,11 @@ let stream_to_channel ?buf ?(len=2096) ?std oc st =
         None -> Buffer.create len
       | Some ob -> ob
   in
-  stream_to_buffer ?std ob st;
-  Buffer.output_buffer oc ob
+  Stream.iter (fun json ->
+    to_buffer ?std ob json;
+    Buffer.output_buffer oc ob;
+    Buffer.clear ob;
+  ) st
 
 let stream_to_file ?len ?std file st =
   let oc = open_out file in
