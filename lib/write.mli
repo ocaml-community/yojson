@@ -23,13 +23,9 @@ val to_channel :
   ?std:bool ->
   out_channel -> t -> unit
   (** Write a compact JSON value to a channel.
-      @param buf allows to reuse an existing buffer created with
-      [Buffer.create] on the same channel.
-      [buf] is flushed right
-      before [to_channel] returns but the [out_channel] is
-      not flushed automatically.
+      Note: the [out_channel] is not flushed by this function.
 
-      See [to_string] for the role of the other optional arguments. *)
+      See [to_string] for the role of the optional arguments. *)
 
 val to_output :
   ?buf:Buffer.t ->
@@ -37,13 +33,8 @@ val to_output :
   ?std:bool ->
   < output : string -> int -> int -> int; .. > -> t -> unit
   (** Write a compact JSON value to an OO channel.
-      @param buf allows to reuse an existing buffer created with
-      [Buffer.add_channel] on the same channel.
-      [buf] is flushed right
-      before [to_output] returns but the channel itself is
-      not flushed automatically.
 
-      See [to_string] for the role of the other optional arguments. *)
+      See [to_string] for the role of the optional arguments. *)
 
 val to_file :
   ?len:int ->

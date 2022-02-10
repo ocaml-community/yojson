@@ -9,6 +9,7 @@
   * `Bi_outbuf.t` in signatures is replaced with `Buffer.t`
   * `to_outbuf` becomes `to_buffer` and `stream_to_outbuf` becomes
     `stream_to_buffer`
+  (@Leonidas-from-XIV, #74, and @gasche, #132)
 - Removed `yojson-biniou` library
 - Removed deprecated `json` type aliasing type `t` which has been available
   since 1.6.0 (@Leonidas-from-XIV, #100).
