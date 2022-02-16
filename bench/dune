@@ -6,6 +6,15 @@
  (libraries yojson core_bench core))
 
 (alias
-  (name bench)
+  (name bench-generic)
   (deps bench.json)
-  (action (run ./bench.exe)))
+  (action (run ./bench.exe generic)))
+
+(alias
+  (name bench-buffer)
+  (deps bench.json)
+  (action (run ./bench.exe buffer)))
+
+(alias
+  (name bench)
+  (deps (alias bench-generic) (alias bench-buffer)))

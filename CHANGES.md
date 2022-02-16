@@ -21,6 +21,8 @@
 
 - Add an opam package `yojson-bench` to deal with benchmarks dependency
   (@tmcgilchrist, #117)
+- Add a benchmark to judge the respective performance of providing a buffer vs
+  letting Yojson create an internal (#134, @Leonidas-from-XIV)
 
 ### Change
 
