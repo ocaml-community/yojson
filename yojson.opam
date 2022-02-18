@@ -18,6 +18,7 @@ depends: [
   "cppo" {build}
   "alcotest" {with-test & >= "0.8.5"}
   "odoc" {with-doc}
+  "seq" {>= "0.2.2"}
 ]
 synopsis:
   "Yojson is an optimized parsing and printing library for the JSON format"

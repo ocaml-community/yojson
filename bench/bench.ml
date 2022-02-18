@@ -25,6 +25,13 @@ let large_string_list =
   in
   `List strings
 
+let streamable_string =
+  let buf = Buffer.create (large * 100) in
+  for i = 1 to large do
+    Printf.bprintf buf "%d\n" i
+  done;
+  Buffer.contents buf
+
 let main () =
   Command.run (Bench.make_command [
     Bench.Test.create ~name:"JSON reading" (fun () ->
@@ -46,6 +53,13 @@ let main () =
     Bench.Test.create ~name:"JSON writing assoc to channel" (fun () ->
       Out_channel.with_file "/dev/null" ~f:(fun oc ->
       ignore (Yojson.Safe.to_channel oc large_int_assoc)));
+    begin
+      let buf = Buffer.create 1000 in
+      Bench.Test.create ~name:"JSON seq roundtrip" (fun () ->
+        let stream = Yojson.Safe.seq_from_string ~buf streamable_string in
+        ignore (Yojson.Safe.seq_to_string ~buf stream)
+      )
+    end;
   ])
 
 let () =

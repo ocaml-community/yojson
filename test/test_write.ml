@@ -29,24 +29,29 @@ let to_file () =
   test ~newline:true ();
   test ~newline:false ()
 
-let stream_to_file () =
-  let output_file = Filename.temp_file "test_yojson_stream_to_file" ".json" in
+(* List.to_seq is not available on old OCaml versions. *)
+let rec list_to_seq = function
+  | [] -> (fun () -> Seq.Nil)
+  | x :: xs -> (fun () -> Seq.Cons (x, list_to_seq xs))
+
+let seq_to_file () =
+  let output_file = Filename.temp_file "test_yojson_seq_to_file" ".json" in
   let data = [`String "foo"; `String "bar"] in
-  Yojson.Safe.stream_to_file output_file (Stream.of_list data);
+  Yojson.Safe.seq_to_file output_file (list_to_seq data);
   let read_data =
-    let stream = Yojson.Safe.stream_from_file output_file in
+    let seq = Yojson.Safe.seq_from_file output_file in
     let acc = ref [] in
-    Stream.iter (fun v -> acc := v :: !acc) stream;
+    Seq.iter (fun v -> acc := v :: !acc) seq;
     List.rev !acc
   in
   Sys.remove output_file;
   if data <> read_data then
     (* TODO: it would be nice to use Alcotest.check,
        but we don't have a 'testable' instance for JSON values. *)
-    Alcotest.fail "stream_{to,from}_file roundtrip failure"
+    Alcotest.fail "seq_{to,from}_file roundtrip failure"
 
 let single_json = [
   "to_string", `Quick, to_string;
   "to_file", `Quick, to_file;
-  "stream_to_file", `Quick, stream_to_file;
+  "seq_to_file", `Quick, seq_to_file;
 ]
