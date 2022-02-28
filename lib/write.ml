@@ -441,20 +441,21 @@ let to_channel ?buf ?(len=4096) ?std oc x =
   let ob =
     match buf with
         None -> Buffer.create len
-      | Some ob -> ob
+      | Some ob -> Buffer.clear ob; ob
   in
   to_buffer ?std ob x;
-  Buffer.output_buffer oc ob
+  Buffer.output_buffer oc ob;
+  Buffer.clear ob
 
 let to_output ?buf ?(len=4096) ?std out x =
   let ob =
     match buf with
         None -> Buffer.create len
-      | Some ob -> ob
+      | Some ob -> Buffer.clear ob; ob
   in
   to_buffer ?std ob x;
   out#output (Buffer.contents ob) 0 (Buffer.length ob);
-  ()
+  Buffer.clear ob
 
 let to_file ?len ?std ?(newline = true) file x =
   let oc = open_out file in
@@ -487,7 +488,7 @@ let seq_to_channel ?buf ?(len=2096) ?std oc seq =
   let ob =
     match buf with
         None -> Buffer.create len
-      | Some ob -> ob
+      | Some ob -> Buffer.clear ob; ob
   in
   Seq.iter (fun json ->
     to_buffer ?std ob json;
