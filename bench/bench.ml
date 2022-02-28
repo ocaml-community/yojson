@@ -32,8 +32,8 @@ let streamable_string =
   done;
   Buffer.contents buf
 
-let main () =
-  Command.run (Bench.make_command [
+let generic =
+  Bench.make_command [
     Bench.Test.create ~name:"JSON reading" (fun () ->
       ignore (Yojson.Safe.from_string data));
     Bench.Test.create ~name:"JSON writing" (fun () ->
@@ -60,7 +60,26 @@ let main () =
         ignore (Yojson.Safe.seq_to_string ~buf stream)
       )
     end;
-  ])
+  ]
+
+let buffer =
+  let buf = Buffer.create 4096 in
+  let data = large_int_assoc in
+  Bench.make_command [
+    Bench.Test.create ~name:"JSON writing with internal buffer" (fun () ->
+      Out_channel.with_file "/dev/null" ~f:(fun oc ->
+        ignore (Yojson.Safe.to_channel oc data)));
+    Bench.Test.create ~name:"JSON writing with provided buffer" (fun () ->
+      Out_channel.with_file "/dev/null" ~f:(fun oc ->
+        ignore (Yojson.Safe.to_channel ~buf oc data)));
+  ]
+
+let main () =
+  Command.group ~summary:"Benchmark" [
+    ("generic", generic);
+    ("buffer", buffer)
+  ]
+  |> Command.run
 
 let () =
   main ()
