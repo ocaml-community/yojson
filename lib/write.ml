@@ -417,14 +417,14 @@ and write_std_variant ob s o =
 #endif
 
 
-let to_buffer ?(std = false) ob x =
+let to_buffer ?(suf = "") ?(std = false) ob x =
   if std then
     write_std_json ob x
   else
-    write_json ob x
+    write_json ob x;
+  Buffer.add_string ob suf
 
-
-let to_string ?buf ?(len = 256) ?std x =
+let to_string ?buf ?(len = 256) ?(suf = "") ?std x =
   let ob =
     match buf with
         None -> Buffer.create len
@@ -432,46 +432,44 @@ let to_string ?buf ?(len = 256) ?std x =
           Buffer.clear ob;
           ob
   in
-  to_buffer ?std ob x;
+  to_buffer ~suf ?std ob x;
   let s = Buffer.contents ob in
   Buffer.clear ob;
   s
 
-let to_channel ?buf ?(len=4096) ?std oc x =
+let to_channel ?buf ?(len=4096) ?(suf = "") ?std oc x =
   let ob =
     match buf with
         None -> Buffer.create len
       | Some ob -> Buffer.clear ob; ob
   in
-  to_buffer ?std ob x;
+  to_buffer ~suf ?std ob x;
   Buffer.output_buffer oc ob;
   Buffer.clear ob
 
-let to_output ?buf ?(len=4096) ?std out x =
+let to_output ?buf ?(len=4096) ?(suf = "") ?std out x =
   let ob =
     match buf with
         None -> Buffer.create len
       | Some ob -> Buffer.clear ob; ob
   in
-  to_buffer ?std ob x;
+  to_buffer ~suf ?std ob x;
   out#output (Buffer.contents ob) 0 (Buffer.length ob);
   Buffer.clear ob
 
-let to_file ?len ?std ?(newline = true) file x =
+let to_file ?len ?std ?(suf = "\n") file x =
   let oc = open_out file in
   try
-    to_channel ?len ?std oc x;
-    if newline then
-      output_string oc "\n";
+    to_channel ?len ~suf ?std oc x;
     close_out oc
   with e ->
     close_out_noerr oc;
     raise e
 
-let seq_to_buffer ?std ob st =
-  Seq.iter (to_buffer ?std ob) st
+let seq_to_buffer ?(suf = "\n") ?std ob st =
+  Seq.iter (to_buffer ~suf ?std ob) st
 
-let seq_to_string ?buf ?(len = 256) ?std st =
+let seq_to_string ?buf ?(len = 256) ?(suf = "\n") ?std st =
   let ob =
     match buf with
         None -> Buffer.create len
@@ -479,27 +477,27 @@ let seq_to_string ?buf ?(len = 256) ?std st =
           Buffer.clear ob;
           ob
   in
-  seq_to_buffer ?std ob st;
+  seq_to_buffer ~suf ?std ob st;
   let s = Buffer.contents ob in
   Buffer.clear ob;
   s
 
-let seq_to_channel ?buf ?(len=2096) ?std oc seq =
+let seq_to_channel ?buf ?(len=2096) ?(suf = "\n") ?std oc seq =
   let ob =
     match buf with
         None -> Buffer.create len
       | Some ob -> Buffer.clear ob; ob
   in
   Seq.iter (fun json ->
-    to_buffer ?std ob json;
+    to_buffer ~suf ?std ob json;
     Buffer.output_buffer oc ob;
     Buffer.clear ob;
   ) seq
 
-let seq_to_file ?len ?std file st =
+let seq_to_file ?len ?(suf = "\n") ?std file st =
   let oc = open_out file in
   try
-    seq_to_channel ?len ?std oc st;
+    seq_to_channel ?len ~suf ?std oc st;
     close_out oc
   with e ->
     close_out_noerr oc;

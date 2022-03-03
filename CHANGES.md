@@ -23,11 +23,14 @@
   (@tmcgilchrist, #117)
 - Add a benchmark to judge the respective performance of providing a buffer vs
   letting Yojson create an internal (#134, @Leonidas-from-XIV)
+- Add an optional `suf` keyword argument was added to functions that write
+  serialized JSON, thus allowing NDJSON output. Most functions default to not
+  adding any suffix except for `to_file` (#124, @panglesd) and functions
+  writing sequences of values where the default is `\n` (#135,
+  @Leonidas-from-XIV)
 
 ### Change
 
-- The function `to_file` now adds a newline at the end of the generated file. An
-  optional argument allows to return to the original behaviour (#124, @panglesd)
 - The `stream_from_*` and `stream_to_*` functions now use a `Seq.t` instead of a
   `Stream.t`, and they are renamed into `seq_from_*` and `seq_to_*` (@gasche, #131).
 
