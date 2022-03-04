@@ -12,7 +12,12 @@ let from_file () =
   Alcotest.(check Testable.yojson) __LOC__ Fixtures.json_value (Yojson.Safe.from_file input_file);
   Sys.remove input_file
 
+let validate () =
+  Alcotest.(check ( option unit )) __LOC__ None (Yojson.Safe.validate_t () Fixtures.json_value);
+  Alcotest.(check ( option unit )) __LOC__ None (Yojson.Safe.validate_json () Fixtures.json_value)
+
 let single_json = [
   "from_string", `Quick, from_string;
   "from_file", `Quick, from_file;
+  "validate", `Quick, validate;
 ]
