@@ -16,6 +16,8 @@
 - Removed `json_max` type (@Leonidas-from-XIV, #103)
 - Removed constraint that the "root" value being rendered (via either
   `pretty_print` or `to_string`) must be an object or array. (@cemerick, #121)
+- Removed `validate_json` as it only made sense if the type was called `json`.
+  (@Leonidas-from-XIV, #<PR_NUMBER>)
 
 ### Add
 
