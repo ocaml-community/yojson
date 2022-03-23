@@ -79,7 +79,7 @@ let main () =
     ("generic", generic);
     ("buffer", buffer)
   ]
-  |> Command.run
+  |> Command_unix.run
 
 let () =
   main ()

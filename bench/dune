@@ -3,7 +3,7 @@
  (package yojson-bench)
  (public_name yojson-bench)
  (flags (-safe-string))
- (libraries yojson core_bench core))
+ (libraries yojson core_bench core core_unix.command_unix))
 
 (alias
   (name bench-generic)
