@@ -7,11 +7,12 @@ dev-repo: "git+https://github.com/ocaml-community/yojson.git"
 doc: "https://ocaml-community.github.io/yojson/"
 license: "BSD-3-Clause"
 depends: [
-  "ocaml" {>= "4.04"}
+  "ocaml" {>= "4.08"}
   "yojson" {= version}
   "dune"
-  "core_bench" {>= "v0.11.0"}
-  "core" {>= "v0.11.0"}
+  "core_bench" {>= "v0.14.0"}
+  "core" {>= "v0.14.0"}
+  "core_unix" {>= "v0.14.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}
