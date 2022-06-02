@@ -44,7 +44,7 @@ end
 #undef STRING
 end
 
-(** {{1:safe} Multipurpose JSON tree type} *)
+(** {1:safe Multipurpose JSON tree type} *)
 
 module Safe :
 sig
