@@ -1,5 +1,17 @@
 ## unreleased
 
+### Added
+
+### Removed
+
+### Changed
+
+### Fixed
+
+## 2.0.0
+
+*2022-06-02*
+
 ### Removed
 
 - Removed dependency on easy-format and removed `pretty_format` from
