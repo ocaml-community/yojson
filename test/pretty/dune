@@ -1,16 +1,23 @@
-(executable
- (name test)
+(executables
+ (names test atd)
  (libraries yojson))
 
 (rule
- (targets test.output)
- (deps ./sample.json ./test.exe)
- (action
-  (with-stdout-to
-   %{targets}
-   (run ./test.exe))))
+  (deps ./sample.json)
+  (action
+    (with-stdout-to
+      test.output.json
+      (run ./test.exe))))
+
+(rule
+  (action
+    (with-stdout-to
+      atd.output.json
+      (run ./atd.exe))))
 
 (alias
  (name runtest)
  (action
-  (diff test.expected test.output)))
+  (progn
+   (diff test.expected.json test.output.json)
+   (diff atd.expected.json atd.output.json))))
