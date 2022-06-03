@@ -32,15 +32,14 @@ let rec format inbox std (out:Format.formatter) (x:t) : unit =
 #endif
     | `List [] -> Format.pp_print_string out "[]"
     | `List l ->
-      if not inbox then Format.fprintf out "@[<hv2>";
-      Format.fprintf out "[@;<1 0>%a@;<1 -2>]" (pp_list "," (format false std)) l;
+      if not inbox then Format.fprintf out "@[<hov2>";
+      Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format false std)) l;
       if not inbox then Format.fprintf out "@]";
     | `Assoc [] -> Format.pp_print_string out "{}"
     | `Assoc l ->
-      if inbox then
-        Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l
-      else
-        Format.fprintf out "@[<hv2>{@;<1 0>%a@;<1 -2>}@]" (pp_list "," (format_field std)) l
+      if not inbox then Format.fprintf out "@[<hv2>";
+      Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l;
+      if not inbox then Format.fprintf out "@]";
 #ifdef TUPLE
     | `Tuple l ->
         if std then
@@ -49,7 +48,7 @@ let rec format inbox std (out:Format.formatter) (x:t) : unit =
           if l = [] then
             Format.pp_print_string out "()"
           else (
-            if not inbox then Format.fprintf out "@[<hv2>";
+            if not inbox then Format.fprintf out "@[<hov2>";
             Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format false std)) l;
             if not inbox then Format.fprintf out "@]";
           )
