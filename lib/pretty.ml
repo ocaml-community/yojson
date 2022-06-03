@@ -31,10 +31,10 @@ let rec format std (out:Format.formatter) (x:t) : unit =
     | `Stringlit s -> Format.pp_print_string out s
 #endif
     | `List [] -> Format.pp_print_string out "[]"
-    | `List l -> Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format std)) l
+    | `List l -> Format.fprintf out "[@;<1 0>@[<hv>%a@]@;<1 -2>]" (pp_list "," (format std)) l
     | `Assoc [] -> Format.pp_print_string out "{}"
     | `Assoc l ->
-      Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l
+      Format.fprintf out "{@;<1 0>@[<hv>%a@]@;<1 -2>}" (pp_list "," (format_field std)) l
 #ifdef TUPLE
     | `Tuple l ->
         if std then
