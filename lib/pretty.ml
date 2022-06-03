@@ -3,7 +3,7 @@ let pp_list sep ppx out l =
   let pp_sep out () = Format.fprintf out "%s@ " sep in
   Format.pp_print_list ~pp_sep ppx out l
 
-let rec format inbox std (out:Format.formatter) (x:t) : unit =
+let rec format ~inside_box std (out:Format.formatter) (x:t) : unit =
   match x with
     | `Null -> Format.pp_print_string out "null"
     | `Bool x -> Format.pp_print_bool out x
@@ -32,25 +32,25 @@ let rec format inbox std (out:Format.formatter) (x:t) : unit =
 #endif
     | `List [] -> Format.pp_print_string out "[]"
     | `List l ->
-      if not inbox then Format.fprintf out "@[<hov2>";
-      Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format false std)) l;
-      if not inbox then Format.fprintf out "@]";
+      if not inside_box then Format.fprintf out "@[<hov2>";
+      Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format ~inside_box:false std)) l;
+      if not inside_box then Format.fprintf out "@]";
     | `Assoc [] -> Format.pp_print_string out "{}"
     | `Assoc l ->
-      if not inbox then Format.fprintf out "@[<hv2>";
+      if not inside_box then Format.fprintf out "@[<hv2>";
       Format.fprintf out "{@;<1 0>%a@;<1 -2>}" (pp_list "," (format_field std)) l;
-      if not inbox then Format.fprintf out "@]";
+      if not inside_box then Format.fprintf out "@]";
 #ifdef TUPLE
     | `Tuple l ->
         if std then
-          format inbox std out (`List l)
+          format ~inside_box std out (`List l)
         else
           if l = [] then
             Format.pp_print_string out "()"
           else (
-            if not inbox then Format.fprintf out "@[<hov2>";
-            Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format false std)) l;
-            if not inbox then Format.fprintf out "@]";
+            if not inside_box then Format.fprintf out "@[<hov2>";
+            Format.fprintf out "(@,%a@;<0 -2>)" (pp_list "," (format ~inside_box:false std)) l;
+            if not inside_box then Format.fprintf out "@]";
           )
 #endif
 #ifdef VARIANT
@@ -61,7 +61,7 @@ let rec format inbox std (out:Format.formatter) (x:t) : unit =
 #elif defined STRINGLIT
           let representation = `Stringlit s in
 #endif
-          format inbox std out representation
+          format ~inside_box std out representation
         else
           Format.fprintf out "<%s>" (json_string_of_string s)
 
@@ -72,17 +72,17 @@ let rec format inbox std (out:Format.formatter) (x:t) : unit =
 #elif defined STRINGLIT
           let representation = `Stringlit s in
 #endif
-          format inbox std out (`List [ representation; x ])
+          format ~inside_box std out (`List [ representation; x ])
         else
           let op = json_string_of_string s in
-          Format.fprintf out "<@[<hv2>%s: %a@]>" op (format true std) x
+          Format.fprintf out "<@[<hv2>%s: %a@]>" op (format ~inside_box:true std) x
 #endif
 
 and format_field std out (name, x) =
-  Format.fprintf out "@[<hv2>%s: %a@]" (json_string_of_string name) (format true std) x
+  Format.fprintf out "@[<hv2>%s: %a@]" (json_string_of_string name) (format ~inside_box:true std) x
 
 let pp ?(std = false) out x =
-  Format.fprintf out "@[<hv2>%a@]" (format true std) (x :> t)
+  Format.fprintf out "@[<hv2>%a@]" (format ~inside_box:true std) (x :> t)
 
 let to_string ?std x =
   Format.asprintf "%a" (pp ?std) x
