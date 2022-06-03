@@ -8,7 +8,7 @@
 
 ### Fixed
 
-- Fix pretty-printing behavior for lists/objects inside lists
+- Fix pretty-printing behavior for lists/objects inside lists (#141, @c-cube)
 
 ## 2.0.0
 
