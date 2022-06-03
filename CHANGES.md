@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- Fix pretty-printing behavior for lists/objects inside lists
+
 ## 2.0.0
 
 *2022-06-02*
@@ -53,7 +55,6 @@
 - Avoid copying unnecessarily large amounts of strings when parsing (#85, #108,
   @Leonidas-from-XIV)
 - Fix `stream_to_file` (#133, @tcoopman and @gasche)
-- Fix pretty-printing behavior for lists/objects inside lists
 
 ## 1.7.0
 
