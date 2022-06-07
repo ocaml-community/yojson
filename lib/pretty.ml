@@ -54,6 +54,22 @@ let is_atom (x: [> t]) =
 let is_atom_list l =
   List.for_all is_atom l
 
+(*
+   inside_box: indicates that we're already within a box that imposes
+   a certain style and we shouldn't create a new one. This is used for
+   printing field values like this:
+
+     foo: [
+       bar
+     ]
+
+   rather than something else like
+
+     foo:
+       [
+         bar
+       ]
+*)
 let rec format ~inside_box std (out:Format.formatter) (x:t) : unit =
   match x with
     | `Null -> Format.pp_print_string out "null"
@@ -83,7 +99,7 @@ let rec format ~inside_box std (out:Format.formatter) (x:t) : unit =
 #endif
     | `List [] -> Format.pp_print_string out "[]"
     | `List l ->
-      if not inside_box then Format.fprintf out "@[<hov2>";
+      if not inside_box then Format.fprintf out "@[<hv2>";
       if is_atom_list l then
         (* use line wrapping like we would do for a paragraph of text *)
         Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]"
