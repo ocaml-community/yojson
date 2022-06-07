@@ -1,7 +1,58 @@
+(*
+   Pretty-print JSON data in an attempt to maximize readability.
+
+   1. What fits on one line stays on one line.
+   2. What doesn't fit on one line gets printed more vertically so as to not
+      exceed a reasonable page width, if possible.
+
+   Arrays containing only simple elements ("atoms") are pretty-printed with
+   end-of-line wrapping like ordinary text:
+
+     [
+        "hello", "hello", "hello", "hello", "hello", "hello", "hello", "hello",
+        "hello", "hello", "hello", "hello", "hello", "hello", "hello", "hello"
+     ]
+
+   Other arrays are printed either horizontally or vertically depending
+   on whether they fit on a single line:
+
+     [ { "hello": "world" }, { "hello": "world" }, { "hello": "world" } ]
+
+   or
+
+     [
+       { "hello": "world" },
+       { "hello": "world" },
+       { "hello": "world" },
+       { "hello": "world" }
+     ]
+*)
 
 let pp_list sep ppx out l =
   let pp_sep out () = Format.fprintf out "%s@ " sep in
   Format.pp_print_list ~pp_sep ppx out l
+
+let is_atom (x: [> t]) =
+  match x with
+  | `Null
+  | `Bool _
+  | `Int _
+  | `Float _
+  | `String _
+  | `Intlit _
+  | `Floatlit _
+  | `Stringlit _
+  | `List []
+  | `Assoc []
+  | `Tuple []
+  | `Variant (_, None) -> true
+  | `List _
+  | `Assoc _
+  | `Tuple _
+  | `Variant (_, Some _) -> false
+
+let is_atom_list l =
+  List.for_all is_atom l
 
 let rec format ~inside_box std (out:Format.formatter) (x:t) : unit =
   match x with
@@ -33,7 +84,15 @@ let rec format ~inside_box std (out:Format.formatter) (x:t) : unit =
     | `List [] -> Format.pp_print_string out "[]"
     | `List l ->
       if not inside_box then Format.fprintf out "@[<hov2>";
-      Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]" (pp_list "," (format ~inside_box:false std)) l;
+      if is_atom_list l then
+        (* use line wrapping like we would do for a paragraph of text *)
+        Format.fprintf out "[@;<1 0>@[<hov>%a@]@;<1 -2>]"
+          (pp_list "," (format ~inside_box:false std)) l
+      else
+        (* print the elements horizontally if they fit on the line,
+           otherwise print them in a column *)
+        Format.fprintf out "[@;<1 0>@[<hv>%a@]@;<1 -2>]"
+          (pp_list "," (format ~inside_box:false std)) l;
       if not inside_box then Format.fprintf out "@]";
     | `Assoc [] -> Format.pp_print_string out "{}"
     | `Assoc l ->
