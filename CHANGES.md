@@ -1,10 +1,6 @@
-## unreleased
+## 2.0.1
 
-### Added
-
-### Removed
-
-### Changed
+*2022-06-28*
 
 ### Fixed
 
