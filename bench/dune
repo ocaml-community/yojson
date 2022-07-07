@@ -3,7 +3,7 @@
  (package yojson-bench)
  (public_names yojson-bench -)
  (flags (-safe-string))
- (libraries yojson core_bench core core_unix.command_unix core_bench.internals))
+ (libraries yojson core_bench core core_unix.command_unix core_bench.internals sexplib))
 
 (alias
   (name bench-generic)
