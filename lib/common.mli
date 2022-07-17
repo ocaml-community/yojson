@@ -1,8 +1,10 @@
 val version : string
 
 exception Json_error of string
+(** Exception (usually) describing a parsing failure. *)
 
 val json_error : string -> 'a
+(** @raise Json_error *)
 
 type lexer_state = {
   buf : Buffer.t;
