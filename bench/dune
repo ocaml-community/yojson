@@ -3,30 +3,39 @@
  (package yojson-bench)
  (public_names yojson-bench -)
  (flags (-safe-string))
- (libraries yojson core_bench core core_unix.command_unix core_bench.internals sexplib))
+ (libraries yojson core_bench core core_unix.command_unix
+   core_bench.internals sexplib))
 
 (rule
-  (alias bench-generic)
-  (deps bench.json)
-  (action (run ./bench.exe generic)))
+ (alias bench-generic)
+ (deps bench.json)
+ (action
+  (run ./bench.exe generic)))
 
 (rule
-  (alias bench-generic-sexp)
-  (deps bench.json)
-  (action (pipe-stdout (run ./bench.exe generic -sexp)
-                       (run ./conversions.exe -- generic))))
+ (alias bench-generic-sexp)
+ (deps bench.json)
+ (action
+  (pipe-stdout
+   (run ./bench.exe generic -sexp)
+   (run ./conversions.exe -- generic))))
 
 (rule
-  (alias bench-buffer)
-  (deps bench.json)
-  (action (run ./bench.exe buffer)))
+ (alias bench-buffer)
+ (deps bench.json)
+ (action
+  (run ./bench.exe buffer)))
 
 (rule
-  (alias bench-buffer-sexp)
-  (deps bench.json)
-  (action (pipe-stdout (run ./bench.exe buffer -sexp)
-                       (run ./conversions.exe -- buffer))))
+ (alias bench-buffer-sexp)
+ (deps bench.json)
+ (action
+  (pipe-stdout
+   (run ./bench.exe buffer -sexp)
+   (run ./conversions.exe -- buffer))))
 
 (alias
-  (name bench)
-  (deps (alias bench-generic) (alias bench-buffer)))
+ (name bench)
+ (deps
+  (alias bench-generic)
+  (alias bench-buffer)))
