@@ -5,25 +5,27 @@
  (flags (-safe-string))
  (libraries yojson core_bench core core_unix.command_unix core_bench.internals sexplib))
 
-(alias
-  (name bench-generic)
+(rule
+  (alias bench-generic)
   (deps bench.json)
   (action (run ./bench.exe generic)))
 
-(alias
-  (name bench-generic-sexp)
+(rule
+  (alias bench-generic-sexp)
   (deps bench.json)
-  (action (run ./bench.exe generic -sexp)))
+  (action (pipe-stdout (run ./bench.exe generic -sexp)
+                       (run ./conversions.exe -- generic))))
 
-(alias
-  (name bench-buffer)
+(rule
+  (alias bench-buffer)
   (deps bench.json)
   (action (run ./bench.exe buffer)))
 
-(alias
-  (name bench-buffer-sexp)
+(rule
+  (alias bench-buffer-sexp)
   (deps bench.json)
-  (action (run ./bench.exe buffer -sexp)))
+  (action (pipe-stdout (run ./bench.exe buffer -sexp)
+                       (run ./conversions.exe -- buffer))))
 
 (alias
   (name bench)

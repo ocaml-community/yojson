@@ -15,8 +15,8 @@
       atd.output.json
       (run ./atd.exe))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action
   (progn
    (diff test.expected.json test.output.json)

@@ -6,8 +6,8 @@
   )
 )
 
-(alias
-  (name compliance-tests)
+(rule
+  (alias compliance-tests)
   (deps
     (:test test.exe)
     (glob_files test_cases/*)

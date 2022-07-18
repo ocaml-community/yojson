@@ -16,9 +16,8 @@ uninstall:
 
 .PHONY: bench
 bench:
-	@ dune build bench/bench.exe
-	@ dune build @bench-generic-sexp --force 2>&1 | dune exec bench/conversions.exe -- generic
-	@ dune build @bench-buffer-sexp --force 2>&1 | dune exec bench/conversions.exe -- buffer
+	@dune build --display=quiet @bench-generic-sexp --force
+	@dune build --display=quiet @bench-buffer-sexp --force
 
 .PHONY: bench-local
 bench-local:
