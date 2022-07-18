@@ -6,6 +6,10 @@
 
 ### Removed
 
+- Removed undocumented and unused functions `write_float_fast` and
+  `write_std_float_fast` from `Yojson`, `Yojson.Basic` and `Yojson.Safe`
+  (@sim642, #149)
+
 ### Changed
 
 ### Fixed

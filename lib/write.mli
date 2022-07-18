@@ -124,8 +124,6 @@ val write_int : Buffer.t -> int -> unit
 #ifdef FLOAT
 val write_float : Buffer.t -> float -> unit
 val write_std_float : Buffer.t -> float -> unit
-val write_float_fast : Buffer.t -> float -> unit
-val write_std_float_fast : Buffer.t -> float -> unit
 val write_float_prec : int -> Buffer.t -> float -> unit
 val write_std_float_prec : int -> Buffer.t -> float -> unit
 #endif
