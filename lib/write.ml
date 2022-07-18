@@ -121,7 +121,8 @@ let float_needs_period s =
 
   The _fast version is faster but often produces unnecessarily long numbers.
 *)
-let write_float_fast ob x = (* unused *)
+(* unused *)
+let write_float_fast ob x =
   match classify_float x with
     FP_nan ->
       Buffer.add_string ob "NaN"
@@ -175,7 +176,8 @@ let write_normal_float_prec significant_figures ob x =
   if float_needs_period s then
     Buffer.add_string ob ".0"
 
-let write_float_prec significant_figures ob x = (* used by atdgen *)
+(* used by atdgen *)
+let write_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
       Buffer.add_string ob "NaN"
@@ -190,7 +192,8 @@ let json_string_of_float x =
   Buffer.contents ob
 
 
-let write_std_float_fast ob x = (* unused *)
+(* unused *)
+let write_std_float_fast ob x =
   match classify_float x with
     FP_nan ->
       json_error "NaN value not allowed in standard JSON"
@@ -226,7 +229,8 @@ let write_std_float ob x =
       if float_needs_period s then
         Buffer.add_string ob ".0"
 
-let write_std_float_prec significant_figures ob x = (* used by atdgen *)
+(* used by atdgen *)
+let write_std_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
       json_error "NaN value not allowed in standard JSON"

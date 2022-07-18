@@ -1,7 +1,9 @@
 val version : string
 
 exception Json_error of string
-(** Exception (usually) describing a parsing failure. *)
+(** Exception used:
+    - in JSON readers, if parsing fails;
+    - in JSON writers and pretty printing, if [float] value is not allowed in standard JSON. *)
 
 val json_error : string -> 'a
 (** @raise Json_error *)

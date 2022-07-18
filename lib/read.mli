@@ -136,7 +136,7 @@ val lineseq_from_channel :
 
       See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments and returned exceptions. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
 val lineseq_from_file :
   ?buf:Buffer.t ->
@@ -149,7 +149,7 @@ val lineseq_from_file :
 
       See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments and returned exceptions. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
 val read_t : lexer_state -> Lexing.lexbuf -> t
 (** Read a JSON value from the given lexer_state and lexing buffer and return it.
