@@ -9,7 +9,7 @@ license: "BSD-3-Clause"
 depends: [
   "ocaml" {>= "4.08"}
   "yojson" {= version}
-  "dune"
+  "dune" {>= "2.7.0"}
   "core_bench" {>= "v0.15.0"}
   "core" {>= "v0.14.0"}
   "core_unix" {>= "v0.14.0"}
