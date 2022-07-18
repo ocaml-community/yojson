@@ -1,6 +1,8 @@
 ## unreleased
- 
+
 ### Added
+
+- Expanded documentation of exceptions (@sim642, #148)
 
 ### Removed
 
