@@ -1,10 +1,10 @@
 val prettify : ?std:bool -> string -> string
   (** Combined parser and pretty-printer.
-      See [to_string] for the role of the optional [std] argument. *)
+      See [to_string] for the role of the optional [std] argument and raised exceptions. *)
 
 val compact : ?std:bool -> string -> string
   (** Combined parser and printer.
-      See [to_string] for the role of the optional [std] argument. *)
+      See [to_string] for the role of the optional [std] argument and raised exceptions. *)
 
 (** {2 JSON readers} *)
 
@@ -22,6 +22,7 @@ val from_string :
       @param fname data file name to be used in error messages. It does
       not have to be a real file.
       @param lnum number of the first line of input. Default is 1.
+      @raise Json_error if parsing fails.
   *)
 
 val from_channel :
@@ -30,7 +31,7 @@ val from_channel :
   ?lnum:int ->
   in_channel -> t
   (** Read a JSON value from a channel.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 val from_file :
   ?buf:Buffer.t ->
@@ -38,7 +39,7 @@ val from_file :
   ?lnum:int ->
   string -> t
   (** Read a JSON value from a file.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 
 type lexer_state = Lexer_state.t = {
@@ -65,7 +66,7 @@ val from_lexbuf :
   Lexing.lexbuf -> t
   (** Read a JSON value from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
-      See [from_string] for the meaning of the optional arguments.
+      See [from_string] for the meaning of the optional arguments and raised exceptions.
 
       @param stream indicates whether more data may follow. The default value
       is false and indicates that only JSON whitespace can be found between
@@ -78,7 +79,7 @@ val seq_from_string :
   string -> t Seq.t
   (** Input a sequence of JSON values from a string.
       Whitespace between JSON values is fine but not required.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 val seq_from_channel :
   ?buf:Buffer.t ->
@@ -94,7 +95,7 @@ val seq_from_channel :
       @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and other raised exceptions. *)
 
 val seq_from_file :
   ?buf:Buffer.t ->
@@ -104,7 +105,7 @@ val seq_from_file :
   (** Input a sequence of JSON values from a file.
       Whitespace between JSON values is fine but not required.
 
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 val seq_from_lexbuf :
   lexer_state ->
@@ -117,7 +118,7 @@ val seq_from_lexbuf :
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
       See [seq_from_channel] for the meaning of the optional [fin]
-      argument. *)
+      argument and other raised exceptions. *)
 
 
 type json_line = [ `Json of t | `Exn of exn ]
@@ -135,7 +136,7 @@ val lineseq_from_channel :
 
       See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
 val lineseq_from_file :
   ?buf:Buffer.t ->
@@ -148,7 +149,7 @@ val lineseq_from_file :
 
       See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
 val read_t : lexer_state -> Lexing.lexbuf -> t
 (** Read a JSON value from the given lexer_state and lexing buffer and return it.

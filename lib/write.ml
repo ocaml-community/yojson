@@ -121,6 +121,7 @@ let float_needs_period s =
 
   The _fast version is faster but often produces unnecessarily long numbers.
 *)
+(* unused *)
 let write_float_fast ob x =
   match classify_float x with
     FP_nan ->
@@ -175,6 +176,7 @@ let write_normal_float_prec significant_figures ob x =
   if float_needs_period s then
     Buffer.add_string ob ".0"
 
+(* used by atdgen *)
 let write_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
@@ -190,6 +192,7 @@ let json_string_of_float x =
   Buffer.contents ob
 
 
+(* unused *)
 let write_std_float_fast ob x =
   match classify_float x with
     FP_nan ->
@@ -226,6 +229,7 @@ let write_std_float ob x =
       if float_needs_period s then
         Buffer.add_string ob ".0"
 
+(* used by atdgen *)
 let write_std_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
