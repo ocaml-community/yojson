@@ -115,25 +115,9 @@ let float_needs_period s =
     false
 
 (*
-  Both write_float_fast and write_float guarantee
-  that a sufficient number of digits are printed in order to
-  allow reversibility.
-
-  The _fast version is faster but often produces unnecessarily long numbers.
+  Guarantees that a sufficient number of digits are printed in order to allow
+  reversibility.
 *)
-(* unused *)
-let write_float_fast ob x =
-  match classify_float x with
-    FP_nan ->
-      Buffer.add_string ob "NaN"
-  | FP_infinite ->
-      Buffer.add_string ob (if x > 0. then "Infinity" else "-Infinity")
-  | _ ->
-      let s = Printf.sprintf "%.17g" x in
-      Buffer.add_string ob s;
-      if float_needs_period s then
-        Buffer.add_string ob ".0"
-
 let write_float ob x =
   match classify_float x with
     FP_nan ->
@@ -191,23 +175,6 @@ let json_string_of_float x =
   write_float ob x;
   Buffer.contents ob
 
-
-(* unused *)
-let write_std_float_fast ob x =
-  match classify_float x with
-    FP_nan ->
-      json_error "NaN value not allowed in standard JSON"
-  | FP_infinite ->
-      json_error
-        (if x > 0. then
-           "Infinity value not allowed in standard JSON"
-         else
-           "-Infinity value not allowed in standard JSON")
-  | _ ->
-      let s = Printf.sprintf "%.17g" x in
-      Buffer.add_string ob s;
-      if float_needs_period s then
-        Buffer.add_string ob ".0"
 
 let write_std_float ob x =
   match classify_float x with
