@@ -14,6 +14,9 @@
 
 ### Fixed
 
+- Fix out-of-bounds error occurring when parsing object field names
+  with atdgen parsers using `map_ident` or `map_lexeme` (@mjambon, #150)
+
 ## 2.0.1
 
 *2022-06-28*
