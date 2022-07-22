@@ -55,12 +55,10 @@ let unquoted_from_lexbuf () =
 
   map_string (ident_expected "hello");
 
-  (match Yojson.Safe.read_object_end lexbuf with
-  | _ -> Alcotest.fail "Object end expected but did not happen"
-  | exception Yojson.End_of_object -> ());
-
-  (* successfully made it here, pass the test *)
-  ()
+  Alcotest.check_raises
+    "Reading } raises End_of_object"
+    Yojson.End_of_object
+    (fun () -> Yojson.Safe.read_object_end lexbuf)
 
 let single_json = [
   "from_string", `Quick, from_string;
