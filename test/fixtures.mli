@@ -8,3 +8,6 @@ val json_string : string
 
 (** The same JSON string terminated with a newline *)
 val json_string_newline : string
+
+val unquoted_json : string
+val unquoted_value : Yojson.Safe.t
