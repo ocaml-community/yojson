@@ -18,8 +18,8 @@ let unquoted_from_string () =
     Fixtures.unquoted_value
     (Yojson.Safe.from_string Fixtures.unquoted_json)
 
-let unquoted_from_lexbuf () =
-  let lexbuf = Lexing.from_string {|{foo: null, bar: "hello"}|} in
+let map_ident_and_string () =
+  let lexbuf = Lexing.from_string {|{foo:"hello"}|} in
   let lexer_state = Yojson.init_lexer () in
 
   let ident_expected expectation reference start len =
@@ -42,13 +42,6 @@ let unquoted_from_lexbuf () =
   skip_over Yojson.Safe.read_lcurl;
   map_ident (ident_expected "foo");
   skip_over Yojson.Safe.read_colon;
-  skip_over Yojson.Safe.read_space;
-  skip_over Yojson.Safe.read_null;
-  skip_over Yojson.Safe.read_comma;
-  skip_over Yojson.Safe.read_space;
-  map_ident (ident_expected "bar");
-  skip_over Yojson.Safe.read_colon;
-  skip_over Yojson.Safe.read_space;
 
   let variant = skip_over Yojson.Safe.start_any_variant in
   Alcotest.(check Testable.variant_kind) "String starts with double quote" `Double_quote variant;
@@ -64,5 +57,5 @@ let single_json = [
   "from_string", `Quick, from_string;
   "from_file", `Quick, from_file;
   "unquoted_from_string", `Quick, unquoted_from_string;
-  "unquoted_from_lexbuf", `Quick, unquoted_from_lexbuf;
+  "map_ident/map_string", `Quick, map_ident_and_string;
 ]
