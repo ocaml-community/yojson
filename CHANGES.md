@@ -2,6 +2,18 @@
 
 ### Added
 
+### Removed
+
+### Changed
+
+### Fixed
+
+## 2.0.2
+
+*2022-08-09*
+
+### Added
+
 - Expanded documentation of exceptions (@sim642, #148)
 
 ### Removed
@@ -9,8 +21,6 @@
 - Removed undocumented and unused functions `write_float_fast` and
   `write_std_float_fast` from `Yojson`, `Yojson.Basic` and `Yojson.Safe`
   (@sim642, #149)
-
-### Changed
 
 ### Fixed
 
