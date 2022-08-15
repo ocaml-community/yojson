@@ -1,6 +1,5 @@
 (lang dune 2.7)
 (name yojson)
-(formatting (enabled_for dune))
 
 (generate_opam_files true)
 (source (github ocaml-community/yojson))
