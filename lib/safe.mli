@@ -1,5 +1,5 @@
 val to_basic : t -> Basic.t
-  (**
+(**
      Tuples are converted to JSON arrays,
      Variants are converted to JSON strings or arrays of a string (constructor)
      and a json value (argument).
