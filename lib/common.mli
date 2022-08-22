@@ -9,22 +9,16 @@ val json_error : string -> 'a
 (** @raise Json_error *)
 
 type lexer_state = {
-  buf : Buffer.t;
-    (** Buffer used to accumulate substrings *)
-
-  mutable lnum : int;
-    (** Current line number (counting from 1) *)
-
+  buf : Buffer.t;  (** Buffer used to accumulate substrings *)
+  mutable lnum : int;  (** Current line number (counting from 1) *)
   mutable bol : int;
-    (** Absolute position of the first character of the current line
+      (** Absolute position of the first character of the current line
         (counting from 0) *)
-
   mutable fname : string option;
-    (** Name referencing the input file in error messages *)
+      (** Name referencing the input file in error messages *)
 }
 
-module Lexer_state :
-sig
+module Lexer_state : sig
   type t = lexer_state = {
     buf : Buffer.t;
     mutable lnum : int;
@@ -34,12 +28,8 @@ sig
 end
 
 val init_lexer :
-  ?buf: Buffer.t ->
-  ?fname: string ->
-  ?lnum: int ->
-  unit -> lexer_state
-  (** Create a fresh lexer_state record. *)
-
+  ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> unit -> lexer_state
+(** Create a fresh lexer_state record. *)
 
 (**/**)
 (* begin undocumented section *)

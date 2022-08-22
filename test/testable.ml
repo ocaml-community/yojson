@@ -6,7 +6,7 @@ let variant_kind_pp fmt = function
   | `Double_quote -> Format.fprintf fmt "`Double_quote"
 
 let variant_kind_equal a b =
-  match a, b with
+  match (a, b) with
   | `Edgy_bracket, `Edgy_bracket -> true
   | `Square_bracket, `Square_bracket -> true
   | `Double_quote, `Double_quote -> true
