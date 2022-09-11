@@ -1,6 +1,13 @@
 module M = struct
   include Yojson_json5.Safe
 
+  let from_string_err s =
+    match from_string s with
+    | Ok x ->
+        failwith
+          (Format.sprintf "Test didn't failed when should: %s" (to_string x))
+    | Error e -> e
+
   let from_string s =
     match from_string s with
     | Ok t -> t
@@ -37,6 +44,10 @@ let test_from_string () =
   Alcotest.(check yojson_json5)
     "more string escaping" (`String "Hello λ world")
     (M.from_string "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"");
+  Alcotest.(check string)
+    "string unescaped linebreak fails" "Unexpected character: "
+    (M.from_string_err {|"foo
+bar"|});
   Alcotest.(check yojson_json5)
     "null byte string" (`String "\x00") (M.from_string {|"\0"|});
   Alcotest.(check yojson_json5)
@@ -45,7 +56,10 @@ let test_from_string () =
     "null and octal string" (`String "\x007") (M.from_string {|"\07"|});
   Alcotest.(check yojson_json5) "int" (`Int 1) (M.from_string "1");
   Alcotest.(check yojson_json5)
-    "line break" (`String "foo\\\nbar")
+    "backslash escape" (`String {|foo\bar|})
+    (M.from_string {|"foo\\bar"|});
+  Alcotest.(check yojson_json5)
+    "line break" (`String "foobar")
     (M.from_string "\"foo\\\nbar\"");
   Alcotest.(check yojson_json5)
     "string and comment" (`String "bar")
@@ -55,8 +69,7 @@ let test_from_string () =
       [
         ("unquoted", `String "and you can quote me on that");
         ("singleQuotes", `String "I can use \"double quotes\" here");
-        ("lineBreaks", `String {|Look, Mom! \
-No \\n's!|});
+        ("lineBreaks", `String {|Look, Mom! No \n's!|});
         ("hexadecimal", `Int 0xdecaf);
         ("leadingDecimalPoint", `Float 0.8675309);
         ("andTrailing", `Float 8675309.0);

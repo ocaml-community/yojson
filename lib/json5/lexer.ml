@@ -94,7 +94,7 @@ let json5_int =
 let unicode_escape_sequence =
   [%sedlex.regexp? 'u', hex_digit, hex_digit, hex_digit, hex_digit]
 
-let single_escape_character = [%sedlex.regexp? Chars {|'"\bfnrtv|}]
+let single_escape_character = [%sedlex.regexp? Chars {|'"\\bfnrtv|}]
 
 let escape_character =
   [%sedlex.regexp? single_escape_character | decimal_digit | 'x' | 'u']
@@ -181,7 +181,8 @@ let string_lex_single lexbuf strbuf =
         let* s = Unescape.unescape (lexeme lexbuf) in
         Buffer.add_string strbuf s;
         lex lexbuf strbuf
-    | Sub (source_character, '\'') ->
+    | line_continuation -> lex lexbuf strbuf
+    | Sub (source_character, ('\'' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
     | _ ->
@@ -203,7 +204,8 @@ let string_lex_double lexbuf strbuf =
         let* s = Unescape.unescape (lexeme lexbuf) in
         Buffer.add_string strbuf s;
         lex lexbuf strbuf
-    | Sub (source_character, '"') ->
+    | line_continuation -> lex lexbuf strbuf
+    | Sub (source_character, ('"' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
     | _ ->

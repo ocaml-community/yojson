@@ -66,7 +66,8 @@ let unescape str =
           | None -> Error (Format.sprintf "bad escape sequence %s" escape_chars)
         in
         utf_8_string_of_unicode as_int
-    | '\\' | '"' | 'n' | 't' -> Ok str
+    | '"' | '\'' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' -> Ok str
+    | '\\' -> Ok {|\|}
     | '0' ->
         if String.length str = 2 then Ok "\x00"
         else if String.length str = 4 then
