@@ -29,6 +29,20 @@ let test_from_string () =
     "float" (`Float 12345.67890)
     (M.from_string "12345.67890");
   Alcotest.(check yojson_json5) "hex" (`Int 0x1) (M.from_string "0x1");
+  Alcotest.(check yojson_json5)
+    "hex escape sequence" (`String "a") (M.from_string {|"\x61"|});
+  Alcotest.(check yojson_json5)
+    "unicode escape sequence" (`String "λ")
+    (M.from_string {|"\u03bb"|});
+  Alcotest.(check yojson_json5)
+    "more string escaping" (`String "Hello λ world")
+    (M.from_string "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"");
+  Alcotest.(check yojson_json5)
+    "null byte string" (`String "\x00") (M.from_string {|"\0"|});
+  Alcotest.(check yojson_json5)
+    "octal string" (`String "?") (M.from_string {|"\077"|});
+  Alcotest.(check yojson_json5)
+    "null and octal string" (`String "\x007") (M.from_string {|"\07"|});
   Alcotest.(check yojson_json5) "int" (`Int 1) (M.from_string "1");
   Alcotest.(check yojson_json5)
     "line break" (`String "foo\\\nbar")

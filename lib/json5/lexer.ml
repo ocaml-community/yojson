@@ -1,3 +1,5 @@
+open Let_syntax.Result
+
 type token =
   | OPEN_PAREN
   | CLOSE_PAREN
@@ -92,7 +94,7 @@ let json5_int =
 let unicode_escape_sequence =
   [%sedlex.regexp? 'u', hex_digit, hex_digit, hex_digit, hex_digit]
 
-let single_escape_character = [%sedlex.regexp? Chars {|'"\\bfnrtv|}]
+let single_escape_character = [%sedlex.regexp? Chars {|'"\bfnrtv|}]
 
 let escape_character =
   [%sedlex.regexp? single_escape_character | decimal_digit | 'x' | 'u']
@@ -104,9 +106,13 @@ let character_escape_sequence =
   [%sedlex.regexp? single_escape_character | non_escape_character]
 
 let line_continuation = [%sedlex.regexp? '\\', line_terminator_sequence]
+let hex_escape_sequence = [%sedlex.regexp? 'x', hex_digit, hex_digit]
 
 let escape_sequence =
-  [%sedlex.regexp? character_escape_sequence | '0' | unicode_escape_sequence]
+  [%sedlex.regexp?
+    ( character_escape_sequence
+    | '0', Opt (decimal_digit, decimal_digit)
+    | hex_escape_sequence | unicode_escape_sequence )]
 
 let single_string_character =
   [%sedlex.regexp?
@@ -163,8 +169,57 @@ let comment = [%sedlex.regexp? multi_line_comment | single_line_comment]
 let white_space =
   [%sedlex.regexp? 0x0009 | 0x000B | 0x000C | 0x0020 | 0x00A0 | 0xFEFF | zs]
 
-let rec lex : token list -> Sedlexing.lexbuf -> (token list, string) result =
- fun tokens buf ->
+let string_lex_single lexbuf strbuf =
+  Buffer.add_char strbuf '\'';
+  let lexeme = Sedlexing.Utf8.lexeme in
+  let rec lex lexbuf strbuf =
+    match%sedlex lexbuf with
+    | '\'' ->
+        Buffer.add_char strbuf '\'';
+        Ok (Buffer.contents strbuf)
+    | '\\', escape_sequence ->
+        let* s = Unescape.unescape (lexeme lexbuf) in
+        Buffer.add_string strbuf s;
+        lex lexbuf strbuf
+    | Sub (source_character, '\'') ->
+        Buffer.add_string strbuf (lexeme lexbuf);
+        lex lexbuf strbuf
+    | _ ->
+        lexeme lexbuf
+        |> Format.asprintf "Unexpected character: %s"
+        |> Result.error
+  in
+  lex lexbuf strbuf
+
+let string_lex_double lexbuf strbuf =
+  Buffer.add_char strbuf '"';
+  let lexeme = Sedlexing.Utf8.lexeme in
+  let rec lex lexbuf strbuf =
+    match%sedlex lexbuf with
+    | '"' ->
+        Buffer.add_char strbuf '"';
+        Ok (Buffer.contents strbuf)
+    | '\\', escape_sequence ->
+        let* s = Unescape.unescape (lexeme lexbuf) in
+        Buffer.add_string strbuf s;
+        lex lexbuf strbuf
+    | Sub (source_character, '"') ->
+        Buffer.add_string strbuf (lexeme lexbuf);
+        lex lexbuf strbuf
+    | _ ->
+        lexeme lexbuf
+        |> Format.asprintf "Unexpected character: %s"
+        |> Result.error
+  in
+  lex lexbuf strbuf
+
+let string_lex lexbuf quote =
+  let strbuf = Buffer.create 200 in
+  if quote = "'" then string_lex_single lexbuf strbuf
+  else if quote = "\"" then string_lex_double lexbuf strbuf
+  else Error (Format.sprintf "invalid string quote %s" quote)
+
+let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
   match%sedlex buf with
   | '(' -> lex (OPEN_PAREN :: tokens) buf
@@ -175,6 +230,9 @@ let rec lex : token list -> Sedlexing.lexbuf -> (token list, string) result =
   | ']' -> lex (CLOSE_BRACKET :: tokens) buf
   | ':' -> lex (COLON :: tokens) buf
   | ',' -> lex (COMMA :: tokens) buf
+  | Chars {|"'|} ->
+      let* s = string_lex buf (lexeme buf) in
+      lex (STRING s :: tokens) buf
   | multi_line_comment | single_line_comment | white_space | line_terminator ->
       lex tokens buf
   | "true" -> lex (TRUE :: tokens) buf
@@ -192,9 +250,6 @@ let rec lex : token list -> Sedlexing.lexbuf -> (token list, string) result =
   | identifier_name ->
       let s = lexeme buf in
       lex (IDENTIFIER_NAME s :: tokens) buf
-  | string_literal ->
-      let s = lexeme buf in
-      lex (STRING s :: tokens) buf
   | eof -> Ok (List.rev tokens)
   | _ ->
       lexeme buf |> Format.asprintf "Unexpected character: '%s'" |> Result.error
