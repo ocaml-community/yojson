@@ -1,5 +1,0 @@
-(executable
- (name json5_test)
- (libraries yojson_json5 alcotest)
- (preprocess
-  (pps ppx_deriving.show ppx_deriving.eq)))
