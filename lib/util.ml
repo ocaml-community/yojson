@@ -28,6 +28,8 @@ let member name = function
   | `Assoc obj -> assoc name obj
   | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
 
+let path l obj= List.fold_left (Fun.flip member) obj l
+
 let index i = function
   | `List l as js ->
       let len = List.length l in
