@@ -67,34 +67,6 @@ let rec pp fmt =
           true) false xs);
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
-#ifdef TUPLE
-  | `Tuple tup ->
-    Format.fprintf fmt "`Tuple (@[<hov>";
-    Format.fprintf fmt "@[<2>[";
-    ignore (List.fold_left
-      (fun sep e ->
-         if sep then
-           Format.fprintf fmt ";@ ";
-           pp fmt e;
-           true) false tup);
-    Format.fprintf fmt "@,]@]";
-    Format.fprintf fmt "@])"
-#endif
-#ifdef VARIANT
-  | `Variant (name, value) ->
-    Format.fprintf fmt "`Variant (@[<hov>";
-    Format.fprintf fmt "(@[";
-    Format.fprintf fmt "%S" name;
-    Format.fprintf fmt ",@ ";
-    (match value with
-      | None -> Format.pp_print_string fmt "None"
-      | Some x ->
-        Format.pp_print_string fmt "(Some ";
-        pp fmt x;
-        Format.pp_print_string fmt ")");
-    Format.fprintf fmt "@])";
-    Format.fprintf fmt "@])"
-#endif
 
 let show x =
   Format.asprintf "%a" pp x
@@ -133,23 +105,10 @@ let rec equal a b =
       | exception Invalid_argument _ ->
         (* the lists were of different lengths, thus unequal *)
         false)
-#ifdef TUPLE
-    | `Tuple xs, `Tuple ys
-#endif
     | `List xs, `List ys ->
       (match List.for_all2 equal xs ys with
       | result -> result
       | exception Invalid_argument _ ->
         (* the lists were of different lengths, thus unequal *)
         false)
-#ifdef VARIANT
-    | `Variant (name, value), `Variant (name', value') ->
-      (match name = name' with
-      | false -> false
-      | true ->
-        match value, value' with
-        | None, None -> true
-        | Some x, Some y -> equal x y
-        | _ -> false)
-#endif
     | _ -> false

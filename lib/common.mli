@@ -36,7 +36,6 @@ val init_lexer :
 
 exception End_of_array
 exception End_of_object
-exception End_of_tuple
 exception End_of_input
 
 (* end undocumented section *)

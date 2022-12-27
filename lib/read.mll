@@ -251,35 +251,11 @@ rule read_json v = parse
                  }
 
   | '('          {
-                   #ifdef TUPLE
-                     let acc = ref [] in
-                     try
-                       read_space v lexbuf;
-                       read_tuple_end lexbuf;
-                       acc := read_json v lexbuf :: !acc;
-                       while true do
-                         read_space v lexbuf;
-                         read_tuple_sep v lexbuf;
-                         read_space v lexbuf;
-                         acc := read_json v lexbuf :: !acc;
-                       done;
-                       assert false
-                     with Common.End_of_tuple ->
-                       `Tuple (List.rev !acc)
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | '<'          {
-                   #ifdef VARIANT
-                     read_space v lexbuf;
-                     let cons = read_ident v lexbuf in
-                     read_space v lexbuf;
-                     `Variant (cons, finish_variant v lexbuf)
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | "//"[^'\n']* { read_json v lexbuf }
@@ -354,15 +330,6 @@ and finish_stringlit v = parse
            Bytes.to_string s
          }
   | _    { long_error "Invalid string literal" v lexbuf }
-  | eof  { custom_error "Unexpected end of input" v lexbuf }
-
-and finish_variant v = parse
-    ':'  { let x = read_json v lexbuf in
-           read_space v lexbuf;
-           read_gt v lexbuf;
-           Some x }
-  | '>'  { None }
-  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lt v = parse
@@ -592,68 +559,6 @@ and read_array_sep v = parse
   | _        { long_error "Expected ',' or ']' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
-
-and read_tuple read_cell init_acc v = parse
-    '('          {
-                   #ifdef TUPLE
-                     let pos = ref 0 in
-                     let acc = ref init_acc in
-                     try
-                       read_space v lexbuf;
-                       read_tuple_end lexbuf;
-                       acc := read_cell !pos !acc v lexbuf;
-                       incr pos;
-                       while true do
-                         read_space v lexbuf;
-                         read_tuple_sep v lexbuf;
-                         read_space v lexbuf;
-                         acc := read_cell !pos !acc v lexbuf;
-                         incr pos;
-                       done;
-                       assert false
-                     with Common.End_of_tuple ->
-                       !acc
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
-                 }
-  | _        { long_error "Expected ')' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
-and read_tuple_end = parse
-    ')'      { raise Common.End_of_tuple }
-  | ""       { () }
-
-and read_tuple_end2 v std = parse
-    ')'      { if std then
-                 long_error "Expected ')' or '' but found" v lexbuf
-               else
-                 raise Common.End_of_tuple }
-  | ']'      { if std then
-                 raise Common.End_of_tuple
-               else
-                 long_error "Expected ']' or '' but found" v lexbuf }
-  | ""       { () }
-
-and read_tuple_sep v = parse
-    ','      { () }
-  | ')'      { raise Common.End_of_tuple }
-  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
-and read_tuple_sep2 v std = parse
-    ','      { () }
-  | ')'      { if std then
-                 long_error "Expected ',' or ']' but found" v lexbuf
-               else
-                 raise Common.End_of_tuple }
-  | ']'      { if std then
-                 raise Common.End_of_tuple
-               else
-                 long_error "Expected ',' or ')' but found" v lexbuf }
-  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
 (* Read a JSON object, reading the keys using a custom parser *)
 and read_abstract_fields read_key read_field init_acc v = parse
     '{'      { let acc = ref init_acc in
@@ -781,34 +686,11 @@ and skip_json v = parse
                  }
 
   | '('          {
-                   #ifdef TUPLE
-                     try
-                       read_space v lexbuf;
-                       read_tuple_end lexbuf;
-                       skip_json v lexbuf;
-                       while true do
-                         read_space v lexbuf;
-                         read_tuple_sep v lexbuf;
-                         read_space v lexbuf;
-                         skip_json v lexbuf;
-                       done;
-                       assert false
-                     with Common.End_of_tuple ->
-                       ()
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | '<'          {
-                   #ifdef VARIANT
-                     read_space v lexbuf;
-                     skip_ident v lexbuf;
-                     read_space v lexbuf;
-                     finish_skip_variant v lexbuf
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | "//"[^'\n']* { skip_json v lexbuf }
@@ -824,14 +706,6 @@ and finish_skip_stringlit v = parse
     | [^'"' '\\'] )* '"'
          { () }
   | _    { long_error "Invalid string literal" v lexbuf }
-  | eof  { custom_error "Unexpected end of input" v lexbuf }
-
-and finish_skip_variant v = parse
-    ':'  { skip_json v lexbuf;
-           read_space v lexbuf;
-           read_gt v lexbuf }
-  | '>'  { () }
-  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and skip_ident v = parse
@@ -895,36 +769,11 @@ and buffer_json v = parse
                  }
 
   | '('          {
-                   #ifdef TUPLE
-                     try
-                       Buffer.add_char v.buf '(';
-                       buffer_space v lexbuf;
-                       buffer_tuple_end v lexbuf;
-                       buffer_json v lexbuf;
-                       while true do
-                         buffer_space v lexbuf;
-                         buffer_tuple_sep v lexbuf;
-                         buffer_space v lexbuf;
-                         buffer_json v lexbuf;
-                       done;
-                       assert false
-                     with Common.End_of_tuple ->
-                       ()
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | '<'          {
-                   #ifdef VARIANT
-                     Buffer.add_char v.buf '<';
-                     buffer_space v lexbuf;
-                     buffer_ident v lexbuf;
-                     buffer_space v lexbuf;
-                     finish_buffer_variant v lexbuf
-                   #else
-                     long_error "Invalid token" v lexbuf
-                   #endif
+                   long_error "Invalid token" v lexbuf
                  }
 
   | "//"[^'\n']* { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
@@ -1001,18 +850,6 @@ and buffer_array_sep v = parse
     ','      { Buffer.add_char v.buf ',' }
   | ']'      { Buffer.add_char v.buf ']'; raise Common.End_of_array }
   | _        { long_error "Expected ',' or ']' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
-and buffer_tuple_end v = parse
-    ')'      {
-      Buffer.add_char v.buf ')';
-      raise Common.End_of_tuple }
-  | ""       { () }
-
-and buffer_tuple_sep v = parse
-    ','      { Buffer.add_char v.buf ',' }
-  | ')'      { Buffer.add_char v.buf ')'; raise Common.End_of_tuple }
-  | _        { long_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_colon v = parse
