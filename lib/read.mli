@@ -143,7 +143,7 @@ val map_ident :
   lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
 (* equivalent to read_ident *)
 
-type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
+type variant_kind = [ `Square_bracket | `Double_quote ]
 
 val start_any_variant : lexer_state -> Lexing.lexbuf -> variant_kind
 val read_lt : lexer_state -> Lexing.lexbuf -> unit
