@@ -147,7 +147,7 @@
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     f (Bytes.sub_string lexbuf.lex_buffer lexbuf.lex_start_pos len) 0 len
 
-  type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
+  type variant_kind = [ `Square_bracket | `Double_quote ]
 }
 
 let space = [' ' '\t' '\r']+
@@ -348,7 +348,6 @@ and read_comma v = parse
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and start_any_variant v = parse
-    '<'      { `Edgy_bracket }
   | '"'      { Buffer.clear v.buf;
                `Double_quote }
   | '['      { `Square_bracket }
@@ -608,7 +607,6 @@ and read_colon v = parse
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and start_any_tuple v = parse
-    '('      { false }
   | '['      { true }
   | _        { long_error "Expected '(' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
