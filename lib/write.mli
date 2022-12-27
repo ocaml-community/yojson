@@ -143,14 +143,6 @@ val write_stringlit : Buffer.t -> string -> unit
 
 val write_assoc : Buffer.t -> (string * t) list -> unit
 val write_list : Buffer.t -> t list -> unit
-#ifdef TUPLE
-val write_tuple : Buffer.t -> t list -> unit
-val write_std_tuple : Buffer.t -> t list -> unit
-#endif
-#ifdef VARIANT
-val write_variant : Buffer.t -> string -> t option -> unit
-val write_std_variant : Buffer.t -> string -> t option -> unit
-#endif
 
 val write_json : Buffer.t -> t -> unit
 val write_std_json : Buffer.t -> t -> unit
