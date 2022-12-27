@@ -4,6 +4,10 @@
 
 ### Removed
 
+- Removed support for Tuple and Variant in JSON. It was a non-standard
+  extension that was rarely used, so this simplifies the Yojson types and the
+  parser more standard-conforming (#105, #158 @Leonidas-from-XIV)
+
 ### Changed
 
 ### Fixed
