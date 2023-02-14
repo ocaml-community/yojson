@@ -27,7 +27,7 @@ let json_string = {|
 let json = Yojson.Safe.from_string json_string
 (* val json : Yojson.Safe.t *)
 
-Format.printf "Parsed to %a" Yojson.Safe.pp json
+let () = Format.printf "Parsed to %a" Yojson.Safe.pp json
 ```
 
 
