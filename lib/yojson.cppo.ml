@@ -94,6 +94,10 @@ end
 #include "monomorphic.ml"
 #include "write2.ml"
 #include "read.ml"
+module Util =
+struct
+  #include "util.ml"
+end
 #undef INTLIT
 #undef FLOATLIT
 #undef STRINGLIT

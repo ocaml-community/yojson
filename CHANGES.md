@@ -2,6 +2,9 @@
 
 ### Added
 
+- Add Yojson.Raw.Util module to provide combinators for extracting fields
+  from Yojson.Raw values. (@tmcgilchrist, #163)
+
 ### Removed
 
 ### Changed
