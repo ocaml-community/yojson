@@ -28,6 +28,17 @@ let member name = function
   | `Assoc obj -> assoc name obj
   | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
 
+let rec path l obj =
+  match l with
+  | [] -> Some obj
+  | key :: l -> (
+      match obj with
+      | `Assoc assoc -> (
+          match List.assoc key assoc with
+          | obj -> path l obj
+          | exception Not_found -> None)
+      | _ -> None)
+
 let index i = function
   | `List l as js ->
       let len = List.length l in
