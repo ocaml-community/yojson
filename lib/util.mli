@@ -85,12 +85,9 @@ val member : string -> t -> t
       object [obj], or [`Null] if [k] is not present in [obj].
       @raise Type_error if [obj] is not a JSON object. *)
 
-val path : string list -> t -> t
-(* [path l obj] returns the value associated with the list of keys [l] in
-     the JSON object [obj], or [`Null] if [l] did no led to an object in
-     [obj]. [path [k1; ...; kn] obj] is the same as
-     [member kn (... (member k1 obj))]
-     @raise Type_error if [obj] is not a JSON object. *)
+val path : string list -> t -> t option
+(* [path l obj] recurses the JSON object [obj] for each key in the path
+   [l] until the path is empty or there is no such key in the chain. *)
 
 val index : int -> t -> t
 (** [index i arr] returns the value at index [i] in the JSON array [arr].

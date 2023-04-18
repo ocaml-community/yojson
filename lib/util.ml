@@ -28,7 +28,16 @@ let member name = function
   | `Assoc obj -> assoc name obj
   | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
 
-let path l obj= List.fold_left (Fun.flip member) obj l
+let rec path l obj =
+  match l with
+  | [] -> Some obj
+  | key :: l -> (
+      match obj with
+      | `Assoc assoc -> (
+          match List.assoc key assoc with
+          | obj -> path l obj
+          | exception Not_found -> None)
+      | _ -> None)
 
 let index i = function
   | `List l as js ->
