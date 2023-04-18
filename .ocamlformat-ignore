@@ -4,3 +4,4 @@ lib/monomorphic.ml
 lib/write.ml*
 lib/pretty.ml
 lib/type.ml
+lib/util.ml
