@@ -1,7 +1,5 @@
 {
   "abc": [ 1, 2, -3 ],
-  "cd": (1.2, "zz"),
-  "ef": [ <"Int": 123>, <"Null">, <"Test": "abcdefghijklmnopqrstuvwxyz"> ],
   "aaaaoooaoaooooooooaoaoaoooaoa": {
     "big int": 123456789012345678901837292020484756564574
   },

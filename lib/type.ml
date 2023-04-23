@@ -24,12 +24,6 @@ type t =
 #endif
     | `Assoc of (string * t) list
     | `List of t list
-#ifdef TUPLE
-    | `Tuple of t list
-#endif
-#ifdef VARIANT
-    | `Variant of (string * t option)
-#endif
     ]
 (**
 All possible cases defined in Yojson:
@@ -47,10 +41,6 @@ All possible cases defined in Yojson:
 - `Stringlit of string: JSON string literal including the double quotes.
 - `Assoc of (string * json) list: JSON object.
 - `List of json list: JSON array.
-- `Tuple of json list: Tuple (non-standard extension of JSON).
-	    Syntax: [("abc", 123)].
-- `Variant of (string * json option): Variant (non-standard extension of JSON).
-	    Syntax: [<"Foo">] or [<"Bar":123>].
 *)
 
 (*

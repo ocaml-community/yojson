@@ -63,8 +63,6 @@ sig
 #define INTLIT
 #define FLOAT
 #define STRING
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
 #include "safe.mli"
@@ -80,8 +78,6 @@ end
 #undef INTLIT
 #undef FLOAT
 #undef STRING
-#undef TUPLE
-#undef VARIANT
 end
 
 (** {1 JSON tree type with literal int/float/string leaves} *)
@@ -98,8 +94,6 @@ sig
 #define INTLIT
 #define FLOATLIT
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
 #include "write.mli"
@@ -113,8 +107,6 @@ end
 #undef INTLIT
 #undef FLOATLIT
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT
 end
 
 (** {1:raw Supertype of all JSON tree types} *)
@@ -125,8 +117,6 @@ end
 #define FLOATLIT
 #define STRING
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
 #include "write.mli"
@@ -137,5 +127,3 @@ end
 #undef FLOATLIT
 #undef STRING
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT

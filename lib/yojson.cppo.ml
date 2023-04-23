@@ -6,8 +6,6 @@
 #define FLOATLIT
 #define STRING
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "write.ml"
 #include "monomorphic.ml"
@@ -22,8 +20,6 @@ end
 #undef FLOATLIT
 #undef STRING
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT
 
 module Basic =
 struct
@@ -54,8 +50,6 @@ struct
 #define INTLIT
 #define FLOAT
 #define STRING
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "safe.ml"
 #include "write.ml"
@@ -74,8 +68,6 @@ end
 #undef INTLIT
 #undef FLOAT
 #undef STRING
-#undef TUPLE
-#undef VARIANT
 end
 
 module Raw =
@@ -83,8 +75,6 @@ struct
 #define INTLIT
 #define FLOATLIT
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 #include "type.ml"
 #include "write.ml"
 module Pretty =
@@ -101,6 +91,4 @@ end
 #undef INTLIT
 #undef FLOATLIT
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT
 end
