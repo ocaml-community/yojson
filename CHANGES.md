@@ -1,18 +1,14 @@
-## unreleased
+## 2.1.0
+
+*2023-04-26*
 
 ### Added
 
-- Add Yojson.Raw.Util module to provide combinators for extracting fields
-  from Yojson.Raw values. (@tmcgilchrist, #163)
+- Add `Yojson.Raw.Util` module to provide combinators for extracting fields
+  from `Yojson.Raw.t` values. (@tmcgilchrist, #163)
 
 - Add `Util.path` function to recurse into an object through a list of keys.
   (@cuihtlauac, @Leonidas-from-XIV, #157)
-
-### Removed
-
-### Changed
-
-### Fixed
 
 ## 2.0.2
 
