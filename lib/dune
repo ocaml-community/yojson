@@ -111,7 +111,7 @@
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson t basic safe raw common)
+ (modules yojson t basic safe raw common codec)
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags (-safe-string)))

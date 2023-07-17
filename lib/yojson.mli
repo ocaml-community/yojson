@@ -12,7 +12,6 @@ Each of these different types have their own module.
 (** {1 Shared types and functions} *)
 
 include module type of Common
-
 include module type of T
 
 (** {1:basic Basic JSON tree type} *)
@@ -28,4 +27,3 @@ module Safe = Safe
 module Raw = Raw
 
 (** {1:raw Supertype of all JSON tree types} *)
-

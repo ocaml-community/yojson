@@ -34,9 +34,6 @@ val init_lexer :
 (**/**)
 (* begin undocumented section *)
 
-val utf8_of_code : Buffer.t -> int -> unit
-val utf8_of_surrogate_pair : Buffer.t -> int -> int -> unit
-
 exception End_of_array
 exception End_of_object
 exception End_of_tuple

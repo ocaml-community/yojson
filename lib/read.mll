@@ -340,7 +340,7 @@ and finish_escaped_char v = parse
            if x >= 0xD800 && x <= 0xDBFF then
              finish_surrogate_pair v x lexbuf
            else
-             Common.utf8_of_code v.buf x
+             Codec.utf8_of_code v.buf x
 
          }
   | _    { long_error "Invalid escape sequence" v lexbuf }
@@ -352,7 +352,7 @@ and finish_surrogate_pair v x = parse
              (hex a lsl 12) lor (hex b lsl 8) lor (hex c lsl 4) lor hex d
            in
            if y >= 0xDC00 && y <= 0xDFFF then
-             Common.utf8_of_surrogate_pair v.buf x y
+             Codec.utf8_of_surrogate_pair v.buf x y
            else
              long_error "Invalid low surrogate for code point beyond U+FFFF"
                v lexbuf
