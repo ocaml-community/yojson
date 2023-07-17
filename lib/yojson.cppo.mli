@@ -67,7 +67,7 @@ sig
 #define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
-#include "safe.mli"
+#include "safe_convert.mli"
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"

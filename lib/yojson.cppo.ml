@@ -57,7 +57,7 @@ struct
 #define TUPLE
 #define VARIANT
 #include "type.ml"
-#include "safe.ml"
+#include "safe_convert.ml"
 #include "write.ml"
 module Pretty =
 struct

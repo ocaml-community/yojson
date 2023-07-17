@@ -7,7 +7,7 @@
   monomorphic.ml
   read.ml
   write.ml
-  safe.ml
+  safe_convert.ml
   prettyprint.ml
   write2.ml
   common.ml
@@ -23,7 +23,7 @@
   monomorphic.mli
   write.mli
   read.mli
-  safe.mli
+  safe_convert.mli
   write2.mli
   common.mli
   util.mli
