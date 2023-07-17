@@ -1,9 +1,9 @@
 (ocamllex read)
 
 (rule
- (targets yojson.ml)
+ (targets basic.ml)
  (deps
-  (:out yojson.cppo.ml)
+  (:out basic.cppo.ml)
   monomorphic.ml
   read.ml
   write.ml
@@ -17,9 +17,98 @@
   (run cppo %{out} -o %{targets})))
 
 (rule
- (targets yojson.mli)
+ (targets basic.mli)
  (deps
-  (:out yojson.cppo.mli)
+  (:out basic.cppo.mli)
+  monomorphic.mli
+  write.mli
+  read.mli
+  safe_convert.mli
+  write2.mli
+  common.mli
+  util.mli
+  type.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets t.ml)
+ (deps
+  (:out t.cppo.ml)
+  type.ml
+  monomorphic.ml
+  prettyprint.ml
+  write.ml
+  write2.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets t.mli)
+ (deps
+  (:out t.cppo.mli)
+  monomorphic.mli
+  write.mli
+  read.mli
+  safe_convert.mli
+  write2.mli
+  common.mli
+  util.mli
+  type.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets safe.ml)
+ (deps
+  (:out safe.cppo.ml)
+  monomorphic.ml
+  read.ml
+  write.ml
+  safe_convert.ml
+  prettyprint.ml
+  write2.ml
+  common.ml
+  util.ml
+  type.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets safe.mli)
+ (deps
+  (:out safe.cppo.mli)
+  monomorphic.mli
+  write.mli
+  read.mli
+  safe_convert.mli
+  write2.mli
+  common.mli
+  util.mli
+  type.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets raw.ml)
+ (deps
+  (:out raw.cppo.ml)
+  monomorphic.ml
+  read.ml
+  write.ml
+  safe_convert.ml
+  prettyprint.ml
+  write2.ml
+  common.ml
+  util.ml
+  type.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets raw.mli)
+ (deps
+  (:out raw.cppo.mli)
   monomorphic.mli
   write.mli
   read.mli
