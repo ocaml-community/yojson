@@ -389,7 +389,11 @@ let to_output ?buf ?(len=4096) ?(suf = "") ?std out x =
       | Some ob -> Buffer.clear ob; ob
   in
   to_buffer ~suf ?std ob x;
-  out#output (Buffer.contents ob) 0 (Buffer.length ob);
+  (* this requires an int and never uses it. This is done to preserve
+     backward compatibility to not break the signatur but can safely
+     be changed to require unit in a future compatibility-breaking
+     release *)
+  let _ : int = out#output (Buffer.contents ob) 0 (Buffer.length ob) in
   Buffer.clear ob
 
 let to_file ?len ?std ?(suf = "\n") file x =
