@@ -13,7 +13,7 @@
 #include "monomorphic.ml"
 module Pretty =
 struct
-#include "pretty.ml"
+#include "prettyprint.ml"
 end
 #include "write2.ml"
 #undef INT
@@ -34,7 +34,7 @@ struct
 #include "write.ml"
 module Pretty =
 struct
-#include "pretty.ml"
+#include "prettyprint.ml"
 end
 #include "monomorphic.ml"
 #include "write2.ml"
@@ -61,7 +61,7 @@ struct
 #include "write.ml"
 module Pretty =
 struct
-#include "pretty.ml"
+#include "prettyprint.ml"
 end
 #include "monomorphic.ml"
 #include "write2.ml"
@@ -89,7 +89,7 @@ struct
 #include "write.ml"
 module Pretty =
 struct
-#include "pretty.ml"
+#include "prettyprint.ml"
 end
 #include "monomorphic.ml"
 #include "write2.ml"
