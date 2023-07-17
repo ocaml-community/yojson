@@ -4,6 +4,11 @@
 
 ### Changed
 
+- Make `Basic`, `Safe` & `Raw` seperate compilation units that get exposed by
+  the main module as suggested by @hhugo to enable JSOO to discard unused
+  modules. No API changes should be observable.(#84, #167
+  @Leonidas-from-XIV)
+
 ### Deprecated
 
 ### Fixed
