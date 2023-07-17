@@ -11,9 +11,9 @@ Each of these different types have their own module.
 
 (** {1 Shared types and functions} *)
 
-(* include Common *)
+include module type of Common
 
-(* include T *)
+include module type of T
 
 (** {1:basic Basic JSON tree type} *)
 

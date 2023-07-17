@@ -4,15 +4,13 @@
  (targets basic.ml)
  (deps
   (:out basic.cppo.ml)
-  monomorphic.ml
-  read.ml
+  type.ml
   write.ml
-  safe_convert.ml
   prettyprint.ml
+  monomorphic.ml
   write2.ml
-  common.ml
-  util.ml
-  type.ml)
+  read.ml
+  util.ml)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -20,14 +18,12 @@
  (targets basic.mli)
  (deps
   (:out basic.cppo.mli)
-  monomorphic.mli
+  type.ml
   write.mli
-  read.mli
-  safe_convert.mli
+  monomorphic.mli
   write2.mli
-  common.mli
-  util.mli
-  type.ml)
+  read.mli
+  util.mli)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -47,14 +43,10 @@
  (targets t.mli)
  (deps
   (:out t.cppo.mli)
+  type.ml
   monomorphic.mli
   write.mli
-  read.mli
-  safe_convert.mli
-  write2.mli
-  common.mli
-  util.mli
-  type.ml)
+  write2.mli)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -62,15 +54,13 @@
  (targets safe.ml)
  (deps
   (:out safe.cppo.ml)
-  monomorphic.ml
-  read.ml
-  write.ml
+  type.ml
   safe_convert.ml
+  write.ml
   prettyprint.ml
+  monomorphic.ml
   write2.ml
-  common.ml
-  util.ml
-  type.ml)
+  util.ml)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -78,14 +68,13 @@
  (targets safe.mli)
  (deps
   (:out safe.cppo.mli)
+  type.ml
   monomorphic.mli
-  write.mli
-  read.mli
   safe_convert.mli
+  write.mli
   write2.mli
-  common.mli
-  util.mli
-  type.ml)
+  read.mli
+  util.mli)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -93,15 +82,13 @@
  (targets raw.ml)
  (deps
   (:out raw.cppo.ml)
-  monomorphic.ml
-  read.ml
+  type.ml
   write.ml
-  safe_convert.ml
   prettyprint.ml
+  monomorphic.ml
   write2.ml
-  common.ml
-  util.ml
-  type.ml)
+  read.ml
+  util.ml)
  (action
   (run cppo %{out} -o %{targets})))
 
@@ -109,21 +96,19 @@
  (targets raw.mli)
  (deps
   (:out raw.cppo.mli)
+  type.ml
   monomorphic.mli
   write.mli
-  read.mli
-  safe_convert.mli
   write2.mli
-  common.mli
-  util.mli
-  type.ml)
+  read.mli
+  util.mli)
  (action
   (run cppo %{out} -o %{targets})))
 
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson)
+ (modules yojson t basic safe raw common)
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags (-safe-string)))

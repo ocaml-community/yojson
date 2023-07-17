@@ -1,5 +1,3 @@
-(* included: type.ml *)
-
 let hex n =
   Char.chr (
     if n < 10 then n + 48
@@ -179,9 +177,9 @@ let json_string_of_float x =
 let write_std_float ob x =
   match classify_float x with
     FP_nan ->
-      json_error "NaN value not allowed in standard JSON"
+      Common.json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
-      json_error
+      Common.json_error
         (if x > 0. then
            "Infinity value not allowed in standard JSON"
          else
@@ -200,9 +198,9 @@ let write_std_float ob x =
 let write_std_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
-      json_error "NaN value not allowed in standard JSON"
+      Common.json_error "NaN value not allowed in standard JSON"
   | FP_infinite ->
-      json_error
+      Common.json_error
         (if x > 0. then
            "Infinity value not allowed in standard JSON"
          else
