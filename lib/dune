@@ -114,4 +114,5 @@
  (modules yojson t basic safe raw common codec)
  (synopsis "JSON parsing and printing")
  (libraries seq)
- (flags (:standard -w -27-32 -safe-string)))
+ (flags
+  (:standard -w -27-32 -safe-string)))
