@@ -51,25 +51,11 @@ let json_string_of_string s =
   write_string ob s;
   Buffer.contents ob
 
-let test_string () =
-  let s = Bytes.create 256 in
-  for i = 0 to 255 do
-    Bytes.set s i (Char.chr i)
-  done;
-  json_string_of_string (Bytes.to_string s)
-
-
 let write_null ob () =
   Buffer.add_string ob "null"
 
 let write_bool ob x =
   Buffer.add_string ob (if x then "true" else "false")
-
-
-let max_digits =
-  max
-    (String.length (string_of_int max_int))
-    (String.length (string_of_int min_int))
 
 let dec n =
   Char.chr (n + 48)
@@ -213,26 +199,6 @@ let std_json_string_of_float x =
   write_std_float ob x;
   Buffer.contents ob
 
-
-let test_float () =
-  let l = [ 0.; 1.; -1. ] in
-  let l = l @ List.map (fun x -> 2. *. x +. 1.) l in
-  let l = l @ List.map (fun x -> x /. sqrt 2.) l in
-  let l = l @ List.map (fun x -> x *. sqrt 3.) l in
-  let l = l @ List.map cos l in
-  let l = l @ List.map (fun x -> x *. 1.23e50) l in
-  let l = l @ [ infinity; neg_infinity ] in
-  List.iter (
-    fun x ->
-      let s = Printf.sprintf "%.17g" x in
-      let y = float_of_string s in
-      Printf.printf "%g %g %S %B\n" x y s (x = y)
-  )
-    l
-
-(*
-let () = test_float ()
-*)
 
 let write_intlit = Buffer.add_string
 let write_floatlit = Buffer.add_string
