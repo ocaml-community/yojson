@@ -1,4 +1,4 @@
-let rec to_basic = function
+let rec to_basic : t -> Basic.t = function
   | (`Null | `Bool _ | `Int _ | `Float _ | `String _) as x -> x
   | `Intlit s -> `String s
   | `List l | `Tuple l -> `List (List.rev (List.rev_map to_basic l))
