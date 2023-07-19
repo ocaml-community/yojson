@@ -1,4 +1,3 @@
-
 (** {2 JSON pretty-printing} *)
 
 val pretty_print : ?std:bool -> Format.formatter -> t -> unit
@@ -19,4 +18,3 @@ val pretty_to_channel : ?std:bool -> out_channel -> t -> unit
       See [to_string] for the role of the optional [std] argument.
       See [pretty_print] for raised exceptions.
   *)
-

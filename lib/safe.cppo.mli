@@ -15,17 +15,24 @@
 #define STRING
 #define TUPLE
 #define VARIANT
+
 #include "type.ml"
+
 #include "monomorphic.mli"
+
 #include "safe_convert.mli"
+
 #include "write.mli"
+
 #include "write2.mli"
+
 #include "read.mli"
+
 (** This module provides combinators for extracting fields from JSON values. *)
-module Util :
-sig
+module Util : sig
   #include "util.mli"
 end
+
 #undef INT
 #undef INTLIT
 #undef FLOAT

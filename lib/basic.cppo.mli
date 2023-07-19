@@ -10,17 +10,22 @@
 #define INT
 #define FLOAT
 #define STRING
+
 #include "type.ml"
+
 #include "write.mli"
+
 #include "monomorphic.mli"
+
 #include "write2.mli"
+
 #include "read.mli"
 
 (** This module provides combinators for extracting fields from JSON values. *)
-module Util :
-sig
+module Util : sig
   #include "util.mli"
 end
+
 #undef INT
 #undef FLOAT
 #undef STRING
