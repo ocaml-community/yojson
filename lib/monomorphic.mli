@@ -11,3 +11,4 @@ val equal : t -> t -> bool
       duplicate keys which will be considered equal as long as they are in the
       same input order.
     *)
+
