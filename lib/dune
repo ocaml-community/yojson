@@ -115,4 +115,4 @@
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags
-  (:standard -w -27-32 -safe-string)))
+  (:standard -w -27-32)))
