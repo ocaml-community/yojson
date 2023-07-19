@@ -4,20 +4,27 @@
 #define STRING
 #define TUPLE
 #define VARIANT
+
 #include "type.ml"
-#include "safe_convert.ml"
+
+#include "safe_to_basic.ml"
+
 #include "write.ml"
-module Pretty =
-struct
-#include "prettyprint.ml"
+
+module Pretty = struct
+  #include "prettyprint.ml"
 end
+
 #include "monomorphic.ml"
+
 #include "write2.ml"
+
 #include "read.ml"
-module Util =
-struct
+
+module Util = struct
   #include "util.ml"
 end
+
 #undef INT
 #undef INTLIT
 #undef FLOAT

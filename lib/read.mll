@@ -137,10 +137,6 @@
         lexer_error "Int overflow" v lexbuf
       #endif
 
-
-  let set_file_name v fname =
-    v.fname <- fname
-
   let newline v lexbuf =
     v.lnum <- v.lnum + 1;
     v.bol <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos
@@ -154,7 +150,6 @@
     f (Bytes.sub_string lexbuf.lex_buffer lexbuf.lex_start_pos len) 0 len
 
   type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
-  type tuple_kind = [ `Parenthesis | `Square_bracket ]
 }
 
 let space = [' ' '\t' '\r']+
@@ -1211,6 +1206,6 @@ and junk = parse
   let prettify ?std s =
     pretty_to_string ?std (from_string s)
 
-  let compact ?std s =
+  let compact ?std:_ s =
     to_string (from_string s)
 }

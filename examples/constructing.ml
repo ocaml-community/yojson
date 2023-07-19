@@ -13,8 +13,6 @@
 EOF
 *)
 
-open Yojson.Basic.Util
-
 let json_output =
   `Assoc
     [

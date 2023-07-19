@@ -9,10 +9,6 @@ exception End_of_object
 exception End_of_tuple
 exception End_of_input
 
-type in_param = { string_buf : Buffer.t }
-
-let create_in_param ?(len = 256) () = { string_buf = Buffer.create len }
-
 type lexer_state = {
   buf : Buffer.t; (* Buffer used to accumulate substrings *)
   mutable lnum : int; (* Current line number (starting from 1) *)

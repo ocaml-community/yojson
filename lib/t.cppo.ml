@@ -6,14 +6,19 @@
 #define STRINGLIT
 #define TUPLE
 #define VARIANT
+
 #include "type.ml"
+
 #include "write.ml"
+
 #include "monomorphic.ml"
-module Pretty =
-struct
+
+module Pretty = struct
 #include "prettyprint.ml"
 end
+
 #include "write2.ml"
+
 #undef INT
 #undef INTLIT
 #undef FLOAT
@@ -22,4 +27,3 @@ end
 #undef STRINGLIT
 #undef TUPLE
 #undef VARIANT
-
