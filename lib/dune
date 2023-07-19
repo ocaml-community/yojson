@@ -56,7 +56,7 @@
   basic.ml
   (:out safe.cppo.ml)
   type.ml
-  safe_convert.ml
+  safe_to_basic.ml
   write.ml
   prettyprint.ml
   monomorphic.ml
@@ -73,7 +73,7 @@
   (:out safe.cppo.mli)
   type.ml
   monomorphic.mli
-  safe_convert.mli
+  safe_to_basic.mli
   write.mli
   write2.mli
   read.mli

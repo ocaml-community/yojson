@@ -20,7 +20,7 @@
 
 #include "monomorphic.mli"
 
-#include "safe_convert.mli"
+#include "safe_to_basic.mli"
 
 #include "write.mli"
 
