@@ -30,7 +30,7 @@ val from_file : ?buf:Buffer.t -> ?fname:string -> ?lnum:int -> string -> t
 (** Read a JSON value from a file.
       See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
-type lexer_state = Lexer_state.t = {
+type lexer_state = Common.Lexer_state.t = {
   buf : Buffer.t;
   mutable lnum : int;
   mutable bol : int;

@@ -1,40 +1,117 @@
 (ocamllex read)
 
 (rule
- (targets yojson.ml)
+ (targets t.ml)
  (deps
-  (:out yojson.cppo.ml)
+  (:out t.cppo.ml)
+  type.ml
   monomorphic.ml
-  read.ml
+  prettyprint.ml
   write.ml
-  safe.ml
-  pretty.ml
-  write2.ml
-  common.ml
-  util.ml
-  type.ml)
+  write2.ml)
  (action
   (run cppo %{out} -o %{targets})))
 
 (rule
- (targets yojson.mli)
+ (targets t.mli)
  (deps
-  (:out yojson.cppo.mli)
+  (:out t.cppo.mli)
+  type.ml
   monomorphic.mli
   write.mli
-  read.mli
-  safe.mli
+  write2.mli)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets basic.ml)
+ (deps
+  (:out basic.cppo.ml)
+  type.ml
+  write.ml
+  prettyprint.ml
+  monomorphic.ml
+  write2.ml
+  read.ml
+  util.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets basic.mli)
+ (deps
+  (:out basic.cppo.mli)
+  type.ml
+  write.mli
+  monomorphic.mli
   write2.mli
-  common.mli
-  util.mli
-  type.ml)
+  read.mli
+  util.mli)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets safe.ml)
+ (deps
+  basic.ml
+  (:out safe.cppo.ml)
+  type.ml
+  safe_convert.ml
+  write.ml
+  prettyprint.ml
+  monomorphic.ml
+  write2.ml
+  read.ml
+  util.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets safe.mli)
+ (deps
+  basic.mli
+  (:out safe.cppo.mli)
+  type.ml
+  monomorphic.mli
+  safe_convert.mli
+  write.mli
+  write2.mli
+  read.mli
+  util.mli)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets raw.ml)
+ (deps
+  (:out raw.cppo.ml)
+  type.ml
+  write.ml
+  prettyprint.ml
+  monomorphic.ml
+  write2.ml
+  read.ml
+  util.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets raw.mli)
+ (deps
+  (:out raw.cppo.mli)
+  type.ml
+  monomorphic.mli
+  write.mli
+  write2.mli
+  read.mli
+  util.mli)
  (action
   (run cppo %{out} -o %{targets})))
 
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson)
+ (modules yojson t basic safe raw common codec)
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags (-safe-string)))

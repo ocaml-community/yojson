@@ -2,6 +2,6 @@
 lib/*.cppo.ml*
 lib/monomorphic.ml
 lib/write.ml*
-lib/pretty.ml
+lib/prettyprint.ml
 lib/type.ml
 lib/util.ml
