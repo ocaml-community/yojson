@@ -69,11 +69,11 @@
       (sprintf "%s '%s'" descr (Lexing.lexeme lexbuf))
       v lexbuf
 
-  let read_junk = ref (fun _ -> assert false)
-
   let long_error descr v lexbuf =
     let junk = Lexing.lexeme lexbuf in
-    let extra_junk = !read_junk lexbuf in
+    let buf = Buffer.create 32 in
+    let () = Lexer_utils.read_junk buf 32 lexbuf in
+    let extra_junk = Buffer.contents buf in
     custom_error
       (sprintf "%s '%s%s'" descr junk extra_junk)
       v lexbuf
@@ -168,16 +168,6 @@ let number = '-'? positive_int (frac | exp | frac exp)?
 let hex = [ '0'-'9' 'a'-'f' 'A'-'F' ]
 
 let ident = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '_' '0'-'9']*
-
-let optjunk4 = (eof | _ (eof | _ (eof | _ (eof | _))))
-let optjunk8 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk4)))))
-let optjunk12 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk8)))))
-let optjunk16 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk12)))))
-let optjunk20 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk16)))))
-let optjunk24 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk20)))))
-let optjunk28 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk24)))))
-let optjunk32 = (eof | _ (eof | _ (eof | _ (eof | _ (eof | optjunk28)))))
-let junk = optjunk32
 
 rule read_json v = parse
   | "true"      { `Bool true }
@@ -1045,16 +1035,10 @@ and finish_buffer_comment v = parse
            finish_buffer_comment v lexbuf }
   | _    { add_lexeme v.buf lexbuf; finish_buffer_comment v lexbuf }
 
-and junk = parse
-    junk     { Lexing.lexeme lexbuf }
-
 {
   let _ = (read_json : lexer_state -> Lexing.lexbuf -> t)
 
   let read_t = read_json
-
-  let () =
-    read_junk := junk
 
   let read_int8 v lexbuf =
     let n = read_int v lexbuf in
