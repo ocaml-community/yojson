@@ -7,6 +7,8 @@
 
 Each of these different types have their own module.
 
+The JSON spec doesn't allow leading zeros in literal numbers. It is useful to be able to read JSON values produced externally that might have leading zeroes (and some JSON parsers do). Module {Anynum} accepts JSON values that contain leading zeroes in literal numbers. It has submodules {Basic}, {Safe}, and {Raw}.
+
 *)
 
 (** {1 Shared types and functions} *)
@@ -27,3 +29,5 @@ module Safe = Safe
 module Raw = Raw
 
 (** {1:raw Supertype of all JSON tree types} *)
+
+module Anynum = Anynum

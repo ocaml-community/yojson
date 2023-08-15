@@ -1,4 +1,5 @@
 (ocamllex read)
+(ocamllex read_anynum)
 
 (rule
  (targets t.ml)
@@ -108,10 +109,23 @@
  (action
   (run cppo %{out} -o %{targets})))
 
+(rule
+ (targets anynum.ml)
+ (deps
+  (:out anynum.cppo.ml)
+  type.ml
+  write.ml
+  prettyprint.ml
+  write2.ml
+  read_anynum.ml)
+ (action
+  (run cppo %{out} -o %{targets})))
+
+
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson t basic safe raw common codec)
+ (modules yojson t basic safe raw anynum common codec)
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags
