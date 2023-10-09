@@ -6,8 +6,9 @@
 
 - Make `Basic`, `Safe` & `Raw` seperate compilation units that get exposed by
   the main module as suggested by @hhugo to enable JSOO to discard unused
-  modules. No API changes should be observable.(#84, #167
-  @Leonidas-from-XIV)
+  modules. No API changes should be observable. (#84, #167 @Leonidas-from-XIV)
+- Removed forward refs in the parser to make dead-code elimination in JSOO
+  better (#168, @hhugo)
 
 ### Deprecated
 
