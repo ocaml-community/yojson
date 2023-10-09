@@ -1,4 +1,4 @@
-(ocamllex read)
+(ocamllex read lexer_utils)
 
 (rule
  (targets t.ml)
@@ -111,7 +111,7 @@
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson t basic safe raw common codec)
+ (modules yojson t basic safe raw common codec lexer_utils)
  (synopsis "JSON parsing and printing")
  (libraries seq)
  (flags
