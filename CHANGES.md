@@ -1,6 +1,6 @@
-## unreleased
+## 2.1.1
 
-### Added
+*2023-10-10*
 
 ### Changed
 
@@ -9,14 +9,6 @@
   modules. No API changes should be observable. (#84, #167 @Leonidas-from-XIV)
 - Removed forward refs in the parser to make dead-code elimination in JSOO
   better (#168, @hhugo)
-
-### Deprecated
-
-### Fixed
-
-### Removed
-
-### Security
 
 ## 2.1.0
 
