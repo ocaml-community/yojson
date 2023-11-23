@@ -3,6 +3,11 @@ let from_string () =
     __LOC__ Fixtures.json_value
     (Yojson.Safe.from_string Fixtures.json_string)
 
+let from_string_fail () =
+  Alcotest.check_raises "Location of parsing failure is correct"
+    (Yojson.Json_error "Line 1, bytes 0-5:\nInvalid token 'hello'") (fun () ->
+      Yojson.Safe.from_string "hello" |> ignore)
+
 let from_file () =
   let input_file = Filename.temp_file "test_yojson_from_file" ".json" in
   let oc = open_out input_file in
@@ -51,6 +56,7 @@ let map_ident_and_string () =
 let single_json =
   [
     ("from_string", `Quick, from_string);
+    ("from_string_fail", `Quick, from_string_fail);
     ("from_file", `Quick, from_file);
     ("unquoted_from_string", `Quick, unquoted_from_string);
     ("map_ident/map_string", `Quick, map_ident_and_string);
