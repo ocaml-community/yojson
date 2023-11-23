@@ -119,7 +119,7 @@ let write_float ob x =
         Buffer.add_string ob ".0"
 
 let write_normal_float_prec significant_figures ob x =
-  let open Printf in
+  let sprintf = Printf.sprintf in
   let s =
     match significant_figures with
         1 -> sprintf "%.1g" x

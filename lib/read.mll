@@ -22,9 +22,6 @@
       result
   end
 
-  open Printf
-  open Lexing
-
   (* see description in common.mli *)
   type lexer_state = Common.Lexer_state.t = {
     buf : Buffer.t;
@@ -43,7 +40,7 @@
       | 'A'..'F' -> int_of_char c - int_of_char 'A' + 10
       | _ -> assert false
 
-  let custom_error descr v lexbuf =
+  let custom_error descr v (lexbuf : Lexing.lexbuf) =
     let offs = lexbuf.lex_abs_pos - 1 in
     let bol = v.bol in
     let pos1 = offs + lexbuf.lex_start_pos - bol - 1 in
@@ -52,21 +49,21 @@
       match v.fname with
           None -> "Line"
         | Some s ->
-            sprintf "File %s, line" s
+            Printf.sprintf "File %s, line" s
     in
     let bytes =
       if pos1 = pos2 then
-        sprintf "byte %i" (pos1+1)
+        Printf.sprintf "byte %i" (pos1+1)
       else
-        sprintf "bytes %i-%i" (pos1+1) (pos2+1)
+        Printf.sprintf "bytes %i-%i" (pos1+1) (pos2+1)
     in
-    let msg = sprintf "%s %i, %s:\n%s" file_line v.lnum bytes descr in
+    let msg = Printf.sprintf "%s %i, %s:\n%s" file_line v.lnum bytes descr in
     Common.json_error msg
 
 
   let lexer_error descr v lexbuf =
     custom_error
-      (sprintf "%s '%s'" descr (Lexing.lexeme lexbuf))
+      (Printf.sprintf "%s '%s'" descr (Lexing.lexeme lexbuf))
       v lexbuf
 
   let long_error descr v lexbuf =
@@ -76,7 +73,7 @@
     let () = Lexer_utils.read_junk_without_positions buf buf_size lexbuf in
     let extra_junk = Buffer.contents buf in
     custom_error
-      (sprintf "%s '%s%s'" descr junk extra_junk)
+      (Printf.sprintf "%s '%s%s'" descr junk extra_junk)
       v lexbuf
 
   let min10 = min_int / 10 - (if min_int mod 10 = 0 then 0 else 1)
@@ -84,7 +81,7 @@
 
   exception Int_overflow
 
-  let extract_positive_int lexbuf =
+  let extract_positive_int (lexbuf : Lexing.lexbuf) =
     let start = lexbuf.lex_start_pos in
     let stop = lexbuf.lex_curr_pos in
     let s = lexbuf.lex_buffer in
@@ -106,12 +103,12 @@
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        `Intlit (Lexing.lexeme lexbuf)
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
 
-  let extract_negative_int lexbuf =
+  let extract_negative_int (lexbuf : Lexing.lexbuf)  =
     let start = lexbuf.lex_start_pos + 1 in
     let stop = lexbuf.lex_curr_pos in
     let s = lexbuf.lex_buffer in
@@ -133,20 +130,20 @@
       with Int_overflow ->
     #endif
       #ifdef INTLIT
-        `Intlit (lexeme lexbuf)
+        `Intlit (Lexing.lexeme lexbuf)
       #else
         lexer_error "Int overflow" v lexbuf
       #endif
 
-  let newline v lexbuf =
+  let newline v (lexbuf : Lexing.lexbuf) =
     v.lnum <- v.lnum + 1;
     v.bol <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos
 
-  let add_lexeme buf lexbuf =
+  let add_lexeme buf (lexbuf : Lexing.lexbuf) =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     Buffer.add_subbytes buf lexbuf.lex_buffer lexbuf.lex_start_pos len
 
-  let map_lexeme f lexbuf =
+  let map_lexeme f (lexbuf : Lexing.lexbuf) =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     f (Bytes.sub_string lexbuf.lex_buffer lexbuf.lex_start_pos len) 0 len
 
@@ -207,9 +204,9 @@ rule read_json v = parse
   | '-' positive_int     { make_negative_int v lexbuf }
   | float       {
                   #ifdef FLOAT
-                    `Float (float_of_string (lexeme lexbuf))
+                    `Float (float_of_string (Lexing.lexeme lexbuf))
                   #elif defined FLOATLIT
-                    `Floatlit (lexeme lexbuf)
+                    `Floatlit (Lexing.lexeme lexbuf)
                   #endif
                  }
 
@@ -503,7 +500,7 @@ and read_number v = parse
   | "NaN"       { nan }
   | "Infinity"  { infinity }
   | "-Infinity" { neg_infinity }
-  | number      { float_of_string (lexeme lexbuf) }
+  | number      { float_of_string (Lexing.lexeme lexbuf) }
   | '"'         { Buffer.clear v.buf;
                   let s = finish_string v lexbuf in
                   try
