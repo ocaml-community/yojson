@@ -1,20 +1,12 @@
-## unreleased
+## 2.1.2
 
-### Added
-
-### Changed
-
-### Deprecated
+*2023-11-23*
 
 ### Fixed
 
 - Fix the error location reported in the exception. Regression in 2.1.1
   (reported by @johnridesabike, regression test by @ElectreAAS, fix by
   @Leonidas-from-XIV, #171, #172)
-
-### Removed
-
-### Security
 
 ## 2.1.1
 
