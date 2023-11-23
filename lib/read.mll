@@ -71,8 +71,9 @@
 
   let long_error descr v lexbuf =
     let junk = Lexing.lexeme lexbuf in
-    let buf = Buffer.create 32 in
-    let () = Lexer_utils.read_junk buf 32 lexbuf in
+    let buf_size = 32 in
+    let buf = Buffer.create buf_size in
+    let () = Lexer_utils.read_junk_without_positions buf buf_size lexbuf in
     let extra_junk = Buffer.contents buf in
     custom_error
       (sprintf "%s '%s%s'" descr junk extra_junk)
