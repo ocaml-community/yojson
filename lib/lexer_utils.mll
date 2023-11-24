@@ -10,7 +10,9 @@ rule read_junk buf n = parse
 
 {
 let read_junk_without_positions buf n (lexbuf : Lexing.lexbuf) =
-  let junk_start_pos = lexbuf.lex_start_pos in
+  let lex_abs_pos = lexbuf.lex_abs_pos in
+  let lex_start_pos = lexbuf.lex_start_pos in
   read_junk buf n lexbuf;
-  lexbuf.lex_start_pos <- junk_start_pos + 1
+  lexbuf.lex_start_pos <- lex_start_pos + 1;
+  lexbuf.lex_abs_pos <- lex_abs_pos
 }
