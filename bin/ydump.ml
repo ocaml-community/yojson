@@ -1,5 +1,3 @@
-open Printf
-
 let license =
   "Copyright (c) 2010-2012 Martin Jambon\n\
    All rights reserved.\n\n\
@@ -41,10 +39,10 @@ let polycat write_one streaming in_file out_file =
     true
   with e ->
     finally ();
-    eprintf "Error:\n";
+    Printf.eprintf "Error:\n";
     (match e with
-    | Yojson.Json_error s -> eprintf "%s\n%!" s
-    | e -> eprintf "%s\n%!" (Printexc.to_string e));
+    | Yojson.Json_error s -> Printf.eprintf "%s\n%!" s
+    | e -> Printf.eprintf "%s\n%!" (Printexc.to_string e));
     false
 
 let cat sort output_biniou std compact streaming in_file out_file =
