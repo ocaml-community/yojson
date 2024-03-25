@@ -1,6 +1,7 @@
 ## unreleased
 
 ### Added
+- Added support for JSON5
 
 ### Changed
 

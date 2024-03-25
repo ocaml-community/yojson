@@ -1,0 +1,6 @@
+(library
+ (name yojson_json5)
+ (public_name yojson-json5)
+ (libraries yojson sedlex)
+ (preprocess
+  (pps sedlex.ppx)))
