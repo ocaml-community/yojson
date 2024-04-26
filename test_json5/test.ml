@@ -20,6 +20,15 @@ let parsing_test_case name expected input =
   Alcotest.test_case name `Quick (fun () ->
       Alcotest.check yojson name expected (M.from_string input))
 
+let parsing_should_fail name input =
+  Alcotest.test_case name `Quick (fun () ->
+      (* any error message will do *)
+      let any_string = Alcotest.testable Fmt.string (fun _ _ -> true) in
+      let expected = Error "" in
+      Alcotest.(check (result yojson any_string))
+        name expected
+        (Yojson_json5.Safe.from_string input))
+
 let parsing_tests =
   [
     Alcotest.test_case "Unexpected line break" `Quick (fun () ->
@@ -61,6 +70,16 @@ let parsing_tests =
     parsing_test_case "object with unquoted string"
       (`Assoc [ ("foo", `String "bar") ])
       {|{foo: 'bar'}|};
+    parsing_test_case "trailing comma in list"
+      (`List [ `Int 1; `Int 2; `Int 3 ])
+      "[1, 2, 3,]";
+    parsing_should_fail "multiple trailing commas in list" "[1, 2, 3,]";
+    parsing_should_fail "just trailing commas in list" "[,,,]";
+    parsing_test_case "trailing comma in object"
+      (`Assoc [ ("one", `Int 1) ])
+      {|{"one": 1,}|};
+    parsing_should_fail "multiple trailing commas in object" {|{"one": 1,,}|};
+    parsing_should_fail "just trailing commas in object" "{,,,}";
     (let expected =
        `Assoc
          [
