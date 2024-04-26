@@ -1,81 +1,66 @@
-module M = struct
-  include Yojson_json5.Safe
-
-  let from_string_err s =
-    match from_string s with
-    | Ok x ->
-        failwith
-          (Format.sprintf "Test didn't failed when should: %s" (to_string x))
-    | Error e -> e
-
-  let from_string s =
-    match from_string s with
-    | Ok t -> t
-    | Error e -> raise (Yojson.Json_error e)
-end
+module M = Yojson_json5.Safe
 
 let yojson = Alcotest.testable M.pp M.equal
 
 let parsing_test_case name expected input =
   Alcotest.test_case name `Quick (fun () ->
-      Alcotest.check yojson name expected (M.from_string input))
-
-let parsing_should_fail name input =
-  Alcotest.test_case name `Quick (fun () ->
       (* any error message will do *)
       let any_string = Alcotest.testable Fmt.string (fun _ _ -> true) in
-      let expected = Error "" in
       Alcotest.(check (result yojson any_string))
-        name expected
-        (Yojson_json5.Safe.from_string input))
+        name expected (M.from_string input))
+
+let parsing_should_succeed name expected input =
+  parsing_test_case name (Ok expected) input
+
+let parsing_should_fail name input =
+  let failure = Error "<anything>" in
+  parsing_test_case name failure input
 
 let parsing_tests =
   [
-    Alcotest.test_case "Unexpected line break" `Quick (fun () ->
-        Alcotest.(check string)
-          "string unescaped linebreak fails" "Unexpected character: "
-          (M.from_string_err {|"foo
-    bar"|}));
-    parsing_test_case "Empty object" (`Assoc []) "{}";
-    parsing_test_case "Empty list" (`List []) "[]";
-    parsing_test_case "List"
+    parsing_should_fail "Unexpected line break" {|"foo
+    bar"|};
+    parsing_should_succeed "Empty object" (`Assoc []) "{}";
+    parsing_should_succeed "Empty list" (`List []) "[]";
+    parsing_should_succeed "List"
       (`List [ `Int 1; `String "2"; `Float 3. ])
       {|[1, "2", 3.0]|};
-    parsing_test_case "true" (`Bool true) "true";
-    parsing_test_case "false" (`Bool false) "false";
-    parsing_test_case "null" `Null "null";
-    parsing_test_case "double quotes string" (`String "hello world")
+    parsing_should_succeed "true" (`Bool true) "true";
+    parsing_should_succeed "false" (`Bool false) "false";
+    parsing_should_succeed "null" `Null "null";
+    parsing_should_succeed "double quotes string" (`String "hello world")
       {|"hello world"|};
-    parsing_test_case "single quotes string" (`String "hello world")
+    parsing_should_succeed "single quotes string" (`String "hello world")
       {|'hello world'|};
-    parsing_test_case "float" (`Float 12345.67890) "12345.67890";
-    parsing_test_case "hex" (`Int 0x1) "0x1";
-    parsing_test_case "hex escape sequence" (`String "a") {|"\x61"|};
-    parsing_test_case "unicode escape sequence" (`String "λ") {|"\u03bb"|};
-    parsing_test_case "more string escaping" (`String "Hello λ world")
+    parsing_should_succeed "float" (`Float 12345.67890) "12345.67890";
+    parsing_should_succeed "hex" (`Int 0x1) "0x1";
+    parsing_should_succeed "hex escape sequence" (`String "a") {|"\x61"|};
+    parsing_should_succeed "unicode escape sequence" (`String "λ") {|"\u03bb"|};
+    parsing_should_succeed "more string escaping" (`String "Hello λ world")
       "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"";
-    parsing_test_case "null byte string" (`String "\x00") {|"\0"|};
-    parsing_test_case "octal string" (`String "?") {|"\077"|};
-    parsing_test_case "null and octal string" (`String "\x007") {|"\07"|};
-    parsing_test_case "int" (`Int 1) "1";
-    parsing_test_case "backslash escape" (`String {|foo\bar|}) {|"foo\\bar"|};
-    parsing_test_case "line break" (`String "foobar") "\"foo\\\nbar\"";
-    parsing_test_case "string and comment" (`String "bar") "\"bar\" //foo";
-    parsing_test_case "object with double quote string"
+    parsing_should_succeed "null byte string" (`String "\x00") {|"\0"|};
+    parsing_should_succeed "octal string" (`String "?") {|"\077"|};
+    parsing_should_succeed "null and octal string" (`String "\x007") {|"\07"|};
+    parsing_should_succeed "int" (`Int 1) "1";
+    parsing_should_succeed "backslash escape" (`String {|foo\bar|})
+      {|"foo\\bar"|};
+    parsing_should_succeed "line break" (`String "foobar") "\"foo\\\nbar\"";
+    parsing_should_succeed "string and comment" (`String "bar") "\"bar\" //foo";
+    parsing_should_succeed "object with double quote string"
       (`Assoc [ ("foo", `String "bar") ])
       {|{"foo": "bar"}|};
-    parsing_test_case "object with single quote string"
+    parsing_should_succeed "object with single quote string"
       (`Assoc [ ("foo", `String "bar") ])
       {|{'foo': 'bar'}|};
-    parsing_test_case "object with unquoted string"
+    parsing_should_succeed "object with unquoted string"
       (`Assoc [ ("foo", `String "bar") ])
       {|{foo: 'bar'}|};
-    parsing_test_case "trailing comma in list"
+    parsing_should_succeed "trailing comma in list"
       (`List [ `Int 1; `Int 2; `Int 3 ])
       "[1, 2, 3,]";
     parsing_should_fail "multiple trailing commas in list" "[1, 2, 3,]";
     parsing_should_fail "just trailing commas in list" "[,,,]";
-    parsing_test_case "trailing comma in object"
+    parsing_should_succeed "trailing comma in object"
       (`Assoc [ ("one", `Int 1) ])
       {|{"one": 1,}|};
     parsing_should_fail "multiple trailing commas in object" {|{"one": 1,,}|};
@@ -95,7 +80,7 @@ let parsing_tests =
            ("backwardsCompatible", `String "with JSON");
          ]
      in
-     parsing_test_case "More elaborated" expected
+     parsing_should_succeed "More elaborated" expected
        {|{
   // comments
   unquoted: 'and you can quote me on that',
