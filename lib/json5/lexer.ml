@@ -170,13 +170,10 @@ let white_space =
   [%sedlex.regexp? 0x0009 | 0x000B | 0x000C | 0x0020 | 0x00A0 | 0xFEFF | zs]
 
 let string_lex_single lexbuf strbuf =
-  Buffer.add_char strbuf '\'';
   let lexeme = Sedlexing.Utf8.lexeme in
   let rec lex lexbuf strbuf =
     match%sedlex lexbuf with
-    | '\'' ->
-        Buffer.add_char strbuf '\'';
-        Ok (Buffer.contents strbuf)
+    | '\'' -> Ok (Buffer.contents strbuf)
     | '\\', escape_sequence ->
         let* s = Unescape.unescape (lexeme lexbuf) in
         Buffer.add_string strbuf s;
@@ -193,13 +190,10 @@ let string_lex_single lexbuf strbuf =
   lex lexbuf strbuf
 
 let string_lex_double lexbuf strbuf =
-  Buffer.add_char strbuf '"';
   let lexeme = Sedlexing.Utf8.lexeme in
   let rec lex lexbuf strbuf =
     match%sedlex lexbuf with
-    | '"' ->
-        Buffer.add_char strbuf '"';
-        Ok (Buffer.contents strbuf)
+    | '"' -> Ok (Buffer.contents strbuf)
     | '\\', escape_sequence ->
         let* s = Unescape.unescape (lexeme lexbuf) in
         Buffer.add_string strbuf s;
