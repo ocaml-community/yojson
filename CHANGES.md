@@ -1,7 +1,8 @@
 ## unreleased
 
 ### Added
-- Added support for JSON5
+
+- Added support for JSON5 (@dhilist, @gorm-issuu, @gertsonderby, #152)
 
 ### Changed
 
