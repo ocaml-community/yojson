@@ -14,74 +14,69 @@ module M = struct
     | Error e -> raise (Yojson.Json_error e)
 end
 
-let yojson_json5 = Alcotest.testable M.pp M.equal
+let yojson = Alcotest.testable M.pp M.equal
 
-let test_from_string () =
-  Alcotest.(check yojson_json5) "Empty object" (`Assoc []) (M.from_string "{}");
-  Alcotest.(check yojson_json5) "Empty list" (`List []) (M.from_string "[]");
-  Alcotest.(check yojson_json5)
-    "List"
-    (`List [ `Int 1; `String "2"; `Float 3. ])
-    (M.from_string "[1, \"2\", 3.0]");
-  Alcotest.(check yojson_json5) "true" (`Bool true) (M.from_string "true");
-  Alcotest.(check yojson_json5) "false" (`Bool false) (M.from_string "false");
-  Alcotest.(check yojson_json5) "null" `Null (M.from_string "null");
-  Alcotest.(check yojson_json5)
-    "double quotes string" (`String "hello world")
-    (M.from_string {|"hello world"|});
-  Alcotest.(check yojson_json5)
-    "single quotes string" (`String "hello world")
-    (M.from_string {|'hello world'|});
-  Alcotest.(check yojson_json5)
-    "float" (`Float 12345.67890)
-    (M.from_string "12345.67890");
-  Alcotest.(check yojson_json5) "hex" (`Int 0x1) (M.from_string "0x1");
-  Alcotest.(check yojson_json5)
-    "hex escape sequence" (`String "a") (M.from_string {|"\x61"|});
-  Alcotest.(check yojson_json5)
-    "unicode escape sequence" (`String "λ")
-    (M.from_string {|"\u03bb"|});
-  Alcotest.(check yojson_json5)
-    "more string escaping" (`String "Hello λ world")
-    (M.from_string "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"");
-  Alcotest.(check string)
-    "string unescaped linebreak fails" "Unexpected character: "
-    (M.from_string_err {|"foo
-bar"|});
-  Alcotest.(check yojson_json5)
-    "null byte string" (`String "\x00") (M.from_string {|"\0"|});
-  Alcotest.(check yojson_json5)
-    "octal string" (`String "?") (M.from_string {|"\077"|});
-  Alcotest.(check yojson_json5)
-    "null and octal string" (`String "\x007") (M.from_string {|"\07"|});
-  Alcotest.(check yojson_json5) "int" (`Int 1) (M.from_string "1");
-  Alcotest.(check yojson_json5)
-    "backslash escape" (`String {|foo\bar|})
-    (M.from_string {|"foo\\bar"|});
-  Alcotest.(check yojson_json5)
-    "line break" (`String "foobar")
-    (M.from_string "\"foo\\\nbar\"");
-  Alcotest.(check yojson_json5)
-    "string and comment" (`String "bar")
-    (M.from_string "\"bar\" //foo");
-  let expected =
-    `Assoc
-      [
-        ("unquoted", `String "and you can quote me on that");
-        ("singleQuotes", `String "I can use \"double quotes\" here");
-        ("lineBreaks", `String {|Look, Mom! No \n's!|});
-        ("hexadecimal", `Int 0xdecaf);
-        ("leadingDecimalPoint", `Float 0.8675309);
-        ("andTrailing", `Float 8675309.0);
-        ("positiveSign", `Int 1);
-        ("trailingComma", `String "in objects");
-        ("andIn", `List [ `String "arrays" ]);
-        ("backwardsCompatible", `String "with JSON");
-      ]
-  in
-  Alcotest.(check yojson_json5)
-    "More elaborated" expected
-    (M.from_string
+let parsing_test_case name expected input =
+  Alcotest.test_case name `Quick (fun () ->
+      Alcotest.check yojson name expected (M.from_string input))
+
+let parsing_tests =
+  [
+    Alcotest.test_case "Unexpected line break" `Quick (fun () ->
+        Alcotest.(check string)
+          "string unescaped linebreak fails" "Unexpected character: "
+          (M.from_string_err {|"foo
+    bar"|}));
+    parsing_test_case "Empty object" (`Assoc []) "{}";
+    parsing_test_case "Empty list" (`List []) "[]";
+    parsing_test_case "List"
+      (`List [ `Int 1; `String "2"; `Float 3. ])
+      {|[1, "2", 3.0]|};
+    parsing_test_case "true" (`Bool true) "true";
+    parsing_test_case "false" (`Bool false) "false";
+    parsing_test_case "null" `Null "null";
+    parsing_test_case "double quotes string" (`String "hello world")
+      {|"hello world"|};
+    parsing_test_case "single quotes string" (`String "hello world")
+      {|'hello world'|};
+    parsing_test_case "float" (`Float 12345.67890) "12345.67890";
+    parsing_test_case "hex" (`Int 0x1) "0x1";
+    parsing_test_case "hex escape sequence" (`String "a") {|"\x61"|};
+    parsing_test_case "unicode escape sequence" (`String "λ") {|"\u03bb"|};
+    parsing_test_case "more string escaping" (`String "Hello λ world")
+      "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"";
+    parsing_test_case "null byte string" (`String "\x00") {|"\0"|};
+    parsing_test_case "octal string" (`String "?") {|"\077"|};
+    parsing_test_case "null and octal string" (`String "\x007") {|"\07"|};
+    parsing_test_case "int" (`Int 1) "1";
+    parsing_test_case "backslash escape" (`String {|foo\bar|}) {|"foo\\bar"|};
+    parsing_test_case "line break" (`String "foobar") "\"foo\\\nbar\"";
+    parsing_test_case "string and comment" (`String "bar") "\"bar\" //foo";
+    parsing_test_case "object with double quote string"
+      (`Assoc [ ("foo", `String "bar") ])
+      {|{"foo": "bar"}|};
+    parsing_test_case "object with single quote string"
+      (`Assoc [ ("foo", `String "bar") ])
+      {|{'foo': 'bar'}|};
+    parsing_test_case "object with unquoted string"
+      (`Assoc [ ("foo", `String "bar") ])
+      {|{foo: 'bar'}|};
+    (let expected =
+       `Assoc
+         [
+           ("unquoted", `String "and you can quote me on that");
+           ("singleQuotes", `String "I can use \"double quotes\" here");
+           ("lineBreaks", `String {|Look, Mom! No \n's!|});
+           ("hexadecimal", `Int 0xdecaf);
+           ("leadingDecimalPoint", `Float 0.8675309);
+           ("andTrailing", `Float 8675309.0);
+           ("positiveSign", `Int 1);
+           ("trailingComma", `String "in objects");
+           ("andIn", `List [ `String "arrays" ]);
+           ("backwardsCompatible", `String "with JSON");
+         ]
+     in
+     parsing_test_case "More elaborated" expected
        {|{
   // comments
   unquoted: 'and you can quote me on that',
@@ -93,27 +88,26 @@ No \\n's!",
   positiveSign: +1,
   trailingComma: 'in objects', andIn: ['arrays',],
   "backwardsCompatible": "with JSON",
-}|})
+}|});
+  ]
 
-let test_to_string () =
-  Alcotest.(check string) "Empty object" "{}" (M.to_string (`Assoc []));
-  Alcotest.(check string) "Empty list" "[]" (M.to_string (`List []));
-  Alcotest.(check string) "true" "true" (M.to_string (`Bool true));
-  Alcotest.(check string) "false" "false" (M.to_string (`Bool false));
-  Alcotest.(check string) "null" "null" (M.to_string `Null);
-  Alcotest.(check string)
-    "string" "\"hello world\""
-    (M.to_string (`String "hello world"));
-  Alcotest.(check string) "float" "12345.6789" (M.to_string (`Float 12345.6789));
-  Alcotest.(check string) "hex" "1" (M.to_string (`Int 0x1));
-  Alcotest.(check string) "int" "1" (M.to_string (`Int 1))
+let writing_test_case name expected input =
+  Alcotest.test_case name `Quick (fun () ->
+      Alcotest.(check string) name expected (M.to_string input))
 
-(* Run it *)
+let writing_tests =
+  [
+    writing_test_case "Empty object" "{}" (`Assoc []);
+    writing_test_case "Empty list" "[]" (`List []);
+    writing_test_case "true" "true" (`Bool true);
+    writing_test_case "false" "false" (`Bool false);
+    writing_test_case "null" "null" `Null;
+    writing_test_case "string" "\"hello world\"" (`String "hello world");
+    writing_test_case "float" "12345.6789" (`Float 12345.6789);
+    writing_test_case "hex" "1" (`Int 0x1);
+    writing_test_case "int" "1" (`Int 1);
+  ]
+
 let () =
-  let open Alcotest in
-  run "JSON5"
-    [
-      ( "from_string",
-        [ test_case "reading from string" `Quick test_from_string ] );
-      ("to_string", [ test_case "write to string" `Quick test_to_string ]);
-    ]
+  Alcotest.run "JSON5"
+    [ ("parsing", parsing_tests); ("writing", writing_tests) ]
