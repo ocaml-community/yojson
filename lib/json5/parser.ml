@@ -50,11 +50,11 @@ and parse = function
       | INT_OR_FLOAT v -> Ok (FloatLit v, xs)
       | STRING s -> Ok (StringLit s, xs)
       | OPEN_BRACKET ->
-          let* l, xs = parse_list [] xs in
-          Ok (Ast.List (List.rev l), xs)
+          let+ l, xs = parse_list [] xs in
+          (Ast.List (List.rev l), xs)
       | OPEN_BRACE ->
-          let* a, xs = parse_assoc [] xs in
-          Ok (Ast.Assoc (List.rev a), xs)
+          let+ a, xs = parse_assoc [] xs in
+          (Ast.Assoc (List.rev a), xs)
       | x ->
           let s = Format.asprintf "Unexpected token: %a" Lexer.pp_token x in
           Error s)
@@ -68,8 +68,8 @@ let parse_from_lexbuf ?fname ?lnum lexbuffer =
   in
   Sedlexing.set_position lexbuffer pos;
   let* tokens = Lexer.lex [] lexbuffer in
-  let* ast = parse tokens in
-  Ok (fst ast)
+  let+ ast, _unparsed = parse tokens in
+  ast
 
 let parse_from_string ?fname ?lnum input =
   parse_from_lexbuf (Sedlexing.Utf8.from_string input) ?fname ?lnum

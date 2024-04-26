@@ -3,7 +3,7 @@ open Let_syntax.Result
 module type S = sig
   type t
 
-  val convert : Ast.internal -> t
+  val convert : Ast.t -> t
 end
 
 module type Out = sig
@@ -21,14 +21,14 @@ module Make (F : S) : Out with type t = F.t = struct
   type t = F.t
 
   let from_string ?fname ?lnum input =
-    let* ast = Parser.parse_from_string ?fname ?lnum input in
-    Ok (F.convert ast)
+    let+ ast = Parser.parse_from_string ?fname ?lnum input in
+    F.convert ast
 
   let from_channel ?fname ?lnum ic =
-    let* ast = Parser.parse_from_channel ?fname ?lnum ic in
-    Ok (F.convert ast)
+    let+ ast = Parser.parse_from_channel ?fname ?lnum ic in
+    F.convert ast
 
   let from_file ?fname ?lnum file =
-    let* ast = Parser.parse_from_file ?fname ?lnum file in
-    Ok (F.convert ast)
+    let+ ast = Parser.parse_from_file ?fname ?lnum file in
+    F.convert ast
 end

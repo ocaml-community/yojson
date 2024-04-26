@@ -1,6 +1,6 @@
-type internal =
-  | Assoc of (string * internal) list
-  | List of internal list
+type t =
+  | Assoc of (string * t) list
+  | List of t list
   | StringLit of string
   | IntLit of string
   | FloatLit of string
