@@ -187,7 +187,7 @@ let string_lex_single lexbuf strbuf =
         lex lexbuf strbuf
     | _ ->
         lexeme lexbuf
-        |> Format.asprintf "Unexpected character: %s"
+        |> Format.sprintf "Unexpected character: %s"
         |> Result.error
   in
   lex lexbuf strbuf
@@ -210,7 +210,7 @@ let string_lex_double lexbuf strbuf =
         lex lexbuf strbuf
     | _ ->
         lexeme lexbuf
-        |> Format.asprintf "Unexpected character: %s"
+        |> Format.sprintf "Unexpected character: %s"
         |> Result.error
   in
   lex lexbuf strbuf
@@ -218,8 +218,8 @@ let string_lex_double lexbuf strbuf =
 let string_lex lexbuf quote =
   let strbuf = Buffer.create 200 in
   if quote = "'" then string_lex_single lexbuf strbuf
-  else if quote = "\"" then string_lex_double lexbuf strbuf
-  else Error (Format.sprintf "invalid string quote %s" quote)
+  else if quote = {|"|} then string_lex_double lexbuf strbuf
+  else Error (Format.sprintf "Invalid string quote %S" quote)
 
 let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
