@@ -58,7 +58,7 @@ let parsing_tests =
     parsing_should_succeed "trailing comma in list"
       (`List [ `Int 1; `Int 2; `Int 3 ])
       "[1, 2, 3,]";
-    parsing_should_fail "multiple trailing commas in list" "[1, 2, 3,]";
+    parsing_should_fail "multiple trailing commas in list" "[1, 2, 3,,]";
     parsing_should_fail "just trailing commas in list" "[,,,]";
     parsing_should_succeed "trailing comma in object"
       (`Assoc [ ("one", `Int 1) ])

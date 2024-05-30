@@ -2,7 +2,7 @@ open Let_syntax.Result
 
 let rec parse_list acc = function
   | [] -> Error "List never ends"
-  | Lexer.CLOSE_BRACKET :: xs | COMMA :: CLOSE_BRACKET :: xs -> Ok (acc, xs)
+  | Lexer.CLOSE_BRACKET :: xs -> Ok (acc, xs)
   | xs -> (
       let* v, xs = parse xs in
       match xs with
@@ -18,7 +18,7 @@ let rec parse_list acc = function
 
 and parse_assoc acc = function
   | [] -> Error "Assoc never ends"
-  | Lexer.CLOSE_BRACE :: xs | COMMA :: CLOSE_BRACE :: xs -> Ok (acc, xs)
+  | Lexer.CLOSE_BRACE :: xs -> Ok (acc, xs)
   | STRING k :: COLON :: xs | IDENTIFIER_NAME k :: COLON :: xs -> (
       let* v, xs = parse xs in
       let item = (k, v) in
