@@ -2,6 +2,8 @@
 
 ### Added
 
+- Added support for JSON5 (@dhilst, @gorm-issuu, @gertsonderby, #152)
+
 ### Changed
 
 ### Deprecated
