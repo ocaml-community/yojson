@@ -1,4 +1,4 @@
-module M = Yojson_json5.Safe
+module M = Yojson_five.Safe
 
 let yojson = Alcotest.testable M.pp M.equal
 

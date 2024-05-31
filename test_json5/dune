@@ -1,4 +1,4 @@
 (test
  (name test)
- (package yojson-json5)
- (libraries alcotest yojson_json5))
+ (package yojson-five)
+ (libraries alcotest yojson_five))

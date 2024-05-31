@@ -22,6 +22,16 @@ yojson package.")
     (seq (>= 0.2.2))))
 
 (package
+  (name yojson-five)
+  (synopsis "Yojson-five is a parsing and printing library for the JSON5 format")
+  (description "Yojson-five is a parsing and printing library for the JSON5 format.
+It supports parsing JSON5 to Yojson.Basic.t and Yojson.Safe.t types.")
+  (depends
+    (ocaml (>= 4.08))
+    (sedlex (>= 2.5))
+    (alcotest (and :with-test (>= 0.8.5)))))
+
+(package
   (name yojson-bench)
   (synopsis "Run Yojson benchmarks")
   (description "Yojson benchmarks require `Core_bench` which is not a dependency of Yojson,
@@ -34,14 +44,3 @@ meant for developers that are worried about performance changes in Yojson.")
     (core (>= v0.14.0))
     (core_unix (>= v0.14.0))
     (sexplib (>= v0.9.0))))
-
-(package
-  (name yojson-json5)
-  (synopsis "Yojson_json5 is a parsing and printing library for the JSON5 format")
-  (description "Yojson_json5 is a parsing and printing library for the JSON5 format.
-It supports parsing JSON5 to Yojson.Basic.t and Yojson.Safe.t types.")
-  (depends
-    (ocaml (>= 4.08))
-    (sedlex (>= 2.5))
-    (alcotest (and :with-test (>= 0.8.5)))))
-
