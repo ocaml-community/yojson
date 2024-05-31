@@ -1,21 +1,15 @@
-## unreleased
+## 2.2.0
+
+*2024-05-31*
 
 ### Added
 
 - Added support for JSON5 (@dhilst, @gorm-issuu, @gertsonderby, #152)
 
-### Changed
-
-### Deprecated
-
-### Fixed
-
 ### Removed
 
 - Remove CPPO dependency to make the Yojson installation lighter
   (@Leonidas-from-XIV, #175)
-
-### Security
 
 ## 2.1.2
 
