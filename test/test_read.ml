@@ -3,6 +3,11 @@ let from_string () =
     __LOC__ Fixtures.json_value
     (Yojson.Safe.from_string Fixtures.json_string)
 
+let from_crlf_string () =
+  Alcotest.(check Testable.yojson)
+    __LOC__ Fixtures.json_value
+    (Yojson.Safe.from_string Fixtures.json_string_crlf)
+
 let parse s () = s |> Yojson.Safe.from_string |> ignore
 let parse_basic s () = s |> Yojson.Basic.from_string |> ignore
 
@@ -111,6 +116,7 @@ let map_ident_and_string () =
 let single_json =
   [
     ("from_string", `Quick, from_string);
+    ("from_crlf_string", `Quick, from_crlf_string);
     ("from_string_fail_simple", `Quick, from_string_fail_simple);
     ("from_string_fail_lines", `Quick, from_string_fail_lines);
     ("from_string_fail_bytes", `Quick, from_string_fail_bytes);
