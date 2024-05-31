@@ -771,15 +771,6 @@ and finish_buffer_stringlit v = parse
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
-and finish_buffer_variant v = parse
-    ':'  { Buffer.add_char v.buf ':';
-           buffer_json v lexbuf;
-           buffer_space v lexbuf;
-           buffer_gt v lexbuf }
-  | '>'  { Buffer.add_char v.buf '>' }
-  | _    { long_error "Expected ':' or '>' but found" v lexbuf }
-  | eof  { custom_error "Unexpected end of input" v lexbuf }
-
 and buffer_ident v = parse
     '"'      { finish_buffer_stringlit v lexbuf }
   | ident    { add_lexeme v.buf lexbuf }
