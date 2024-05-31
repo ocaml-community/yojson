@@ -1,5 +1,7 @@
 (ocamllex read lexer_utils)
 
+(vendored_dirs mucppo)
+
 (rule
  (targets t.ml)
  (deps
@@ -10,7 +12,7 @@
   write.ml
   write2.ml)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets t.mli)
@@ -21,7 +23,7 @@
   write.mli
   write2.mli)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets basic.ml)
@@ -35,7 +37,7 @@
   read.ml
   util.ml)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets basic.mli)
@@ -48,7 +50,7 @@
   read.mli
   util.mli)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets safe.ml)
@@ -64,7 +66,7 @@
   read.ml
   util.ml)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets safe.mli)
@@ -79,7 +81,7 @@
   read.mli
   util.mli)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets raw.ml)
@@ -93,7 +95,7 @@
   read.ml
   util.ml)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (rule
  (targets raw.mli)
@@ -106,7 +108,7 @@
   read.mli
   util.mli)
  (action
-  (run cppo %{out} -o %{targets})))
+  (run mucppo/mucppo.exe %{out} -o %{targets})))
 
 (library
  (name yojson)
