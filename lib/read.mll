@@ -250,14 +250,6 @@ rule read_json v = parse
                      `List (List.rev !acc)
                  }
 
-  | '('          {
-                   long_error "Invalid token" v lexbuf
-                 }
-
-  | '<'          {
-                   long_error "Invalid token" v lexbuf
-                 }
-
   | "//"[^'\n']* { read_json v lexbuf }
   | "/*"         { finish_comment v lexbuf; read_json v lexbuf }
   | "\n"         { newline v lexbuf; read_json v lexbuf }
@@ -683,14 +675,6 @@ and skip_json v = parse
                      ()
                  }
 
-  | '('          {
-                   long_error "Invalid token" v lexbuf
-                 }
-
-  | '<'          {
-                   long_error "Invalid token" v lexbuf
-                 }
-
   | "//"[^'\n']* { skip_json v lexbuf }
   | "/*"         { finish_comment v lexbuf; skip_json v lexbuf }
   | "\n"         { newline v lexbuf; skip_json v lexbuf }
@@ -764,14 +748,6 @@ and buffer_json v = parse
                      assert false
                    with Common.End_of_array ->
                      ()
-                 }
-
-  | '('          {
-                   long_error "Invalid token" v lexbuf
-                 }
-
-  | '<'          {
-                   long_error "Invalid token" v lexbuf
                  }
 
   | "//"[^'\n']* { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
