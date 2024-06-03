@@ -17,6 +17,7 @@ depends: [
   "dune" {>= "2.7"}
   "ocaml" {>= "4.08"}
   "sedlex" {>= "2.5"}
+  "yojson" {= version}
   "alcotest" {with-test & >= "0.8.5"}
   "odoc" {with-doc}
 ]

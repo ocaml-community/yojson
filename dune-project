@@ -29,6 +29,7 @@ It supports parsing JSON5 to Yojson.Basic.t and Yojson.Safe.t types.")
   (depends
     (ocaml (>= 4.08))
     (sedlex (>= 2.5))
+    (yojson (= :version))
     (alcotest (and :with-test (>= 0.8.5)))))
 
 (package
