@@ -11,12 +11,24 @@ let json_value =
       ("assoc", `Assoc [ ("value", `Int 42) ]);
     ]
 
-let json_string =
-  "{" ^ {|"null":null,|} ^ {|"bool":true,|} ^ {|"int":0,|}
-  ^ {|"intlit":10000000000000000000,|} ^ {|"float":0.0,|}
-  ^ {|"string":"string",|} ^ {|"list":[0,1,2],|} ^ {|"assoc":{"value":42}|}
-  ^ "}"
+let crlf = "\r\n"
 
+let snippets =
+  [
+    "{";
+    {|"null":null,|};
+    {|"bool":true,|};
+    {|"int":0,|};
+    {|"intlit":10000000000000000000,|};
+    {|"float":0.0,|};
+    {|"string":"string",|};
+    {|"list":[0,1,2],|};
+    {|"assoc":{"value":42}|};
+    "}";
+  ]
+
+let json_string = String.concat "" snippets
+let json_string_crlf = String.concat crlf snippets
 let unquoted_json = {|{foo: null}|}
 let unquoted_value = `Assoc [ ("foo", `Null) ]
 let json_string_newline = json_string ^ "\n"
