@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- Don't expose `Yojson_five` internals anymore (@Leonidas_from_XIV, #<PR_NUMBER>)
+
 ### Removed
 
 ### Security
