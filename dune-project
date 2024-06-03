@@ -7,7 +7,6 @@
 
 (maintainers "paul-elliot@tarides.com" "nathan@tarides.com" "marek@tarides.com")
 (authors "Martin Jambon")
-(documentation "https://ocaml-community.github.io/yojson")
 
 (package
   (name yojson)
@@ -16,6 +15,7 @@
 
 ydump is a pretty-printing command-line program provided with the
 yojson package.")
+  (documentation "https://ocaml.org/p/yojson/latest")
   (depends
     (ocaml (>= 4.02.3))
     (alcotest (and :with-test (>= 0.8.5)))
@@ -26,6 +26,7 @@ yojson package.")
   (synopsis "Yojson-five is a parsing and printing library for the JSON5 format")
   (description "Yojson-five is a parsing and printing library for the JSON5 format.
 It supports parsing JSON5 to Yojson.Basic.t and Yojson.Safe.t types.")
+  (documentation "https://ocaml.org/p/yojson-five/latest")
   (depends
     (ocaml (>= 4.08))
     (sedlex (>= 2.5))
