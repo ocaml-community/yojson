@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- Don't expose `Yojson_five` internals anymore (@Leonidas_from_XIV, #180)
+
 ### Removed
 
 ### Security
