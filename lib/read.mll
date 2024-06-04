@@ -146,8 +146,6 @@
   let map_lexeme f (lexbuf : Lexing.lexbuf) =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
     f (Bytes.sub_string lexbuf.lex_buffer lexbuf.lex_start_pos len) 0 len
-
-  type variant_kind = [ `Square_bracket | `Double_quote ]
 }
 
 let space = [' ' '\t' '\r']+
@@ -338,13 +336,6 @@ and read_comma v = parse
     ','  { () }
   | _    { long_error "Expected ',' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
-
-and start_any_variant v = parse
-  | '"'      { Buffer.clear v.buf;
-               `Double_quote }
-  | '['      { `Square_bracket }
-  | _        { long_error "Expected '<', '\"' or '[' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_comment v = parse
   | "*/" { () }
@@ -596,11 +587,6 @@ and read_object_sep v = parse
 and read_colon v = parse
     ':'      { () }
   | _        { long_error "Expected ':' but found" v lexbuf }
-  | eof      { custom_error "Unexpected end of input" v lexbuf }
-
-and start_any_tuple v = parse
-  | '['      { true }
-  | _        { long_error "Expected '(' or '[' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lpar v = parse

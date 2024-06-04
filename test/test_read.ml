@@ -93,17 +93,13 @@ let map_ident_and_string () =
   let skip_over f = f lexer_state lexbuf in
   let map_f mapper f = mapper lexer_state f lexbuf in
   let map_ident = map_f Yojson.Safe.map_ident in
-  let map_string = map_f Yojson.Safe.map_string in
 
   skip_over Yojson.Safe.read_lcurl;
   map_ident (ident_expected "foo");
   skip_over Yojson.Safe.read_colon;
 
-  let variant = skip_over Yojson.Safe.start_any_variant in
-  Alcotest.(check Testable.variant_kind)
-    "String starts with double quote" `Double_quote variant;
-
-  map_string (ident_expected "hello");
+  let key = skip_over Yojson.Safe.read_string in
+  Alcotest.(check string) "String is as expected" "hello" key;
 
   Alcotest.check_raises "Reading } raises End_of_object" Yojson.End_of_object
     (fun () -> Yojson.Safe.read_object_end lexbuf)
