@@ -135,10 +135,6 @@ val finish_string : lexer_state -> Lexing.lexbuf -> string
 val read_string : lexer_state -> Lexing.lexbuf -> string
 val read_ident : lexer_state -> Lexing.lexbuf -> string
 
-val map_string :
-  lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
-(* equivalent to finish_string *)
-
 val map_ident :
   lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
 (* equivalent to read_ident *)

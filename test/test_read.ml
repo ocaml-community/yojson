@@ -78,7 +78,7 @@ let unquoted_from_string () =
     __LOC__ Fixtures.unquoted_value
     (Yojson.Safe.from_string Fixtures.unquoted_json)
 
-let map_ident_and_string () =
+let map_ident () =
   let lexbuf = Lexing.from_string {|{foo:"hello"}|} in
   let lexer_state = Yojson.init_lexer () in
 
@@ -127,5 +127,5 @@ let single_json =
     ("from_string_fail_escaped_char", `Quick, from_string_fail_escaped_char);
     ("from_file", `Quick, from_file);
     ("unquoted_from_string", `Quick, unquoted_from_string);
-    ("map_ident/map_string", `Quick, map_ident_and_string);
+    ("map_ident", `Quick, map_ident);
   ]
