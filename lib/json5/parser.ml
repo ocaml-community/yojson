@@ -1,46 +1,71 @@
 open Let_syntax.Result
 
+let custom_error pos error =
+  let file_line =
+    if String.equal pos.Lexing.pos_fname "" then "Line"
+    else Format.sprintf "File %s, line" pos.Lexing.pos_fname
+  in
+  let msg = Format.sprintf "%s %d: %s" file_line pos.Lexing.pos_lnum error in
+  Error msg
+
 let rec parse_list acc = function
-  | [] -> Error "List never ends"
-  | Lexer.CLOSE_BRACKET :: xs -> Ok (acc, xs)
+  | [] -> Error "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | (Lexer.CLOSE_BRACKET, _) :: xs -> Ok (acc, xs)
   | xs -> (
       let* v, xs = parse xs in
       match xs with
-      | [] -> Error "List was not closed"
-      | Lexer.CLOSE_BRACKET :: xs | COMMA :: CLOSE_BRACKET :: xs ->
+      | [] -> Error "Unexpected end of input"
+      | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+      | (Lexer.CLOSE_BRACKET, _) :: xs | (COMMA, _) :: (CLOSE_BRACKET, _) :: xs
+        ->
           Ok (v :: acc, xs)
-      | COMMA :: xs -> parse_list (v :: acc) xs
-      | x :: _ ->
+      | (COMMA, _) :: xs -> parse_list (v :: acc) xs
+      | (x, pos) :: _ ->
           let s =
             Format.asprintf "Unexpected list token: %a" Lexer.pp_token x
           in
-          Error s)
+          custom_error pos s)
 
 and parse_assoc acc = function
-  | [] -> Error "Assoc never ends"
-  | Lexer.CLOSE_BRACE :: xs -> Ok (acc, xs)
-  | STRING k :: COLON :: xs | IDENTIFIER_NAME k :: COLON :: xs -> (
-      let* v, xs = parse xs in
-      let item = (k, v) in
+  | [] -> Error "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | (CLOSE_BRACE, _) :: xs -> Ok (acc, xs)
+  | (STRING k, _) :: xs -> (
       match xs with
-      | [] -> Error "Object was not closed"
-      | Lexer.CLOSE_BRACE :: xs | COMMA :: CLOSE_BRACE :: xs ->
-          Ok (item :: acc, xs)
-      | COMMA :: xs -> parse_assoc (item :: acc) xs
-      | x :: _ ->
+      | [] -> Error "Unexpected end of input"
+      | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+      | (Lexer.COLON, _) :: xs -> (
+          let* v, xs = parse xs in
+          let item = (k, v) in
+          match xs with
+          | [] -> Error "Unexpected end of input"
+          | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+          | (CLOSE_BRACE, _) :: xs | (COMMA, _) :: (CLOSE_BRACE, _) :: xs ->
+              Ok (item :: acc, xs)
+          | (COMMA, _) :: xs -> parse_assoc (item :: acc) xs
+          | (x, pos) :: _ ->
+              let s =
+                Format.asprintf "Unexpected assoc list token: %a" Lexer.pp_token
+                  x
+              in
+              custom_error pos s)
+      | (x, pos) :: _ ->
           let s =
-            Format.asprintf "Unexpected assoc list token: %a" Lexer.pp_token x
+            Format.asprintf "Expected ':' but found '%a'" Lexer.pp_token x
           in
-          Error s)
-  | x :: _ ->
+          custom_error pos s)
+  | (x, pos) :: _ ->
       let s =
-        Format.asprintf "Unexpected assoc list token: %a" Lexer.pp_token x
+        Format.asprintf "Expected string or identifier but found '%a'"
+          Lexer.pp_token x
       in
-      Error s
+      custom_error pos s
 
 and parse = function
-  | [] -> Error "empty list of tokens"
-  | token :: xs -> (
+  | [] -> Error "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | (token, pos) :: xs -> (
       match token with
       | TRUE -> Ok (Ast.Bool true, xs)
       | FALSE -> Ok (Bool false, xs)
@@ -57,12 +82,10 @@ and parse = function
           (Ast.Assoc (List.rev a), xs)
       | x ->
           let s = Format.asprintf "Unexpected token: %a" Lexer.pp_token x in
-          Error s)
+          custom_error pos s)
 
-let parse_from_lexbuf ?fname ?lnum lexbuffer =
-  let fname = Option.value fname ~default:"" in
+let parse_from_lexbuf ?(fname = "") ?(lnum = 1) lexbuffer =
   Sedlexing.set_filename lexbuffer fname;
-  let lnum = Option.value lnum ~default:1 in
   let pos =
     { Lexing.pos_fname = fname; pos_lnum = lnum; pos_bol = 0; pos_cnum = 0 }
   in

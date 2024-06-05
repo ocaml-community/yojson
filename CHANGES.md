@@ -2,6 +2,10 @@
 
 *2024-06-04*
 
+### Added
+
+- Add locations in the JSON5 parser error messages.
+
 ### Fixed
 
 - Don't expose `Yojson_five` internals anymore (@Leonidas_from_XIV, #180)
