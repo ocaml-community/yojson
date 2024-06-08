@@ -1,22 +1,22 @@
 open Let_syntax.Result
 
-let custom_error pos error =
+let parser_error pos error =
   let file_line =
     if String.equal pos.Lexing.pos_fname "" then "Line"
-    else Format.sprintf "File %s, line" pos.Lexing.pos_fname
+    else Printf.sprintf "File %s, line" pos.Lexing.pos_fname
   in
-  let msg = Format.sprintf "%s %d: %s" file_line pos.Lexing.pos_lnum error in
+  let msg = Printf.sprintf "%s %d: %s" file_line pos.Lexing.pos_lnum error in
   Error msg
 
 let rec parse_list acc = function
   | [] -> Error "Unexpected end of input"
-  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
   | (Lexer.CLOSE_BRACKET, _) :: xs -> Ok (acc, xs)
   | xs -> (
       let* v, xs = parse xs in
       match xs with
       | [] -> Error "Unexpected end of input"
-      | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+      | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
       | (Lexer.CLOSE_BRACKET, _) :: xs | (COMMA, _) :: (CLOSE_BRACKET, _) :: xs
         ->
           Ok (v :: acc, xs)
@@ -25,22 +25,22 @@ let rec parse_list acc = function
           let s =
             Format.asprintf "Unexpected list token: %a" Lexer.pp_token x
           in
-          custom_error pos s)
+          parser_error pos s)
 
 and parse_assoc acc = function
   | [] -> Error "Unexpected end of input"
-  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
   | (CLOSE_BRACE, _) :: xs -> Ok (acc, xs)
   | (STRING k, _) :: xs -> (
       match xs with
       | [] -> Error "Unexpected end of input"
-      | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+      | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
       | (Lexer.COLON, _) :: xs -> (
           let* v, xs = parse xs in
           let item = (k, v) in
           match xs with
           | [] -> Error "Unexpected end of input"
-          | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+          | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
           | (CLOSE_BRACE, _) :: xs | (COMMA, _) :: (CLOSE_BRACE, _) :: xs ->
               Ok (item :: acc, xs)
           | (COMMA, _) :: xs -> parse_assoc (item :: acc) xs
@@ -49,22 +49,22 @@ and parse_assoc acc = function
                 Format.asprintf "Unexpected assoc list token: %a" Lexer.pp_token
                   x
               in
-              custom_error pos s)
+              parser_error pos s)
       | (x, pos) :: _ ->
           let s =
             Format.asprintf "Expected ':' but found '%a'" Lexer.pp_token x
           in
-          custom_error pos s)
+          parser_error pos s)
   | (x, pos) :: _ ->
       let s =
         Format.asprintf "Expected string or identifier but found '%a'"
           Lexer.pp_token x
       in
-      custom_error pos s
+      parser_error pos s
 
 and parse = function
   | [] -> Error "Unexpected end of input"
-  | [ (Lexer.EOF, pos) ] -> custom_error pos "Unexpected end of input"
+  | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
   | (token, pos) :: xs -> (
       match token with
       | TRUE -> Ok (Ast.Bool true, xs)
@@ -82,7 +82,7 @@ and parse = function
           (Ast.Assoc (List.rev a), xs)
       | x ->
           let s = Format.asprintf "Unexpected token: %a" Lexer.pp_token x in
-          custom_error pos s)
+          parser_error pos s)
 
 let parse_from_lexbuf ?(fname = "") ?(lnum = 1) lexbuffer =
   Sedlexing.set_filename lexbuffer fname;

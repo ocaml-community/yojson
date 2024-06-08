@@ -34,15 +34,18 @@ let pp_token ppf = function
   | STRING s -> Format.fprintf ppf "%S" s
   | EOF -> Format.pp_print_string ppf "eof"
 
-let custom_error lexbuf =
+let lexer_error lexbuf =
   let { Lexing.pos_fname = file; pos_lnum = line; _ }, _ =
     Sedlexing.lexing_positions lexbuf
   in
   let file_line =
-    if String.equal file "" then "Line" else Format.sprintf "File %s, line" file
+    if String.equal file "" then "Line" else Printf.sprintf "File %s, line" file
   in
-  Format.sprintf "%s %d: Unexpected character '%s'" file_line line
-    (Sedlexing.Utf8.lexeme lexbuf)
+  let msg =
+    Printf.sprintf "%s %d: Unexpected character '%s'" file_line line
+      (Sedlexing.Utf8.lexeme lexbuf)
+  in
+  Error msg
 
 let source_character = [%sedlex.regexp? any]
 let line_terminator = [%sedlex.regexp? 0x000A | 0x000D | 0x2028 | 0x2029]
@@ -188,7 +191,7 @@ let string_lex_single lexbuf strbuf =
     | Sub (source_character, ('\'' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
-    | _ -> Error (custom_error lexbuf)
+    | _ -> lexer_error lexbuf
   in
   lex lexbuf strbuf
 
@@ -205,7 +208,7 @@ let string_lex_double lexbuf strbuf =
     | Sub (source_character, ('"' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
-    | _ -> Error (custom_error lexbuf)
+    | _ -> lexer_error lexbuf
   in
   lex lexbuf strbuf
 
@@ -213,7 +216,7 @@ let string_lex lexbuf quote =
   let strbuf = Buffer.create 200 in
   if quote = "'" then string_lex_single lexbuf strbuf
   else if quote = {|"|} then string_lex_double lexbuf strbuf
-  else Error (Format.sprintf "Invalid string quote %S" quote)
+  else Error (Printf.sprintf "Invalid string quote %S" quote)
 
 let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
@@ -248,4 +251,4 @@ let rec lex tokens buf =
       let s = lexeme buf in
       lex ((STRING s, pos) :: tokens) buf
   | eof -> Ok (List.rev ((EOF, pos) :: tokens))
-  | _ -> Error (custom_error buf)
+  | _ -> lexer_error buf
