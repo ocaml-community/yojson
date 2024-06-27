@@ -107,6 +107,8 @@ No \\n's!",
        expected);
     parsing_should_fail_with_error "unexpected EOF in list" "[1, 2,"
       "Line 1: Unexpected end of input";
+    parsing_should_fail_with_error "unexpected EOF on different line" "\n[1, 2,"
+      "Line 2: Unexpected end of input";
     parsing_should_fail_with_error "unexpected EOF in assoc" {|{"foo": 1,|}
       "Line 1: Unexpected end of input";
     parsing_should_fail_with_error "missing colon in assoc" {|{"foo"}|}
