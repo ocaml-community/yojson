@@ -1,3 +1,9 @@
+## unreleased
+
+### Added
+
+- Add locations in the JSON5 parser error messages (@gcluzel, #182)
+
 ## 2.2.1
 
 *2024-06-04*

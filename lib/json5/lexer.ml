@@ -9,7 +9,6 @@ type token =
   | CLOSE_BRACKET
   | COLON
   | COMMA
-  | COMMENT of string
   | TRUE
   | FALSE
   | NULL
@@ -18,25 +17,38 @@ type token =
   | INT of string
   | STRING of string
   | IDENTIFIER_NAME of string
+  | EOF
 
-let pp_token ppf = function
-  | OPEN_PAREN -> Format.fprintf ppf "'('"
-  | CLOSE_PAREN -> Format.fprintf ppf "')'"
-  | OPEN_BRACE -> Format.fprintf ppf "'{'"
-  | CLOSE_BRACE -> Format.fprintf ppf "'}'"
-  | OPEN_BRACKET -> Format.fprintf ppf "'['"
-  | CLOSE_BRACKET -> Format.fprintf ppf "']'"
-  | COLON -> Format.fprintf ppf "':'"
-  | COMMA -> Format.fprintf ppf "','"
-  | COMMENT s -> Format.fprintf ppf "COMMENT '%s'" s
-  | TRUE -> Format.fprintf ppf "'true'"
-  | FALSE -> Format.fprintf ppf "'false'"
-  | NULL -> Format.fprintf ppf "'null'"
-  | FLOAT s -> Format.fprintf ppf "FLOAT '%s'" s
-  | INT_OR_FLOAT s -> Format.fprintf ppf "INT_OR_FLOAT '%s'" s
-  | INT s -> Format.fprintf ppf "INT '%s'" s
-  | STRING s -> Format.fprintf ppf "STRING '%s'" s
-  | IDENTIFIER_NAME s -> Format.fprintf ppf "IDENTIFIER_NAME '%s'" s
+let pp_token ppf =
+  let ps = Format.pp_print_string ppf in
+  let pf = Format.fprintf ppf in
+  function
+  | OPEN_PAREN -> ps "'('"
+  | CLOSE_PAREN -> ps "')'"
+  | OPEN_BRACE -> ps "'{'"
+  | CLOSE_BRACE -> ps "'}'"
+  | OPEN_BRACKET -> ps "'['"
+  | CLOSE_BRACKET -> ps "']'"
+  | COLON -> ps "':'"
+  | COMMA -> ps "','"
+  | TRUE -> ps "'true'"
+  | FALSE -> ps "'false'"
+  | NULL -> ps "'null'"
+  | FLOAT s -> pf "FLOAT %S" s
+  | INT_OR_FLOAT s -> pf "INT_OR_STRING %S" s
+  | INT s -> pf "INT %S" s
+  | STRING s -> pf "%S" s
+  | IDENTIFIER_NAME s -> pf "IDENTIFIER_NAME %S" s
+  | EOF -> ps "EOF"
+
+let lexer_error lexbuf =
+  let pos_start, _pos_end = Sedlexing.lexing_positions lexbuf in
+  let location = Errors.string_of_position pos_start in
+  let msg =
+    Printf.sprintf "%s: Unexpected character '%s'" location
+      (Sedlexing.Utf8.lexeme lexbuf)
+  in
+  Error msg
 
 let source_character = [%sedlex.regexp? any]
 let line_terminator = [%sedlex.regexp? 0x000A | 0x000D | 0x2028 | 0x2029]
@@ -182,10 +194,7 @@ let string_lex_single lexbuf strbuf =
     | Sub (source_character, ('\'' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
-    | _ ->
-        lexeme lexbuf
-        |> Format.sprintf "Unexpected character: %s"
-        |> Result.error
+    | _ -> lexer_error lexbuf
   in
   lex lexbuf strbuf
 
@@ -202,50 +211,48 @@ let string_lex_double lexbuf strbuf =
     | Sub (source_character, ('"' | line_terminator)) ->
         Buffer.add_string strbuf (lexeme lexbuf);
         lex lexbuf strbuf
-    | _ ->
-        lexeme lexbuf
-        |> Format.sprintf "Unexpected character: %s"
-        |> Result.error
+    | _ -> lexer_error lexbuf
   in
   lex lexbuf strbuf
 
 let string_lex lexbuf quote =
   let strbuf = Buffer.create 200 in
-  if quote = "'" then string_lex_single lexbuf strbuf
-  else if quote = {|"|} then string_lex_double lexbuf strbuf
-  else Error (Format.sprintf "Invalid string quote %S" quote)
+  match quote with
+  | "'" -> string_lex_single lexbuf strbuf
+  | {|"|} -> string_lex_double lexbuf strbuf
+  | _ -> Error (Printf.sprintf "Invalid string quote %S" quote)
 
 let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
+  let pos, _ = Sedlexing.lexing_positions buf in
   match%sedlex buf with
-  | '(' -> lex (OPEN_PAREN :: tokens) buf
-  | ')' -> lex (CLOSE_PAREN :: tokens) buf
-  | '{' -> lex (OPEN_BRACE :: tokens) buf
-  | '}' -> lex (CLOSE_BRACE :: tokens) buf
-  | '[' -> lex (OPEN_BRACKET :: tokens) buf
-  | ']' -> lex (CLOSE_BRACKET :: tokens) buf
-  | ':' -> lex (COLON :: tokens) buf
-  | ',' -> lex (COMMA :: tokens) buf
+  | '(' -> lex ((OPEN_PAREN, pos) :: tokens) buf
+  | ')' -> lex ((CLOSE_PAREN, pos) :: tokens) buf
+  | '{' -> lex ((OPEN_BRACE, pos) :: tokens) buf
+  | '}' -> lex ((CLOSE_BRACE, pos) :: tokens) buf
+  | '[' -> lex ((OPEN_BRACKET, pos) :: tokens) buf
+  | ']' -> lex ((CLOSE_BRACKET, pos) :: tokens) buf
+  | ':' -> lex ((COLON, pos) :: tokens) buf
+  | ',' -> lex ((COMMA, pos) :: tokens) buf
   | Chars {|"'|} ->
       let* s = string_lex buf (lexeme buf) in
-      lex (STRING s :: tokens) buf
+      lex ((STRING s, pos) :: tokens) buf
   | multi_line_comment | single_line_comment | white_space | line_terminator ->
       lex tokens buf
-  | "true" -> lex (TRUE :: tokens) buf
-  | "false" -> lex (FALSE :: tokens) buf
-  | "null" -> lex (NULL :: tokens) buf
+  | "true" -> lex ((TRUE, pos) :: tokens) buf
+  | "false" -> lex ((FALSE, pos) :: tokens) buf
+  | "null" -> lex ((NULL, pos) :: tokens) buf
   | json5_float ->
       let s = lexeme buf in
-      lex (FLOAT s :: tokens) buf
+      lex ((FLOAT s, pos) :: tokens) buf
   | json5_int ->
       let s = lexeme buf in
-      lex (INT s :: tokens) buf
+      lex ((INT s, pos) :: tokens) buf
   | json5_int_or_float ->
       let s = lexeme buf in
-      lex (INT_OR_FLOAT s :: tokens) buf
+      lex ((INT_OR_FLOAT s, pos) :: tokens) buf
   | identifier_name ->
       let s = lexeme buf in
-      lex (IDENTIFIER_NAME s :: tokens) buf
-  | eof -> Ok (List.rev tokens)
-  | _ ->
-      lexeme buf |> Format.asprintf "Unexpected character: '%s'" |> Result.error
+      lex ((IDENTIFIER_NAME s, pos) :: tokens) buf
+  | eof -> Ok (List.rev ((EOF, pos) :: tokens))
+  | _ -> lexer_error buf

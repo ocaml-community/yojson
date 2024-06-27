@@ -2,19 +2,23 @@ module M = Yojson_five.Safe
 
 let yojson = Alcotest.testable M.pp M.equal
 
-let parsing_test_case name expected input =
+(* any error message will match the string. *)
+let any_string = Alcotest.testable Fmt.string (fun _ _ -> true)
+
+let parsing_test_case name error_msg expected input =
   Alcotest.test_case name `Quick (fun () ->
-      (* any error message will do *)
-      let any_string = Alcotest.testable Fmt.string (fun _ _ -> true) in
-      Alcotest.(check (result yojson any_string))
+      Alcotest.(check (result yojson error_msg))
         name expected (M.from_string input))
 
 let parsing_should_succeed name input expected =
-  parsing_test_case name (Ok expected) input
+  parsing_test_case name Alcotest.string (Ok expected) input
 
 let parsing_should_fail name input =
   let failure = Error "<anything>" in
-  parsing_test_case name failure input
+  parsing_test_case name any_string failure input
+
+let parsing_should_fail_with_error name input expected =
+  parsing_test_case name Alcotest.string (Error expected) input
 
 let parsing_tests =
   [
@@ -101,6 +105,16 @@ No \\n's!",
   "backwardsCompatible": "with JSON",
 }|}
        expected);
+    parsing_should_fail_with_error "unexpected EOF in list" "[1, 2,"
+      "Line 1: Unexpected end of input";
+    parsing_should_fail_with_error "unexpected EOF on different line" "\n[1, 2,"
+      "Line 2: Unexpected end of input";
+    parsing_should_fail_with_error "unexpected EOF in assoc" {|{"foo": 1,|}
+      "Line 1: Unexpected end of input";
+    parsing_should_fail_with_error "missing colon in assoc" {|{"foo"}|}
+      "Line 1: Expected ':' but found '}'";
+    parsing_should_fail_with_error "bad identifier in assoc" {|{[0]}|}
+      "Line 1: Expected string or identifier but found '['";
   ]
 
 let writing_test_case name input expected =
