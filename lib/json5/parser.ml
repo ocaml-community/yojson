@@ -28,7 +28,7 @@ and parse_assoc acc = function
   | [] -> Error "Unexpected end of input"
   | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
   | (CLOSE_BRACE, _) :: xs -> Ok (acc, xs)
-  | (STRING k, _) :: xs -> (
+  | (STRING k, _) :: xs | (IDENTIFIER_NAME k, _) :: xs -> (
       match xs with
       | [] -> Error "Unexpected end of input"
       | [ (Lexer.EOF, pos) ] -> parser_error pos "Unexpected end of input"
@@ -49,12 +49,13 @@ and parse_assoc acc = function
               parser_error pos s)
       | (x, pos) :: _ ->
           let s =
-            Format.asprintf "Expected ':' but found '%a'" Lexer.pp_token x
+            Format.asprintf "Expected %a but found %a" Lexer.pp_token
+              Lexer.COLON Lexer.pp_token x
           in
           parser_error pos s)
   | (x, pos) :: _ ->
       let s =
-        Format.asprintf "Expected string or identifier but found '%a'"
+        Format.asprintf "Expected string or identifier but found %a"
           Lexer.pp_token x
       in
       parser_error pos s

@@ -16,23 +16,30 @@ type token =
   | INT_OR_FLOAT of string
   | INT of string
   | STRING of string
+  | IDENTIFIER_NAME of string
   | EOF
 
-let pp_token ppf = function
-  | OPEN_PAREN -> Format.pp_print_string ppf "("
-  | CLOSE_PAREN -> Format.pp_print_string ppf ")"
-  | OPEN_BRACE -> Format.pp_print_string ppf "{"
-  | CLOSE_BRACE -> Format.pp_print_string ppf "}"
-  | OPEN_BRACKET -> Format.pp_print_string ppf "["
-  | CLOSE_BRACKET -> Format.pp_print_string ppf "]"
-  | COLON -> Format.pp_print_string ppf ":"
-  | COMMA -> Format.pp_print_string ppf ","
-  | TRUE -> Format.pp_print_string ppf "true"
-  | FALSE -> Format.pp_print_string ppf "false"
-  | NULL -> Format.pp_print_string ppf "null"
-  | FLOAT s | INT_OR_FLOAT s | INT s -> Format.pp_print_string ppf s
-  | STRING s -> Format.fprintf ppf "%S" s
-  | EOF -> Format.pp_print_string ppf "EOF"
+let pp_token ppf =
+  let ps = Format.pp_print_string ppf in
+  let pf = Format.fprintf ppf in
+  function
+  | OPEN_PAREN -> ps "'('"
+  | CLOSE_PAREN -> ps "')'"
+  | OPEN_BRACE -> ps "'{'"
+  | CLOSE_BRACE -> ps "'}'"
+  | OPEN_BRACKET -> ps "'['"
+  | CLOSE_BRACKET -> ps "']'"
+  | COLON -> ps "':'"
+  | COMMA -> ps "','"
+  | TRUE -> ps "'true'"
+  | FALSE -> ps "'false'"
+  | NULL -> ps "'null'"
+  | FLOAT s -> pf "FLOAT %S" s
+  | INT_OR_FLOAT s -> pf "INT_OR_STRING %S" s
+  | INT s -> pf "INT %S" s
+  | STRING s -> pf "%S" s
+  | IDENTIFIER_NAME s -> pf "IDENTIFIER_NAME %S" s
+  | EOF -> ps "EOF"
 
 let lexer_error lexbuf =
   let pos_start, _pos_end = Sedlexing.lexing_positions lexbuf in
@@ -246,6 +253,6 @@ let rec lex tokens buf =
       lex ((INT_OR_FLOAT s, pos) :: tokens) buf
   | identifier_name ->
       let s = lexeme buf in
-      lex ((STRING s, pos) :: tokens) buf
+      lex ((IDENTIFIER_NAME s, pos) :: tokens) buf
   | eof -> Ok (List.rev ((EOF, pos) :: tokens))
   | _ -> lexer_error buf
