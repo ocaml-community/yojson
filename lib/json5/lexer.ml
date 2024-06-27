@@ -32,7 +32,7 @@ let pp_token ppf = function
   | NULL -> Format.pp_print_string ppf "null"
   | FLOAT s | INT_OR_FLOAT s | INT s -> Format.pp_print_string ppf s
   | STRING s -> Format.fprintf ppf "%S" s
-  | EOF -> Format.pp_print_string ppf "eof"
+  | EOF -> Format.pp_print_string ppf "EOF"
 
 let lexer_error lexbuf =
   let { Lexing.pos_fname = file; pos_lnum = line; _ }, _ =
