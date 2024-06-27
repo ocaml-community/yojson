@@ -35,14 +35,10 @@ let pp_token ppf = function
   | EOF -> Format.pp_print_string ppf "EOF"
 
 let lexer_error lexbuf =
-  let { Lexing.pos_fname = file; pos_lnum = line; _ }, _ =
-    Sedlexing.lexing_positions lexbuf
-  in
-  let file_line =
-    if String.equal file "" then "Line" else Printf.sprintf "File %s, line" file
-  in
+  let pos_start, _pos_end = Sedlexing.lexing_positions lexbuf in
+  let location = Errors.string_of_position pos_start in
   let msg =
-    Printf.sprintf "%s %d: Unexpected character '%s'" file_line line
+    Printf.sprintf "%s: Unexpected character '%s'" location
       (Sedlexing.Utf8.lexeme lexbuf)
   in
   Error msg

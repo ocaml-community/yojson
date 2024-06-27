@@ -1,11 +1,8 @@
 open Let_syntax.Result
 
 let parser_error pos error =
-  let file_line =
-    if String.equal pos.Lexing.pos_fname "" then "Line"
-    else Printf.sprintf "File %s, line" pos.Lexing.pos_fname
-  in
-  let msg = Printf.sprintf "%s %d: %s" file_line pos.Lexing.pos_lnum error in
+  let location = Errors.string_of_position pos in
+  let msg = Printf.sprintf "%s: %s" location error in
   Error msg
 
 let rec parse_list acc = function
