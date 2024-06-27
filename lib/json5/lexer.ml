@@ -214,9 +214,10 @@ let string_lex_double lexbuf strbuf =
 
 let string_lex lexbuf quote =
   let strbuf = Buffer.create 200 in
-  if quote = "'" then string_lex_single lexbuf strbuf
-  else if quote = {|"|} then string_lex_double lexbuf strbuf
-  else Error (Printf.sprintf "Invalid string quote %S" quote)
+  match quote with
+  | "'" -> string_lex_single lexbuf strbuf
+  | {|"|} -> string_lex_double lexbuf strbuf
+  | _ -> Error (Printf.sprintf "Invalid string quote %S" quote)
 
 let rec lex tokens buf =
   let lexeme = Sedlexing.Utf8.lexeme in
