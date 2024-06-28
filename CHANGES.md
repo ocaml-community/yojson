@@ -1,3 +1,17 @@
+## unreleased
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Fixed
+
+### Removed
+
+### Security
+
 ## 2.2.2
 
 *2024-06-27*
