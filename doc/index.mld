@@ -9,7 +9,7 @@ for efficiency purposes.
 - Distinguishing between ints and floats.
 - Providing optional extensions of the JSON syntax.
 These extensions include comments, arbitrary strings,
-optional quotes around field names, tuples and variants.
+optional quotes around field names.
 
 See {{:http://json.org}JSON specification}.
 

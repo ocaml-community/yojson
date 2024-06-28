@@ -14,7 +14,6 @@ val to_string :
       @param suf appended to the output as a suffix,
       defaults to empty string.
       @param std use only standard JSON syntax,
-      i.e. convert tuples and variants into standard JSON (if applicable),
       refuse to print NaN and infinities,
       require the root node to be either an object or an array.
       Default is [false].

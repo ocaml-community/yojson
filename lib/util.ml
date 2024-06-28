@@ -15,8 +15,6 @@ let typeof = function
 #ifdef STRINGLIT
   | `Stringlit _ -> "stringlit"
 #endif
-  | `Tuple _ -> "tuple"
-  | `Variant _ -> "variant"
 
 let typerr msg js = raise (Type_error (msg ^ typeof js, js))
 

@@ -2,8 +2,6 @@
 #define INTLIT
 #define FLOAT
 #define STRING
-#define TUPLE
-#define VARIANT
 
 #include "type.ml"
 
@@ -29,5 +27,3 @@ end
 #undef INTLIT
 #undef FLOAT
 #undef STRING
-#undef TUPLE
-#undef VARIANT
