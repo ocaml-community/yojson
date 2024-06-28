@@ -73,8 +73,7 @@ let parse_cmdline () =
       ( "-std",
         Arg.Set std,
         "\n\
-        \          Convert tuples and variants into standard JSON,\n\
-        \          refuse to print NaN and infinities,\n\
+        \          Refuse to print NaN and infinities,\n\
         \          require the root node to be either an object or an array." );
       ( "-c",
         Arg.Set compact,
