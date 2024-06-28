@@ -11,3 +11,11 @@ val equal : t -> t -> bool
       duplicate keys which will be considered equal as long as they are in the
       same input order.
     *)
+
+val numeric_equal : t -> t -> bool
+(** [numeric_equal a b] determines whether [a] and [b] are equal, while
+    attempting to preserve equality according to JSON rules which do not
+    distinguish between float and integers.
+
+    The remaining semantics are identical to [equal].
+    *)
