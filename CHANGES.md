@@ -4,7 +4,7 @@
 
 - Add `numeric_equal` function which determines equality preserving JSON
   sematics which does not distinguish between integers and floats (#156,
-  #<PR_NUMBER> @Leonidas-from-XIV)
+  #186 @Leonidas-from-XIV)
 
 ### Changed
 
