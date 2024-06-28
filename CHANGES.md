@@ -4,6 +4,12 @@
 
 ### Changed
 
+- Floats are now always output to JSON in a standard-conformant way or not at
+  all (raising an exception). This makes the `std` variants of functions
+  identical to the non-`std` variants and the `std` arguments have no effect.
+  Users are encouraged to switch to the non-`std` affixed variants, the others
+  will be deprecated in the future.  (#184, @Leonidas-from-XIV)
+
 ### Deprecated
 
 ### Fixed

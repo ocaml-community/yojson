@@ -144,23 +144,12 @@ let write_normal_float_prec significant_figures ob x =
   if float_needs_period s then
     Buffer.add_string ob ".0"
 
-(* used by atdgen *)
-let write_float_prec significant_figures ob x =
-  match classify_float x with
-    FP_nan ->
-      Buffer.add_string ob "NaN"
-  | FP_infinite ->
-      Buffer.add_string ob (if x > 0. then "Infinity" else "-Infinity")
-  | _ ->
-      write_normal_float_prec significant_figures ob x
-
 let json_string_of_float x =
   let ob = Buffer.create 20 in
   write_float ob x;
   Buffer.contents ob
 
-
-let write_std_float ob x =
+let write_float ob x =
   match classify_float x with
     FP_nan ->
       Common.json_error "NaN value not allowed in standard JSON"
@@ -180,8 +169,11 @@ let write_std_float ob x =
       if float_needs_period s then
         Buffer.add_string ob ".0"
 
+(* to be deprecated in a future release *)
+let write_std_float = write_float
+
 (* used by atdgen *)
-let write_std_float_prec significant_figures ob x =
+let write_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
       Common.json_error "NaN value not allowed in standard JSON"
@@ -194,11 +186,7 @@ let write_std_float_prec significant_figures ob x =
   | _ ->
       write_normal_float_prec significant_figures ob x
 
-let std_json_string_of_float x =
-  let ob = Buffer.create 20 in
-  write_std_float ob x;
-  Buffer.contents ob
-
+let write_std_float_prec = write_float_prec
 
 let write_intlit = Buffer.add_string
 let write_floatlit = Buffer.add_string
@@ -262,51 +250,11 @@ and write_list ob l =
 
 let write_t = write_json
 
-let rec write_std_json ob (x : t) =
-  match x with
-      `Null -> write_null ob ()
-    | `Bool b -> write_bool ob b
-#ifdef INT
-    | `Int i -> write_int ob i
-#endif
-#ifdef INTLIT
-    | `Intlit s -> Buffer.add_string ob s
-#endif
-#ifdef FLOAT
-    | `Float f -> write_std_float ob f
-#endif
-#ifdef FLOATLIT
-    | `Floatlit s -> Buffer.add_string ob s
-#endif
-#ifdef STRING
-    | `String s -> write_string ob s
-#endif
-#ifdef STRINGLIT
-    | `Stringlit s -> Buffer.add_string ob s
-#endif
-    | `Assoc l -> write_std_assoc ob l
-    | `List l -> write_std_list ob l
+let write_std_json = write_json
 
-and write_std_assoc ob l =
-  let f_elt ob (s, x) =
-    write_string ob s;
-    Buffer.add_char ob ':';
-    write_std_json ob x
-  in
-  Buffer.add_char ob '{';
-  iter2 f_elt f_sep ob l;
-  Buffer.add_char ob '}';
-
-and write_std_list ob l =
-  Buffer.add_char ob '[';
-  iter2 write_std_json f_sep ob l;
-  Buffer.add_char ob ']'
-
-let to_buffer ?(suf = "") ?(std = false) ob x =
-  if std then
-    write_std_json ob x
-  else
-    write_json ob x;
+(* std argument is going to be deprecated *)
+let to_buffer ?(suf = "") ?(std = true) ob x =
+  write_json ob x;
   Buffer.add_string ob suf
 
 let to_string ?buf ?(len = 256) ?(suf = "") ?std x =
