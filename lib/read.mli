@@ -135,19 +135,10 @@ val finish_string : lexer_state -> Lexing.lexbuf -> string
 val read_string : lexer_state -> Lexing.lexbuf -> string
 val read_ident : lexer_state -> Lexing.lexbuf -> string
 
-val map_string :
-  lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
-(* equivalent to finish_string *)
-
 val map_ident :
   lexer_state -> (string -> int -> int -> 'a) -> Lexing.lexbuf -> 'a
 (* equivalent to read_ident *)
 
-type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
-
-val start_any_variant : lexer_state -> Lexing.lexbuf -> variant_kind
-val finish_variant : lexer_state -> Lexing.lexbuf -> t option
-val finish_skip_variant : lexer_state -> Lexing.lexbuf -> unit
 val read_lt : lexer_state -> Lexing.lexbuf -> unit
 val read_gt : lexer_state -> Lexing.lexbuf -> unit
 val read_comma : lexer_state -> Lexing.lexbuf -> unit
@@ -195,20 +186,8 @@ val read_array :
   Lexing.lexbuf ->
   'a array
 
-val read_tuple :
-  (int -> 'a -> lexer_state -> Lexing.lexbuf -> 'a) ->
-  'a ->
-  lexer_state ->
-  Lexing.lexbuf ->
-  'a
-
-val start_any_tuple : lexer_state -> Lexing.lexbuf -> bool
 val read_lpar : lexer_state -> Lexing.lexbuf -> unit
 val read_rpar : lexer_state -> Lexing.lexbuf -> unit
-val read_tuple_end : Lexing.lexbuf -> unit
-val read_tuple_end2 : lexer_state -> bool -> Lexing.lexbuf -> unit
-val read_tuple_sep : lexer_state -> Lexing.lexbuf -> unit
-val read_tuple_sep2 : lexer_state -> bool -> Lexing.lexbuf -> unit
 val read_lbr : lexer_state -> Lexing.lexbuf -> unit
 val read_rbr : lexer_state -> Lexing.lexbuf -> unit
 

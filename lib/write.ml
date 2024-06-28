@@ -244,12 +244,6 @@ let rec write_json ob (x : t) =
 #endif
     | `Assoc l -> write_assoc ob l
     | `List l -> write_list ob l
-#ifdef TUPLE
-    | `Tuple l -> write_tuple ob l
-#endif
-#ifdef VARIANT
-    | `Variant (s, o) -> write_variant ob s o
-#endif
 
 and write_assoc ob l =
   let f_elt ob (s, x) =
@@ -265,26 +259,6 @@ and write_list ob l =
   Buffer.add_char ob '[';
   iter2 write_json f_sep ob l;
   Buffer.add_char ob ']'
-
-#ifdef TUPLE
-and write_tuple ob l =
-  Buffer.add_char ob '(';
-  iter2 write_json f_sep ob l;
-  Buffer.add_char ob ')'
-#endif
-
-#ifdef VARIANT
-and write_variant ob s o =
-  Buffer.add_char ob '<';
-  write_string ob s;
-  (match o with
-       None -> ()
-     | Some x ->
-         Buffer.add_char ob ':';
-         write_json ob x
-  );
-  Buffer.add_char ob '>'
-#endif
 
 let write_t = write_json
 
@@ -312,12 +286,6 @@ let rec write_std_json ob (x : t) =
 #endif
     | `Assoc l -> write_std_assoc ob l
     | `List l -> write_std_list ob l
-#ifdef TUPLE
-    | `Tuple l -> write_std_tuple ob l
-#endif
-#ifdef VARIANT
-    | `Variant (s, o) -> write_std_variant ob s o
-#endif
 
 and write_std_assoc ob l =
   let f_elt ob (s, x) =
@@ -333,24 +301,6 @@ and write_std_list ob l =
   Buffer.add_char ob '[';
   iter2 write_std_json f_sep ob l;
   Buffer.add_char ob ']'
-
-and write_std_tuple ob l =
-  Buffer.add_char ob '[';
-  iter2 write_std_json f_sep ob l;
-  Buffer.add_char ob ']'
-
-#ifdef VARIANT
-and write_std_variant ob s o =
-  match o with
-      None -> write_string ob s
-    | Some x ->
-        Buffer.add_char ob '[';
-        write_string ob s;
-        Buffer.add_char ob ',';
-        write_std_json ob x;
-        Buffer.add_char ob ']'
-#endif
-
 
 let to_buffer ?(suf = "") ?(std = false) ob x =
   if std then
@@ -449,15 +399,4 @@ let rec sort = function
       `Assoc (List.stable_sort (fun (a, _) (b, _) -> String.compare a b) l)
   | `List l ->
       `List (List.rev (List.rev_map sort l))
-#ifdef TUPLE
-  | `Tuple l ->
-      `Tuple (List.rev (List.rev_map sort l))
-#endif
-#ifdef VARIANT
-  | `Variant (k, Some v) as x ->
-      let v' = sort v in
-      if v == v' then x
-      else
-        `Variant (k, Some v')
-#endif
   | x -> x
