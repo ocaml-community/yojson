@@ -37,6 +37,10 @@ let parsing_tests =
     parsing_should_succeed "unicode escape sequence" {|"\u03bb"|} (`String "λ");
     parsing_should_succeed "more string escaping"
       "\"Hello \\u03bb \\x77\\x6F\\x72\\x6C\\x64\"" (`String "Hello λ world");
+    parsing_should_succeed "escaping quotes" {|"\"\'"|} (`String {|"'|});
+    parsing_should_succeed "more escaping quotes" {|'\"\''|} (`String {|"'|});
+    parsing_should_succeed "escaping other chars" {|'\A\C\/\D\C'|}
+      (`String "AC/DC");
     parsing_should_succeed "null byte string" {|"\0"|} (`String "\x00");
     parsing_should_succeed "octal string" {|"\077"|} (`String "?");
     parsing_should_succeed "null and octal string" {|"\07"|} (`String "\x007");
