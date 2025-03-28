@@ -8,6 +8,10 @@
 
 ### Fixed
 
+- Fixed handling of escape sequences in JSON5. Known escapes like \b will be
+  properly unescaped and undefined escape sequences will unescape to the
+  character itself as per spec (#187, @david-maison-TrustInSoft)
+
 ### Removed
 
 - Removed support for Tuple and Variant in JSON. It was a non-standard

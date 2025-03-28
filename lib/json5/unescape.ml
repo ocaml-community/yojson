@@ -66,8 +66,13 @@ let unescape str =
           | None -> Error (Format.sprintf "bad escape sequence %s" escape_chars)
         in
         utf_8_string_of_unicode as_int
-    | '"' | '\'' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' -> Ok str
-    | '\\' -> Ok {|\|}
+    (* https://spec.json5.org/#escapes table 1 *)
+    | 'b' -> Ok "\b"
+    | 'n' -> Ok "\n"
+    | 'r' -> Ok "\r"
+    | 't' -> Ok "\t"
+    | 'f' -> Ok "\x0C"
+    | 'v' -> Ok "\x0B"
     | '0' ->
         if String.length str = 2 then Ok "\x00"
         else if String.length str = 4 then
@@ -79,4 +84,13 @@ let unescape str =
           in
           utf_8_string_of_unicode as_int
         else Error (Format.sprintf "invalid octal sequence %s" str)
-    | _ -> Error (Format.sprintf "invalid escape sequence %c" str.[1])
+    | '1' .. '9' -> Error (Format.sprintf "invalid escape sequence %c" str.[1])
+    | c ->
+        (* According to https://spec.json5.org/#escapes : "If any other
+           character follows a reverse solidus, except for the decimal
+           digits 1 through 9, that character will be included in the
+           string, but the reverse solidus will not.".
+           Alternatively, apostrophe, quotation mark and reverse solidus
+           should also be included in the string without the leading
+           reverse solidus. *)
+        Ok (String.make 1 c)
