@@ -41,6 +41,8 @@ let parsing_tests =
     parsing_should_succeed "more escaping quotes" {|'\"\''|} (`String {|"'|});
     parsing_should_succeed "escaping other chars" {|'\A\C\/\D\C'|}
       (`String "AC/DC");
+    parsing_should_succeed "built in escapes" {|'\b\n\r\t\f\v'|}
+      (`String "\b\n\r\t\012\011");
     parsing_should_succeed "null byte string" {|"\0"|} (`String "\x00");
     parsing_should_succeed "octal string" {|"\077"|} (`String "?");
     parsing_should_succeed "null and octal string" {|"\07"|} (`String "\x007");

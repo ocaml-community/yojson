@@ -66,7 +66,13 @@ let unescape str =
           | None -> Error (Format.sprintf "bad escape sequence %s" escape_chars)
         in
         utf_8_string_of_unicode as_int
-    | 'b' | 'f' | 'n' | 'r' | 't' | 'v' -> Ok str
+    (* https://spec.json5.org/#escapes table 1 *)
+    | 'b' -> Ok "\b"
+    | 'n' -> Ok "\n"
+    | 'r' -> Ok "\r"
+    | 't' -> Ok "\t"
+    | 'f' -> Ok "\x0C"
+    | 'v' -> Ok "\x0B"
     | '0' ->
         if String.length str = 2 then Ok "\x00"
         else if String.length str = 4 then
