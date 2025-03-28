@@ -84,14 +84,13 @@ let unescape str =
           in
           utf_8_string_of_unicode as_int
         else Error (Format.sprintf "invalid octal sequence %s" str)
-    | '1'..'9' ->
-      Error (Format.sprintf "invalid escape sequence %c" str.[1])
+    | '1' .. '9' -> Error (Format.sprintf "invalid escape sequence %c" str.[1])
     | c ->
-      (* According to https://spec.json5.org/#escapes : "If any other
-         character follows a reverse solidus, except for the decimal
-         digits 1 through 9, that character will be included in the
-         string, but the reverse solidus will not.".
-         Alternatively, apostrophe, quotation mark and reverse solidus
-         should also be included in the string without the leading
-         reverse solidus. *)
-      Ok (String.make 1 c)
+        (* According to https://spec.json5.org/#escapes : "If any other
+           character follows a reverse solidus, except for the decimal
+           digits 1 through 9, that character will be included in the
+           string, but the reverse solidus will not.".
+           Alternatively, apostrophe, quotation mark and reverse solidus
+           should also be included in the string without the leading
+           reverse solidus. *)
+        Ok (String.make 1 c)
