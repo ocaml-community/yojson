@@ -1,8 +1,6 @@
 #define INTLIT
 #define FLOATLIT
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 
 #include "type.ml"
 
@@ -25,5 +23,3 @@ end
 #undef INTLIT
 #undef FLOATLIT
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT
