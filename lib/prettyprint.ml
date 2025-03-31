@@ -43,13 +43,9 @@ let is_atom (x: [> t]) =
   | `Floatlit _
   | `Stringlit _
   | `List []
-  | `Assoc []
-  | `Tuple []
-  | `Variant (_, None) -> true
+  | `Assoc [] -> true
   | `List _
-  | `Assoc _
-  | `Tuple _
-  | `Variant (_, Some _) -> false
+  | `Assoc _ -> false
 
 let is_atom_list l =
   List.for_all is_atom l

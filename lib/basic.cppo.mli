@@ -1,6 +1,5 @@
 (**
-   This module supports standard JSON nodes only, i.e. no special syntax
-   for variants or tuples as supported by {!Yojson.Safe}.
+   This module supports standard JSON nodes only.
    Arbitrary integers are not supported as they must all fit within the
    standard OCaml int type (31 or 63 bits depending on the platform).
 

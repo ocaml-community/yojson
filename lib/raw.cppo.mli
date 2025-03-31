@@ -1,15 +1,11 @@
 (**
    Ints, floats and strings literals are systematically preserved using
    [`Intlit], [`Floatlit] and [`Stringlit].
-   This module also supports the specific syntax for variants and tuples
-   supported by {!Yojson.Safe}.
 *)
 
 #define INTLIT
 #define FLOATLIT
 #define STRINGLIT
-#define TUPLE
-#define VARIANT
 
 #include "type.ml"
 
@@ -29,5 +25,3 @@ end
 #undef INTLIT
 #undef FLOATLIT
 #undef STRINGLIT
-#undef TUPLE
-#undef VARIANT
