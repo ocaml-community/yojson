@@ -1,37 +1,20 @@
 (executables
- (names bench conversions)
+ (names generic buf)
  (package yojson-bench)
  (public_names yojson-bench -)
- (libraries yojson core_bench core core_unix.command_unix
-   core_bench.internals sexplib))
+ (libraries yojson benchmark))
 
 (rule
  (alias bench-generic)
  (deps bench.json)
  (action
-  (run ./bench.exe generic)))
-
-(rule
- (alias bench-generic-sexp)
- (deps bench.json)
- (action
-  (pipe-stdout
-   (run ./bench.exe generic -sexp)
-   (run ./conversions.exe -- generic))))
+  (run ./generic.exe)))
 
 (rule
  (alias bench-buffer)
  (deps bench.json)
  (action
-  (run ./bench.exe buffer)))
-
-(rule
- (alias bench-buffer-sexp)
- (deps bench.json)
- (action
-  (pipe-stdout
-   (run ./bench.exe buffer -sexp)
-   (run ./conversions.exe -- buffer))))
+  (run ./buf.exe)))
 
 (alias
  (name bench)

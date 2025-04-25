@@ -40,9 +40,6 @@ It supports parsing JSON5 to Yojson.Basic.t and Yojson.Safe.t types.")
 because it is not part of the regular installation/testing flow. This is solely
 meant for developers that are worried about performance changes in Yojson.")
   (depends
-    (ocaml (>= 4.08))
+    (ocaml (>= 4.14))
     (yojson (= :version))
-    (core_bench (>= v0.15.0))
-    (core (>= v0.14.0))
-    (core_unix (>= v0.14.0))
-    (sexplib (>= v0.9.0))))
+    benchmark))
