@@ -16,16 +16,21 @@ let to_string_tests =
       fun () -> test ~suf:"" Fixtures.json_string );
   ]
 
+let replace_crlf s =
+  (* a bit hacky as it will just remove \r even when not \r\n *)
+  let parts = String.split_on_char '\r' s in
+  String.concat "" parts
+
 let to_file_tests =
   let test ?suf expected =
     let output_file = Filename.temp_file "test_yojson_to_file" ".json" in
     Yojson.Safe.to_file ?suf output_file Fixtures.json_value;
     let file_content =
-      let ic = open_in output_file in
+      let ic = open_in_bin output_file in
       let length = in_channel_length ic in
       let s = really_input_string ic length in
       close_in ic;
-      s
+      replace_crlf s
     in
     Sys.remove output_file;
     Alcotest.(check string) __LOC__ expected file_content
