@@ -9,6 +9,10 @@
   identical to the non-`std` variants and the `std` arguments have no effect.
   Users are encouraged to switch to the non-`std` affixed variants, the others
   will be deprecated in the future.  (#184, @Leonidas-from-XIV)
+- Bumped the minimum required version of OCaml for the main package to 4.08
+  since the CI dropped the support. This however allows removing the dependency
+  on the `seq` library, so the depencency cone becomes slightly smaller. (#194,
+  @Leonidas-from-XIV)
 
 ### Deprecated
 

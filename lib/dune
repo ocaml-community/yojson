@@ -115,6 +115,5 @@
  (public_name yojson)
  (modules yojson t basic safe raw common codec lexer_utils)
  (synopsis "JSON parsing and printing")
- (libraries seq)
  (flags
   (:standard -w -27-32)))
