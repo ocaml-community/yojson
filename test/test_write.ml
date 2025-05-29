@@ -17,9 +17,31 @@ let to_string_tests =
   ]
 
 let replace_crlf s =
-  (* a bit hacky as it will just remove \r even when not \r\n *)
-  let parts = String.split_on_char '\r' s in
-  String.concat "" parts
+  (* finds indices of \r\n *)
+  let rec find_rn_idx from acc =
+    match String.index_from_opt s from '\r' with
+    | None ->
+        (* no \r left in string *)
+        acc
+    | Some i -> (
+        match s.[i + 1] with
+        | exception Invalid_argument _ ->
+            (* \r was last in string *)
+            acc
+        | '\n' -> find_rn_idx (i + 2) (i :: acc)
+        | _ -> find_rn_idx (i + 1) acc)
+  in
+  let rec cut_parts from acc = function
+    | [] ->
+        (* last part, read to end *)
+        let part = String.sub s from (String.length s - from) in
+        part :: acc
+    | i :: idx ->
+        let part = String.sub s from (i - from) in
+        cut_parts (i + 2) (part :: acc) idx
+  in
+  find_rn_idx 0 [] |> List.rev |> cut_parts 0 [] |> List.rev
+  |> String.concat "\n"
 
 let to_file_tests =
   let test ?suf expected =
