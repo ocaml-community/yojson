@@ -16,16 +16,43 @@ let to_string_tests =
       fun () -> test ~suf:"" Fixtures.json_string );
   ]
 
+let replace_crlf s =
+  (* finds indices of \r\n *)
+  let rec find_rn_idx from acc =
+    match String.index_from_opt s from '\r' with
+    | None ->
+        (* no \r left in string *)
+        acc
+    | Some i -> (
+        match s.[i + 1] with
+        | exception Invalid_argument _ ->
+            (* \r was last in string *)
+            acc
+        | '\n' -> find_rn_idx (i + 2) (i :: acc)
+        | _ -> find_rn_idx (i + 1) acc)
+  in
+  (* reads backwards to avoid List.rev *)
+  let rec cut_parts until acc = function
+    | [] ->
+        (* last part, read from front *)
+        let part = String.sub s 0 until in
+        part :: acc
+    | i :: idx ->
+        let part = String.sub s (i + 2) (until - i - 2) in
+        cut_parts i (part :: acc) idx
+  in
+  find_rn_idx 0 [] |> cut_parts (String.length s) [] |> String.concat "\n"
+
 let to_file_tests =
   let test ?suf expected =
     let output_file = Filename.temp_file "test_yojson_to_file" ".json" in
     Yojson.Safe.to_file ?suf output_file Fixtures.json_value;
     let file_content =
-      let ic = open_in output_file in
+      let ic = open_in_bin output_file in
       let length = in_channel_length ic in
       let s = really_input_string ic length in
       close_in ic;
-      s
+      replace_crlf s
     in
     Sys.remove output_file;
     Alcotest.(check string) __LOC__ expected file_content

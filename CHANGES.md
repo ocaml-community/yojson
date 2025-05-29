@@ -21,6 +21,8 @@
 - Fixed handling of escape sequences in JSON5. Known escapes like \b will be
   properly unescaped and undefined escape sequences will unescape to the
   character itself as per spec (#187, @david-maison-TrustInSoft)
+- Fixed tests failing on Windows due to disagreements with the length of an
+  input channel and the text mode conversion (#192, @Leonidas-from-XIV)
 
 ### Removed
 
