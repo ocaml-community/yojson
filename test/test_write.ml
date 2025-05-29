@@ -31,17 +31,17 @@ let replace_crlf s =
         | '\n' -> find_rn_idx (i + 2) (i :: acc)
         | _ -> find_rn_idx (i + 1) acc)
   in
-  let rec cut_parts from acc = function
+  (* reads backwards to avoid List.rev *)
+  let rec cut_parts until acc = function
     | [] ->
-        (* last part, read to end *)
-        let part = String.sub s from (String.length s - from) in
+        (* last part, read from front *)
+        let part = String.sub s 0 until in
         part :: acc
     | i :: idx ->
-        let part = String.sub s from (i - from) in
-        cut_parts (i + 2) (part :: acc) idx
+        let part = String.sub s (i + 2) (until - i - 2) in
+        cut_parts i (part :: acc) idx
   in
-  find_rn_idx 0 [] |> List.rev |> cut_parts 0 [] |> List.rev
-  |> String.concat "\n"
+  find_rn_idx 0 [] |> cut_parts (String.length s) [] |> String.concat "\n"
 
 let to_file_tests =
   let test ?suf expected =
