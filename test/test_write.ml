@@ -42,16 +42,11 @@ let to_file_tests =
       fun () -> test ~suf:"" Fixtures.json_string );
   ]
 
-(* List.to_seq is not available on old OCaml versions. *)
-let rec list_to_seq = function
-  | [] -> fun () -> Seq.Nil
-  | x :: xs -> fun () -> Seq.Cons (x, list_to_seq xs)
-
 let seq_to_file_tests =
   let test ?suf () =
     let output_file = Filename.temp_file "test_yojson_seq_to_file" ".json" in
     let data = [ `String "foo"; `String "bar" ] in
-    Yojson.Safe.seq_to_file ?suf output_file (list_to_seq data);
+    Yojson.Safe.seq_to_file ?suf output_file (List.to_seq data);
     let read_data =
       let seq = Yojson.Safe.seq_from_file output_file in
       let acc = ref [] in
