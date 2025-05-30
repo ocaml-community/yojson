@@ -2,6 +2,10 @@
 
 ### Added
 
+- Add `numeric_equal` function which determines equality preserving JSON
+  sematics which does not distinguish between integers and floats (#156,
+  #186 @Leonidas-from-XIV)
+
 ### Changed
 
 ### Deprecated
