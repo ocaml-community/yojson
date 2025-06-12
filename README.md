@@ -30,6 +30,7 @@ let json = Yojson.Safe.from_string json_string
 let () = Format.printf "Parsed to %a" Yojson.Safe.pp json
 ```
 
+The `examples` directory contains more.
 
 Related tooling
 ---------------
