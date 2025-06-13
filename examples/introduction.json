@@ -1,0 +1,3 @@
+{"Number" : 1,
+ "String" : "two",
+ "List": ["containing", "different", "types", 35.4]}
