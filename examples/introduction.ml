@@ -48,6 +48,5 @@ let () =
   | [| _; "sum"; filename |] -> sum filename
   | [| _; "reverse"; in_filename; out_filename |] ->
       reverse in_filename out_filename
-  | _ ->
-      Printf.eprintf "%s: unknown command line\n"
-        (if Array.length Sys.argv > 0 then Sys.argv.(0) else "")
+  | [| prg |] -> Printf.eprintf "%s: unknown command line\n" prg
+  | _ -> Printf.eprintf "unknown command line\n"
