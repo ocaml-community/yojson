@@ -9,9 +9,9 @@
  (libraries yojson))
 
 (executable
-  (name introduction)
-  (modules introduction)
-  (libraries yojson))
+ (name introduction)
+ (modules introduction)
+ (libraries yojson))
 
 (alias
  (name examples)
