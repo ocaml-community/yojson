@@ -8,6 +8,11 @@
  (modules constructing)
  (libraries yojson))
 
+(executable
+ (name introduction)
+ (modules introduction)
+ (libraries yojson))
+
 (alias
  (name examples)
  (deps filtering.exe))
