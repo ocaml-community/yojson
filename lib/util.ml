@@ -1,4 +1,5 @@
 exception Type_error of string * t
+exception Missing_Member of string
 
 let typeof = function
   | `Assoc _ -> "object"
@@ -24,6 +25,12 @@ let assoc name obj = try List.assoc name obj with Not_found -> `Null
 
 let member name = function
   | `Assoc obj -> assoc name obj
+  | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
+
+let assoc_force name obj = try List.assoc name obj with Not_found -> raise (Missing_Member ("There is no member called " ^ name ^ "in the json object"))
+
+let member_force name = function
+  | `Assoc obj -> assoc_force name obj
   | js -> typerr ("Can't get member '" ^ name ^ "' of non-object type ") js
 
 let rec path l obj =
