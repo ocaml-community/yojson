@@ -8,6 +8,7 @@
   (:out t.cppo.ml)
   type.ml
   monomorphic.ml
+  equal.cppo.ml
   prettyprint.ml
   write.ml
   write2.ml)
@@ -33,6 +34,7 @@
   write.ml
   prettyprint.ml
   monomorphic.ml
+  equal.cppo.ml
   write2.ml
   read.ml
   util.ml)
@@ -62,6 +64,7 @@
   write.ml
   prettyprint.ml
   monomorphic.ml
+  equal.cppo.ml
   write2.ml
   read.ml
   util.ml)
@@ -91,6 +94,7 @@
   write.ml
   prettyprint.ml
   monomorphic.ml
+  equal.cppo.ml
   write2.ml
   read.ml
   util.ml)
