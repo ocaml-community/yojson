@@ -1,27 +1,4 @@
 {
-  module Lexing =
-    (*
-      We override Lexing.engine in order to avoid creating a new position
-      record each time a rule is matched.
-      This reduces total parsing time by about 31%.
-    *)
-  struct
-    include Lexing
-
-    external c_engine : lex_tables -> int -> lexbuf -> int = "caml_lex_engine"
-
-    let engine tbl state buf =
-      let result = c_engine tbl state buf in
-      (*
-      if result >= 0 then begin
-        buf.lex_start_p <- buf.lex_curr_p;
-        buf.lex_curr_p <- {buf.lex_curr_p
-                           with pos_cnum = buf.lex_abs_pos + buf.lex_curr_pos};
-      end;
-      *)
-      result
-  end
-
   (* see description in common.mli *)
   type lexer_state = Common.Lexer_state.t = {
     buf : Buffer.t;
@@ -883,7 +860,7 @@ and finish_buffer_comment v = parse
 
   let from_string ?buf ?fname ?lnum s =
     try
-      let lexbuf = Lexing.from_string s in
+      let lexbuf = Lexing.from_string ~with_positions:false s in
       let v = init_lexer ?buf ?fname ?lnum () in
       from_lexbuf v lexbuf
     with Common.End_of_input ->
@@ -891,7 +868,7 @@ and finish_buffer_comment v = parse
 
   let from_channel ?buf ?fname ?lnum ic =
     try
-      let lexbuf = Lexing.from_channel ic in
+      let lexbuf = Lexing.from_channel ~with_positions:false ic in
       let v = init_lexer ?buf ?fname ?lnum () in
       from_lexbuf v lexbuf
     with Common.End_of_input ->
@@ -925,10 +902,10 @@ and finish_buffer_comment v = parse
 
   let seq_from_string ?buf ?fname ?lnum s =
     let v = init_lexer ?buf ?fname ?lnum () in
-    seq_from_lexbuf v (Lexing.from_string s)
+    seq_from_lexbuf v (Lexing.from_string ~with_positions:false s)
 
   let seq_from_channel ?buf ?fin ?fname ?lnum ic =
-    let lexbuf = Lexing.from_channel ic in
+    let lexbuf = Lexing.from_channel ~with_positions:false ic in
     let v = init_lexer ?buf ?fname ?lnum () in
     seq_from_lexbuf v ?fin lexbuf
 
@@ -940,7 +917,7 @@ and finish_buffer_comment v = parse
           None -> Some file
         | x -> x
     in
-    let lexbuf = Lexing.from_channel ic in
+    let lexbuf = Lexing.from_channel ~with_positions:false ic in
     let v = init_lexer ?buf ?fname ?lnum () in
     seq_from_lexbuf v ~fin lexbuf
 
