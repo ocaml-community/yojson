@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Use `ocamllex -ml`, and `~with_positions:false` in `Lexing.from_string` and
+  `Lexing.from_channel`. This reduces total parsing time (measured in
+  `Yojson.Safe.from_string`). (#208, @ferminr)
+
 ### Deprecated
 
 ### Fixed

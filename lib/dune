@@ -1,4 +1,14 @@
-(ocamllex read lexer_utils)
+(rule
+ (targets read.ml)
+ (deps read.mll)
+ (action
+  (run ocamllex -ml -q -o %{targets} %{deps})))
+
+(rule
+ (targets lexer_utils.ml)
+ (deps lexer_utils.mll)
+ (action
+  (run ocamllex -ml -q -o %{targets} %{deps})))
 
 (vendored_dirs mucppo)
 
