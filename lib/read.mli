@@ -143,8 +143,6 @@ val map_ident :
 val read_lt : lexer_state -> Lexing.lexbuf -> unit
 val read_gt : lexer_state -> Lexing.lexbuf -> unit
 val read_comma : lexer_state -> Lexing.lexbuf -> unit
-val finish_stringlit : lexer_state -> Lexing.lexbuf -> string
-val finish_skip_stringlit : lexer_state -> Lexing.lexbuf -> unit
 val finish_escaped_char : lexer_state -> Lexing.lexbuf -> unit
 val finish_comment : lexer_state -> Lexing.lexbuf -> unit
 val read_space : lexer_state -> Lexing.lexbuf -> unit

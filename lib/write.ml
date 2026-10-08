@@ -189,8 +189,6 @@ let write_float_prec significant_figures ob x =
 let write_std_float_prec = write_float_prec
 
 let write_intlit = Buffer.add_string
-let write_floatlit = Buffer.add_string
-let write_stringlit = Buffer.add_string
 
 let rec iter2_aux f_elt f_sep x = function
     [] -> ()
@@ -212,24 +210,12 @@ let rec write_json ob (x : t) =
   match x with
       `Null -> write_null ob ()
     | `Bool b -> write_bool ob b
-#ifdef INT
     | `Int i -> write_int ob i
-#endif
 #ifdef INTLIT
     | `Intlit s -> Buffer.add_string ob s
 #endif
-#ifdef FLOAT
     | `Float f -> write_float ob f
-#endif
-#ifdef FLOATLIT
-    | `Floatlit s -> Buffer.add_string ob s
-#endif
-#ifdef STRING
     | `String s -> write_string ob s
-#endif
-#ifdef STRINGLIT
-    | `Stringlit s -> Buffer.add_string ob s
-#endif
     | `Assoc l -> write_assoc ob l
     | `List l -> write_list ob l
 

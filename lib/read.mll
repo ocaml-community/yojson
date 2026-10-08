@@ -75,10 +75,8 @@
       !n
 
   let make_positive_int v lexbuf =
-    #ifdef INT
       try `Int (extract_positive_int lexbuf)
       with Int_overflow ->
-    #endif
       #ifdef INTLIT
         `Intlit (Lexing.lexeme lexbuf)
       #else
@@ -102,10 +100,8 @@
       !n
 
   let make_negative_int v lexbuf =
-    #ifdef INT
       try `Int (extract_negative_int lexbuf)
       with Int_overflow ->
-    #endif
       #ifdef INTLIT
         `Intlit (Lexing.lexeme lexbuf)
       #else
@@ -146,45 +142,15 @@ rule read_json v = parse
   | "true"      { `Bool true }
   | "false"     { `Bool false }
   | "null"      { `Null }
-  | "NaN"       {
-                  #ifdef FLOAT
-                    `Float nan
-                  #elif defined FLOATLIT
-                    `Floatlit "NaN"
-                  #endif
-                }
-  | "Infinity"  {
-                  #ifdef FLOAT
-                    `Float infinity
-                  #elif defined FLOATLIT
-                    `Floatlit "Infinity"
-                  #endif
-                }
-  | "-Infinity" {
-                  #ifdef FLOAT
-                    `Float neg_infinity
-                  #elif defined FLOATLIT
-                    `Floatlit "-Infinity"
-                  #endif
-                }
-  | '"'         {
-                  #ifdef STRING
-                    Buffer.clear v.buf;
-                    `String (finish_string v lexbuf)
-                  #elif defined STRINGLIT
-                    `Stringlit (finish_stringlit v lexbuf)
-                  #endif
+  | "NaN"       { `Float nan }
+  | "Infinity"  { `Float infinity }
+  | "-Infinity" { `Float neg_infinity }
+  | '"'         { Buffer.clear v.buf;
+                  `String (finish_string v lexbuf)
                 }
   | positive_int         { make_positive_int v lexbuf }
   | '-' positive_int     { make_negative_int v lexbuf }
-  | float       {
-                  #ifdef FLOAT
-                    `Float (float_of_string (Lexing.lexeme lexbuf))
-                  #elif defined FLOATLIT
-                    `Floatlit (Lexing.lexeme lexbuf)
-                  #endif
-                 }
-
+  | float       { `Float (float_of_string (Lexing.lexeme lexbuf)) }
   | '{'          { let acc = ref [] in
                    try
                      read_space v lexbuf;
@@ -285,18 +251,6 @@ and finish_surrogate_pair v x = parse
          }
   | _    { long_error "Missing escape sequence representing low surrogate \
                        for code point beyond U+FFFF" v lexbuf }
-  | eof  { custom_error "Unexpected end of input" v lexbuf }
-
-and finish_stringlit v = parse
-    ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
-    | [^'"' '\\'] )* '"'
-         { let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-           let s = Bytes.create (len+1) in
-           Bytes.set s 0 '"';
-           Bytes.blit lexbuf.lex_buffer lexbuf.lex_start_pos s 1 len;
-           Bytes.to_string s
-         }
-  | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and read_lt v = parse
@@ -596,7 +550,7 @@ and skip_json v = parse
   | "NaN"       { () }
   | "Infinity"  { () }
   | "-Infinity" { () }
-  | '"'         { finish_skip_stringlit v lexbuf }
+  | '"'         { finish_skip_string v lexbuf }
   | '-'? positive_int     { () }
   | float       { () }
 
@@ -646,7 +600,7 @@ and skip_json v = parse
   | _            { long_error "Invalid token" v lexbuf }
 
 
-and finish_skip_stringlit v = parse
+and finish_skip_string v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { () }
@@ -654,7 +608,7 @@ and finish_skip_stringlit v = parse
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and skip_ident v = parse
-    '"'      { finish_skip_stringlit v lexbuf }
+    '"'      { finish_skip_string v lexbuf }
   | ident    { () }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
@@ -672,7 +626,7 @@ and buffer_json v = parse
   | '-'? positive_int
   | float       { add_lexeme v.buf lexbuf }
 
-  | '"'         { finish_buffer_stringlit v lexbuf }
+  | '"'         { finish_buffer_string v lexbuf }
   | '{'          { try
                      Buffer.add_char v.buf '{';
                      buffer_space v lexbuf;
@@ -725,7 +679,7 @@ and buffer_json v = parse
   | _            { long_error "Invalid token" v lexbuf }
 
 
-and finish_buffer_stringlit v = parse
+and finish_buffer_string v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
          { Buffer.add_char v.buf '"';
@@ -735,7 +689,7 @@ and finish_buffer_stringlit v = parse
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_ident v = parse
-    '"'      { finish_buffer_stringlit v lexbuf }
+    '"'      { finish_buffer_string v lexbuf }
   | ident    { add_lexeme v.buf lexbuf }
   | _        { long_error "Expected string or identifier but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }

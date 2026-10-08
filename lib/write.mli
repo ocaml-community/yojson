@@ -117,27 +117,15 @@ val sort : t -> t
 
 val write_null : Buffer.t -> unit -> unit
 val write_bool : Buffer.t -> bool -> unit
-#ifdef INT
 val write_int : Buffer.t -> int -> unit
-#endif
-#ifdef FLOAT
 val write_float : Buffer.t -> float -> unit
 val write_std_float : Buffer.t -> float -> unit
 val write_float_prec : int -> Buffer.t -> float -> unit
 val write_std_float_prec : int -> Buffer.t -> float -> unit
-#endif
-#ifdef STRING
 val write_string : Buffer.t -> string -> unit
-#endif
 
 #ifdef INTLIT
 val write_intlit : Buffer.t -> string -> unit
-#endif
-#ifdef FLOATLIT
-val write_floatlit : Buffer.t -> string -> unit
-#endif
-#ifdef STRINGLIT
-val write_stringlit : Buffer.t -> string -> unit
 #endif
 
 val write_assoc : Buffer.t -> (string * t) list -> unit

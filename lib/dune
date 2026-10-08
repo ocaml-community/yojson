@@ -93,37 +93,10 @@
  (action
   (run mucppo/mucppo.exe %{out} -o %{targets})))
 
-(rule
- (targets raw.ml)
- (deps
-  (:out raw.cppo.ml)
-  type.ml
-  write.ml
-  prettyprint.ml
-  monomorphic.ml
-  write2.ml
-  read.ml
-  util.ml)
- (action
-  (run mucppo/mucppo.exe %{out} -o %{targets})))
-
-(rule
- (targets raw.mli)
- (deps
-  (:out raw.cppo.mli)
-  type.ml
-  monomorphic.mli
-  write.mli
-  write2.mli
-  read.mli
-  util.mli)
- (action
-  (run mucppo/mucppo.exe %{out} -o %{targets})))
-
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson t basic safe raw common codec lexer_utils)
+ (modules yojson t basic safe common codec lexer_utils)
  (synopsis "JSON parsing and printing")
  (flags
   (:standard -w -27-32)))

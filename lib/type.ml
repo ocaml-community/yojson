@@ -4,24 +4,12 @@ type t =
     [
     | `Null
     | `Bool of bool
-#ifdef INT
     | `Int of int
-#endif
 #ifdef INTLIT
     | `Intlit of string
 #endif
-#ifdef FLOAT
     | `Float of float
-#endif
-#ifdef FLOATLIT
-    | `Floatlit of string
-#endif
-#ifdef STRING
     | `String of string
-#endif
-#ifdef STRINGLIT
-    | `Stringlit of string
-#endif
     | `Assoc of (string * t) list
     | `List of t list
     ]
